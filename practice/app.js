@@ -14,11 +14,11 @@ const CONNECTIONS = [
   [5, 9], [9, 13], [13, 17],
 ];
 
-const PASS_FRAMES = 8;
-const EXTENDED_DEG = 158;
-const CURLED_DEG = 108;
-const TOGETHER_DEG = 18;
-const APART_DEG = 28;
+const PASS_FRAMES = 6;
+const EXTENDED_DEG = 142;
+const CURLED_DEG = 100;
+const TOGETHER_DEG = 22;
+const APART_DEG = 24;
 
 const els = {
   video: document.getElementById("video"),
@@ -42,6 +42,7 @@ let current = null;
 let landmarker = null;
 let running = false;
 let lastVideoTime = -1;
+let lastTimestamp = 0;
 let passStreak = 0;
 let mirror = true;
 
@@ -94,8 +95,14 @@ function indexMiddleSpread(lm) {
 }
 
 function inFrameOf(lm) {
-  const margin = 0.03;
-  return lm.every((p) => p.x > margin && p.x < 1 - margin && p.y > margin && p.y < 1 - margin);
+  const keys = [0, 5, 9, 13, 17];
+  let inside = 0;
+  for (const i of keys) {
+    const p = lm[i];
+    if (!p) continue;
+    if (p.x > -0.05 && p.x < 1.05 && p.y > -0.08 && p.y < 1.12) inside += 1;
+  }
+  return inside >= 3;
 }
 
 function evaluate(letter, lm) {
@@ -126,7 +133,7 @@ function evaluate(letter, lm) {
         hint: curlHint[finger].none,
       });
     }
-    if (want === "full" && got === "none") {
+    if (want === "full" && got !== "full" && got !== "half") {
       issues.push({
         finger,
         code: `${finger}.not_curled`,
@@ -166,12 +173,15 @@ function setVerdict(pass, issues, extra) {
   if (pass) {
     els.verdict.textContent = "到位";
     els.verdict.dataset.state = "ok";
-    els.hint.textContent = "保持一下，换一个光照或换人再试。";
+    els.hint.textContent = "手型对上了。保持一下，换个光照或换人再试。";
     return;
   }
-  els.verdict.textContent = "再试试";
+  els.verdict.textContent = "还不到位";
   els.verdict.dataset.state = "bad";
-  els.hint.textContent = issues[0]?.hint || "对照左边，把手指放到位。";
+  const hints = issues.map((x) => x.hint).filter(Boolean);
+  els.hint.textContent = hints.length
+    ? hints.join("；")
+    : "对照左边，把手指放到位。";
 }
 
 function selectLetter(letter) {
@@ -212,79 +222,102 @@ function resizeCanvas() {
 
 async function loop() {
   if (!running || !landmarker) return;
-  const now = performance.now();
-  if (els.video.currentTime === lastVideoTime) {
-    requestAnimationFrame(loop);
-    return;
-  }
-  lastVideoTime = els.video.currentTime;
-  resizeCanvas();
-
-  const result = landmarker.detectForVideo(els.video, now);
-  const w = els.canvas.width;
-  const h = els.canvas.height;
-  ctx.clearRect(0, 0, w, h);
-
-  const hands = result.landmarks || [];
-  const handedness = result.handednesses || result.handedness || [];
-
-  if (hands.length === 0) {
-    passStreak = 0;
-    setVerdict(false, [], {
-      title: "把手放进框里",
-      state: "idle",
-      hint: "单手、掌心对着镜头，光线尽量打在手上。",
-    });
-    requestAnimationFrame(loop);
-    return;
-  }
-
-  if (hands.length > 1) {
-    passStreak = 0;
-    for (const lm of hands) drawHand(lm, w, h, "rgba(255,196,72,0.9)");
-    setVerdict(false, [], {
-      title: "请只伸一只手",
-      state: "bad",
-      hint: "第二只手会干扰判定。",
-    });
-    requestAnimationFrame(loop);
-    return;
-  }
-
-  const lm = hands[0];
-  const conf =
-    handedness[0]?.[0]?.score ??
-    handedness[0]?.score ??
-    1;
-  drawHand(lm, w, h, conf > 0.6 ? "#7ee0c6" : "#f0c36a");
-
-  if (conf < 0.45 || !inFrameOf(lm)) {
-    passStreak = 0;
-    setVerdict(false, [], {
-      title: "把手放进框里",
-      state: "idle",
-      hint: "手不要贴边，也不要挡脸。",
-    });
-    requestAnimationFrame(loop);
-    return;
-  }
-
-  const { issues } = evaluate(current, lm);
-  if (issues.length === 0) {
-    passStreak += 1;
-    if (passStreak >= PASS_FRAMES) setVerdict(true, []);
-    else {
-      setVerdict(false, [], {
-        title: "再停一下",
-        state: "idle",
-        hint: "手型接近了，保持稳定。",
-      });
+  try {
+    const now = performance.now();
+    if (els.video.readyState < 2) {
+      requestAnimationFrame(loop);
+      return;
     }
-  } else {
-    passStreak = 0;
-    setVerdict(false, issues);
-  }
+    if (els.video.currentTime === lastVideoTime) {
+      requestAnimationFrame(loop);
+      return;
+    }
+    lastVideoTime = els.video.currentTime;
+    lastTimestamp = Math.max(lastTimestamp + 1, now);
+    resizeCanvas();
 
+    const result = landmarker.detectForVideo(els.video, lastTimestamp);
+    const w = els.canvas.width;
+    const h = els.canvas.height;
+    ctx.clearRect(0, 0, w, h);
+
+    const hands = result.landmarks || [];
+    const handedness = result.handednesses || result.handedness || [];
+
+    if (hands.length === 0) {
+      passStreak = 0;
+      setVerdict(false, [], {
+        title: "还没看到完整的手",
+        state: "idle",
+        hint: "单手、掌心对着镜头，手指朝上，光线打在手上。",
+      });
+      requestAnimationFrame(loop);
+      return;
+    }
+
+    if (hands.length > 1) {
+      passStreak = 0;
+      for (const lm of hands) drawHand(lm, w, h, "rgba(255,196,72,0.9)");
+      setVerdict(false, [], {
+        title: "请只伸一只手",
+        state: "bad",
+        hint: "现在看到两只手，判定会乱。放下另一只。",
+      });
+      requestAnimationFrame(loop);
+      return;
+    }
+
+    const lm = hands[0];
+    const conf =
+      handedness[0]?.[0]?.score ??
+      handedness[0]?.score ??
+      1;
+    drawHand(lm, w, h, conf > 0.5 ? "#7ee0c6" : "#f0c36a");
+
+    if (!current) {
+      setVerdict(false, [], {
+        title: "先选一个字母",
+        state: "idle",
+        hint: "点左边的 U 或 V。",
+      });
+      requestAnimationFrame(loop);
+      return;
+    }
+
+    if (conf < 0.35 || !inFrameOf(lm)) {
+      passStreak = 0;
+      setVerdict(false, [], {
+        title: "手再进一点",
+        state: "idle",
+        hint: "腕部可以贴下沿，但掌心和四指尽量留在画面里。",
+      });
+      requestAnimationFrame(loop);
+      return;
+    }
+
+    const { issues } = evaluate(current, lm);
+    if (issues.length === 0) {
+      passStreak += 1;
+      if (passStreak >= PASS_FRAMES) setVerdict(true, []);
+      else {
+        setVerdict(false, [], {
+          title: "接近了，停稳",
+          state: "idle",
+          hint: `正在核对 ${current.label}：手指已经对上，保持这个姿势。`,
+        });
+      }
+    } else {
+      passStreak = 0;
+      setVerdict(false, issues);
+    }
+  } catch (err) {
+    console.warn("detect loop", err);
+    setVerdict(false, [], {
+      title: "这一帧没判出来",
+      state: "idle",
+      hint: "骨架还在就继续比。若一直如此，刷新后再开摄像头。",
+    });
+  }
   requestAnimationFrame(loop);
 }
 

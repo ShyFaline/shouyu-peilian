@@ -25,3 +25,8 @@ python -m http.server 8765
 | `手语陪练-项目日志与框架.md` | 产品框架与日志 |
 
 感知：MediaPipe Hand Landmarker（Apache-2.0）。示范字形：SignPinyin（SIL OFL 1.1），字体不是识别模型。内容对齐 GF 0021—2019。
+
+## Contributors
+
+- [ShyFaline](https://github.com/ShyFaline)
+- [lingr25](https://github.com/lingr25)

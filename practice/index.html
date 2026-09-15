@@ -30,10 +30,13 @@
         <video id="video" playsinline autoplay muted></video>
         <canvas id="overlay"></canvas>
         <div class="placeholder">打开摄像头后，这里画 21 点骨架</div>
+        <div class="live-verdict">
+          <p id="verdict" data-state="idle">比这个手型</p>
+          <p id="hint">对照左边，把手指放到位。看到骨架后应出现「到位」或「还不到位」。</p>
+        </div>
       </div>
       <div class="feedback">
-        <p id="verdict" data-state="idle">比这个手型</p>
-        <p id="hint">对照左边，把手指放到位。</p>
+        <p class="feedback-note">评价在画面左下角。有骨架却没有对错时，多半是手贴边被拦了，现已放宽。</p>
       </div>
       <div class="toolbar">
         <button id="start-btn" type="button">打开摄像头</button>

@@ -1,0 +1,36 @@
+{
+  "standard": "GF 0021-2019",
+  "notes": "第一期只做一对易混手型：U 并拢 / V 分开。规则按国标外形写，允许不完美。",
+  "letters": [
+    {
+      "id": "GF0021.U",
+      "standard": "GF 0021-2019",
+      "label": "U",
+      "title": "字母 U",
+      "how": "食指、中指并拢伸直，其余手指收起。",
+      "demo": "u",
+      "rules": {
+        "index": { "curl": "none" },
+        "middle": { "curl": "none" },
+        "ring": { "curl": "full" },
+        "pinky": { "curl": "full" },
+        "spread": "together"
+      }
+    },
+    {
+      "id": "GF0021.V",
+      "standard": "GF 0021-2019",
+      "label": "V",
+      "title": "字母 V",
+      "how": "食指、中指分开伸直成 V，其余手指收起。",
+      "demo": "v",
+      "rules": {
+        "index": { "curl": "none" },
+        "middle": { "curl": "none" },
+        "ring": { "curl": "full" },
+        "pinky": { "curl": "full" },
+        "spread": "apart"
+      }
+    }
+  ]
+}

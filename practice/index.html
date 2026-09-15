@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>手语学习陪练 · 初版</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <p class="kicker">GF 0021—2019 · 第一期最小线</p>
+      <h1>国标手指字母陪练</h1>
+    </div>
+    <p id="status" class="status">先开摄像头看识别，不对再改规则</p>
+  </header>
+
+  <main>
+    <section class="panel demo">
+      <p class="panel-label">示范</p>
+      <div id="demo-glyph" class="glyph">u</div>
+      <p id="demo-label" class="demo-label">字母 U</p>
+      <p id="how" class="how"></p>
+      <div id="letter-btns" class="letter-btns"></div>
+    </section>
+
+    <section class="panel live">
+      <p class="panel-label">你的手</p>
+      <div id="stage" class="stage" data-mirror="true">
+        <video id="video" playsinline autoplay muted></video>
+        <canvas id="overlay"></canvas>
+        <div class="placeholder">打开摄像头后，这里画 21 点骨架</div>
+      </div>
+      <div class="feedback">
+        <p id="verdict" data-state="idle">比这个手型</p>
+        <p id="hint">对照左边，把手指放到位。</p>
+      </div>
+      <div class="toolbar">
+        <button id="start-btn" type="button">打开摄像头</button>
+        <label><input id="mirror-toggle" type="checkbox" checked /> 镜像</label>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    感知：MediaPipe Hand Landmarker（本机）· 理解：几何规则，不显示分数 · 内容：公开国标，字体 SignPinyin 仅作示范
+  </footer>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

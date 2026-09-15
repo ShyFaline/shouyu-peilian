@@ -1,0 +1,12 @@
+.DS_Store
+Thumbs.db
+*.log
+.idea/
+.vscode/
+
+# 上游开源是 clone，不当子模块嵌进本仓库
+/fingerpose/
+/SignPinyin/
+
+# 本机静态服务缓存
+__pycache__/

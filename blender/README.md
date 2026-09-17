@@ -1,23 +1,45 @@
-# 国标标准手（Blender 内容工厂）
+# GF 0021 标准手（Blender 内容工厂）
 
-识别不走这里。练习页只吃 `practice/content/demos/<id>_front.png`。
+示范图只给练习页对照，**不进识别循环**。  
+Blender：`C:\Program Files\Blender Foundation\Blender 4.5\blender.exe`（4.5.10 LTS）
 
-Blender 4.5 不在 PATH 时用全路径：
+## 1. 打开
 
-```
-"C:\Program Files\Blender Foundation\Blender 4.5\blender.exe"
-```
-
-重建绑定手和姿态草稿：
-
-```
-"C:\Program Files\Blender Foundation\Blender 4.5\blender.exe" -b -P blender/build_gf0021.py
+```bat
+"C:\Program Files\Blender Foundation\Blender 4.5\blender.exe" "C:\Users\15424\Desktop\2026.9.15\blender\hand_gf0021.blend"
 ```
 
-渲染 8 张正面图：
+时间轴标记：`REST`、`GF0021.A` / `B` / `U` / `V` / `L` / `Y` / `I` / `W`。  
+选中 `HandRig`，进入 Pose Mode。
+
+## 2. 摆手
+
+对照 GF 0021—2019 微调当前标记那一帧，再插入关键帧（插值已是 Constant）。  
+八个主路径姿态现在都是**可渲染草稿**，必须人眼过一遍国标图。
+
+重建整只手（会覆盖 `.blend` 里手动摆过的角度）：
+
+```bat
+cd /d C:\Users\15424\Desktop\2026.9.15
+"C:\Program Files\Blender Foundation\Blender 4.5\blender.exe" -b -P blender\build_gf0021.py
+```
+
+## 3. 渲染
+
+```bat
+cd /d C:\Users\15424\Desktop\2026.9.15
+"C:\Program Files\Blender Foundation\Blender 4.5\blender.exe" -b blender\hand_gf0021.blend -P blender\render_gf0021.py
+```
+
+输出（必须带 `_front`）：
 
 ```
-"C:\Program Files\Blender Foundation\Blender 4.5\blender.exe" -b blender/hand_gf0021.blend -P blender/render_gf0021.py
+practice/content/demos/GF0021.A_front.png
+practice/content/demos/GF0021.B_front.png
+practice/content/demos/GF0021.U_front.png
+practice/content/demos/GF0021.V_front.png
+practice/content/demos/GF0021.L_front.png
+practice/content/demos/GF0021.Y_front.png
+practice/content/demos/GF0021.I_front.png
+practice/content/demos/GF0021.W_front.png
 ```
-
-姿态名必须是 `GF0021.A` 这类 ID。当前 PNG 是脚本草稿，U/V 还需要人对照国标再摆。不要用 ASL 手模替换。

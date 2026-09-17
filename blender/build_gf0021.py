@@ -11,9 +11,6 @@ from mathutils import Vector
 ROOT = Path(__file__).resolve().parent
 BLEND = ROOT / "hand_gf0021.blend"
 
-# 右手：掌心朝 +Y（镜头），手指朝 +Z，拇指在 -X（画面左侧）。
-# 骨滚动 align_roll(+Y) 后：局部 X = 屈曲（正值向掌心），局部 Z = 张开（正值向小指）。
-
 
 def clear_scene():
     bpy.ops.object.select_all(action="SELECT")
@@ -31,7 +28,7 @@ def clear_scene():
             coll.remove(item)
 
 
-def look_at(obj, target: Vector, up=Vector((0.0, 0.0, 1.0))):
+def look_at(obj, target: Vector):
     direction = (target - obj.location).normalized()
     obj.rotation_euler = direction.to_track_quat("-Z", "Y").to_euler()
 
@@ -40,8 +37,8 @@ def joint_map():
     j = {
         "wrist": Vector((0.0, 0.0, 0.0)),
         "palm": Vector((0.004, 0.006, 0.050)),
-        "palm_radial": Vector((-0.032, 0.008, 0.056)),
-        "palm_ulnar": Vector((0.040, 0.003, 0.052)),
+        "palm_radial": Vector((-0.032, 0.010, 0.058)),
+        "palm_ulnar": Vector((0.042, 0.004, 0.054)),
         "index.MCP": Vector((-0.026, 0.012, 0.096)),
         "middle.MCP": Vector((-0.002, 0.014, 0.102)),
         "ring.MCP": Vector((0.022, 0.012, 0.097)),
@@ -74,6 +71,7 @@ def add_bone(arm, name, head, tail, parent=None, connected=False):
     bone = arm.edit_bones.new(name)
     bone.head = head
     bone.tail = tail
+    bone.use_deform = True
     bone.use_connect = connected
     if parent is not None:
         bone.parent = parent
@@ -87,9 +85,8 @@ def build_armature(j):
     bpy.context.collection.objects.link(arm)
     bpy.context.view_layer.objects.active = arm
     bpy.ops.object.mode_set(mode="EDIT")
-    eb = data.edit_bones
     wrist = add_bone(data, "wrist", j["wrist"], j["palm"])
-    add_bone(data, "palm", j["palm"], j["palm"] + Vector((0.0, 0.0, 0.02)), wrist, False)
+    add_bone(data, "palm", j["palm"], j["palm"] + Vector((0.0, 0.0, 0.018)), wrist, False)
     thumb_cmc = add_bone(data, "thumb.CMC", j["thumb.CMC"], j["thumb.MCP"], wrist, False)
     thumb_mcp = add_bone(data, "thumb.MCP", j["thumb.MCP"], j["thumb.IP"], thumb_cmc, True)
     thumb_ip = add_bone(data, "thumb.IP", j["thumb.IP"], j["thumb.TIP"], thumb_mcp, True)
@@ -116,6 +113,7 @@ def build_armature(j):
     bpy.ops.object.mode_set(mode="OBJECT")
     arm.show_in_front = True
     data.display_type = "OCTAHEDRAL"
+    data.pose_position = "POSE"
     return arm
 
 
@@ -127,14 +125,14 @@ def aligned_cone(name, p0: Vector, p1: Vector, r0: float, r1: float):
         vertices=18,
         radius1=r0,
         radius2=r1,
-        depth=length * 0.94,
+        depth=length * 0.96,
         end_fill_type="TRIFAN",
         location=mid,
     )
     obj = bpy.context.active_object
     obj.name = name
     obj.rotation_euler = Vector((0.0, 0.0, 1.0)).rotation_difference(vec.normalized()).to_euler()
-    bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
     return obj
 
 
@@ -144,21 +142,60 @@ def sphere(name, loc: Vector, radius: float):
     )
     obj = bpy.context.active_object
     obj.name = name
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
     return obj
 
 
-def build_mesh(j):
-    parts = []
-    bpy.ops.mesh.primitive_cube_add(size=1.0, location=(0.006, 0.002, 0.052))
-    palm = bpy.context.active_object
-    palm.name = "Palm"
-    palm.scale = (0.054, 0.020, 0.050)
-    bpy.ops.object.transform_apply(scale=True)
-    bevel = palm.modifiers.new("Bevel", "BEVEL")
-    bevel.width = 0.009
-    bevel.segments = 4
-    bpy.ops.object.modifier_apply(modifier="Bevel")
-    parts.append(palm)
+def bind_piece(obj, arm, bone_name, mat):
+    vg = obj.vertex_groups.new(name=bone_name)
+    vg.add(list(range(len(obj.data.vertices))), 1.0, "REPLACE")
+    mod = obj.modifiers.new("Armature", "ARMATURE")
+    mod.object = arm
+    mod.use_vertex_groups = True
+    obj.parent = arm
+    if obj.data.materials:
+        obj.data.materials[0] = mat
+    else:
+        obj.data.materials.append(mat)
+    bpy.ops.object.select_all(action="DESELECT")
+    obj.select_set(True)
+    bpy.context.view_layer.objects.active = obj
+    bpy.ops.object.shade_smooth()
+
+
+def make_palm(j):
+    verts = []
+    thickness = 0.015
+    cores = [
+        j["wrist"] + Vector((0.008, 0.0, 0.012)),
+        j["palm"],
+        j["palm_radial"],
+        j["palm_ulnar"],
+        j["index.MCP"] + Vector((0.0, 0.0, -0.01)),
+        j["middle.MCP"] + Vector((0.0, 0.0, -0.01)),
+        j["ring.MCP"] + Vector((0.0, 0.0, -0.01)),
+        j["pinky.MCP"] + Vector((0.0, 0.0, -0.01)),
+        j["thumb.CMC"] + Vector((0.0, 0.0, 0.006)),
+    ]
+    for v in cores:
+        verts.append((v + Vector((0.0, thickness, 0.0))).to_tuple())
+        verts.append((v + Vector((0.0, -thickness, 0.0))).to_tuple())
+    mesh = bpy.data.meshes.new("PalmMesh")
+    mesh.from_pydata(verts, [], [])
+    obj = bpy.data.objects.new("Palm", mesh)
+    bpy.context.collection.objects.link(obj)
+    bpy.context.view_layer.objects.active = obj
+    obj.select_set(True)
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="SELECT")
+    bpy.ops.mesh.convex_hull()
+    bpy.ops.object.mode_set(mode="OBJECT")
+    return obj
+
+
+def build_meshes(j, arm, mat):
+    palm = make_palm(j)
+    bind_piece(palm, arm, "palm", mat)
 
     finger_r = {
         "index": (0.0092, 0.0076, 0.0064),
@@ -173,66 +210,59 @@ def build_mesh(j):
             j[f"{name}.DIP"],
             j[f"{name}.TIP"],
         )
-        parts.append(aligned_cone(f"{name}_ph1", mcp, pip, r0, r1))
-        parts.append(aligned_cone(f"{name}_ph2", pip, dip, r1, r2))
-        parts.append(aligned_cone(f"{name}_ph3", dip, tip, r2, r2 * 0.75))
-        parts.append(sphere(f"{name}_kn1", mcp, r0 * 1.05))
-        parts.append(sphere(f"{name}_kn2", pip, r1 * 1.05))
-        parts.append(sphere(f"{name}_kn3", dip, r2 * 1.08))
-        parts.append(sphere(f"{name}_tip", tip, r2 * 0.95))
+        bind_piece(aligned_cone(f"{name}_ph1", mcp, pip, r0, r1), arm, f"{name}.MCP", mat)
+        bind_piece(aligned_cone(f"{name}_ph2", pip, dip, r1, r2), arm, f"{name}.PIP", mat)
+        bind_piece(aligned_cone(f"{name}_ph3", dip, tip, r2, r2 * 0.75), arm, f"{name}.DIP", mat)
+        bind_piece(sphere(f"{name}_kn1", mcp, r0 * 1.08), arm, f"{name}.MCP", mat)
+        bind_piece(sphere(f"{name}_kn2", pip, r1 * 1.08), arm, f"{name}.PIP", mat)
+        bind_piece(sphere(f"{name}_kn3", dip, r2 * 1.1), arm, f"{name}.DIP", mat)
+        bind_piece(sphere(f"{name}_tip", tip, r2 * 0.95), arm, f"{name}.TIP", mat)
 
-    parts.append(aligned_cone("thumb_ph0", j["thumb.CMC"], j["thumb.MCP"], 0.012, 0.010))
-    parts.append(aligned_cone("thumb_ph1", j["thumb.MCP"], j["thumb.IP"], 0.010, 0.0084))
-    parts.append(aligned_cone("thumb_ph2", j["thumb.IP"], j["thumb.TIP"], 0.0084, 0.0066))
-    parts.append(sphere("thumb_kn0", j["thumb.CMC"], 0.012))
-    parts.append(sphere("thumb_kn1", j["thumb.MCP"], 0.0105))
-    parts.append(sphere("thumb_kn2", j["thumb.IP"], 0.009))
-    parts.append(sphere("thumb_tip", j["thumb.TIP"], 0.0072))
-
-    bpy.ops.object.select_all(action="DESELECT")
-    for obj in parts:
-        obj.select_set(True)
-    bpy.context.view_layer.objects.active = parts[0]
-    bpy.ops.object.join()
-    hand = bpy.context.active_object
-    hand.name = "HandMesh"
-    bpy.ops.object.shade_smooth()
-    sub = hand.modifiers.new("Subsurf", "SUBSURF")
-    sub.levels = 1
-    sub.render_levels = 2
-    return hand
+    bind_piece(
+        aligned_cone("thumb_ph0", j["thumb.CMC"], j["thumb.MCP"], 0.012, 0.010),
+        arm,
+        "thumb.CMC",
+        mat,
+    )
+    bind_piece(
+        aligned_cone("thumb_ph1", j["thumb.MCP"], j["thumb.IP"], 0.010, 0.0084),
+        arm,
+        "thumb.MCP",
+        mat,
+    )
+    bind_piece(
+        aligned_cone("thumb_ph2", j["thumb.IP"], j["thumb.TIP"], 0.0084, 0.0066),
+        arm,
+        "thumb.IP",
+        mat,
+    )
+    bind_piece(sphere("thumb_kn0", j["thumb.CMC"], 0.012), arm, "thumb.CMC", mat)
+    bind_piece(sphere("thumb_kn1", j["thumb.MCP"], 0.0105), arm, "thumb.MCP", mat)
+    bind_piece(sphere("thumb_kn2", j["thumb.IP"], 0.009), arm, "thumb.IP", mat)
+    bind_piece(sphere("thumb_tip", j["thumb.TIP"], 0.0072), arm, "thumb.TIP", mat)
 
 
 def skin_material():
     mat = bpy.data.materials.new("HandSkin")
     mat.use_nodes = True
     bsdf = mat.node_tree.nodes.get("Principled BSDF")
-    bsdf.inputs["Base Color"].default_value = (0.82, 0.62, 0.50, 1.0)
-    bsdf.inputs["Roughness"].default_value = 0.44
+    bsdf.inputs["Base Color"].default_value = (0.78, 0.58, 0.46, 1.0)
+    bsdf.inputs["Roughness"].default_value = 0.48
+    if "Specular IOR Level" in bsdf.inputs:
+        bsdf.inputs["Specular IOR Level"].default_value = 0.18
     if "Subsurface Weight" in bsdf.inputs:
-        bsdf.inputs["Subsurface Weight"].default_value = 0.18
-        if "Subsurface Radius" in bsdf.inputs:
-            bsdf.inputs["Subsurface Radius"].default_value = (0.6, 0.2, 0.12)
+        bsdf.inputs["Subsurface Weight"].default_value = 0.12
     return mat
-
-
-def parent_mesh(mesh, arm):
-    bpy.ops.object.select_all(action="DESELECT")
-    mesh.select_set(True)
-    arm.select_set(True)
-    bpy.context.view_layer.objects.active = arm
-    bpy.ops.object.parent_set(type="ARMATURE_AUTO")
-    arm.hide_render = True
 
 
 def setup_camera_lights():
     cam_data = bpy.data.cameras.new("FrontCam")
     cam_data.type = "ORTHO"
-    cam_data.ortho_scale = 0.30
+    cam_data.ortho_scale = 0.28
     cam = bpy.data.objects.new("FrontCam", cam_data)
     bpy.context.collection.objects.link(cam)
-    cam.location = (0.05, 0.36, 0.12)
-    look_at(cam, Vector((0.0, 0.0, 0.075)))
+    cam.location = (0.04, 0.34, 0.11)
+    look_at(cam, Vector((0.0, 0.0, 0.08)))
     bpy.context.scene.camera = cam
 
     def area(name, loc, energy, size, color=(1.0, 0.97, 0.93)):
@@ -246,15 +276,15 @@ def setup_camera_lights():
         look_at(obj, Vector((0.0, 0.0, 0.07)))
         return obj
 
-    area("Key", (0.16, 0.28, 0.28), 90.0, 0.35)
-    area("Fill", (-0.22, 0.22, 0.12), 28.0, 0.45, (0.85, 0.90, 1.0))
-    area("Rim", (0.0, -0.30, 0.18), 40.0, 0.25, (1.0, 0.95, 0.88))
+    area("Key", (0.14, 0.26, 0.24), 4.0, 0.35)
+    area("Fill", (-0.20, 0.20, 0.10), 1.4, 0.45, (0.85, 0.90, 1.0))
+    area("Rim", (0.0, -0.28, 0.16), 2.0, 0.25, (1.0, 0.95, 0.88))
 
     world = bpy.data.worlds.new("Studio")
     world.use_nodes = True
     bg = world.node_tree.nodes["Background"]
-    bg.inputs[0].default_value = (0.92, 0.91, 0.88, 1.0)
-    bg.inputs[1].default_value = 0.35
+    bg.inputs[0].default_value = (0.90, 0.89, 0.86, 1.0)
+    bg.inputs[1].default_value = 0.2
     bpy.context.scene.world = world
 
 
@@ -267,10 +297,10 @@ def setup_render():
     scene.render.image_settings.file_format = "PNG"
     scene.render.image_settings.color_mode = "RGBA"
     scene.render.film_transparent = True
-    scene.render.filepath = str(ROOT.parent / "practice" / "content" / "demos" / "preview")
     if hasattr(scene, "eevee"):
         scene.eevee.taa_render_samples = 32
     scene.view_settings.view_transform = "Standard"
+    scene.view_settings.look = "None"
     scene.frame_start = 1
     scene.frame_end = 80
 
@@ -403,19 +433,41 @@ POSES = [
 ]
 
 
+def ensure_action(arm):
+    adt = arm.animation_data_create()
+    action = bpy.data.actions.new("GF0021_Poses")
+    adt.action = action
+    if hasattr(action, "slots") and hasattr(adt, "action_slot"):
+        slot = None
+        if len(action.slots) == 0 and hasattr(action.slots, "new"):
+            try:
+                slot = action.slots.new(id_type="OBJECT", name=arm.name)
+            except TypeError:
+                slot = action.slots.new(name=arm.name)
+        elif len(action.slots):
+            slot = action.slots[0]
+        if slot is not None:
+            try:
+                adt.action_slot = slot
+            except Exception as err:
+                print("action_slot skipped:", err)
+    return action
+
+
 def keyframe_pose(arm, frame):
-    bpy.context.scene.frame_set(frame)
+    # 不要先 frame_set：会把刚摆好的 pose 冲成已有动画。
     for pb in arm.pose.bones:
         pb.rotation_mode = "XYZ"
         pb.keyframe_insert(data_path="rotation_euler", frame=frame)
+    for fc in arm.animation_data.action.fcurves:
+        for kp in fc.keyframe_points:
+            kp.interpolation = "CONSTANT"
 
 
 def build_pose_library(arm):
     bpy.context.view_layer.objects.active = arm
     bpy.ops.object.mode_set(mode="POSE")
-    adt = arm.animation_data_create()
-    action = bpy.data.actions.new("GF0021_Poses")
-    adt.action = action
+    action = ensure_action(arm)
     scene = bpy.context.scene
     scene.timeline_markers.clear()
     for frame, name, fn in POSES:
@@ -425,16 +477,21 @@ def build_pose_library(arm):
         keyframe_pose(arm, frame)
         scene.timeline_markers.new(name, frame=frame)
     bpy.ops.object.mode_set(mode="OBJECT")
-    scene.frame_set(30)
+    ncurves = len(action.fcurves) if hasattr(action, "fcurves") else -1
+    print("action fcurves", ncurves)
+    for frame, name, _fn in POSES:
+        scene.frame_set(frame)
+        bpy.context.view_layer.update()
+        ring = arm.pose.bones["ring.TIP"].matrix.to_translation()
+        print(name, "frame", frame, "ring.TIP", tuple(round(c, 4) for c in ring))
 
 
 def main():
     clear_scene()
     j = joint_map()
     arm = build_armature(j)
-    mesh = build_mesh(j)
-    mesh.data.materials.append(skin_material())
-    parent_mesh(mesh, arm)
+    mat = skin_material()
+    build_meshes(j, arm, mat)
     setup_camera_lights()
     setup_render()
     build_pose_library(arm)

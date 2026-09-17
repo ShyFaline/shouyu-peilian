@@ -44,9 +44,14 @@ def main():
     if hasattr(scene, "eevee"):
         scene.eevee.taa_render_samples = 32
 
+    arm = bpy.data.objects.get("HandRig")
     for name in MAIN:
         frame = markers[name]
         scene.frame_set(frame)
+        bpy.context.view_layer.update()
+        if arm is not None:
+            tip = arm.pose.bones["ring.TIP"].matrix.to_translation()
+            print(name, "frame", frame, "ring.TIP", tuple(round(c, 4) for c in tip))
         path = out / f"{name}_front.png"
         scene.render.filepath = str(path)
         bpy.ops.render.render(write_still=True)

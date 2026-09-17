@@ -70,6 +70,22 @@ main {
   text-transform: uppercase;
 }
 
+.demo-stage {
+  position: relative;
+  min-height: 220px;
+  display: grid;
+  place-items: center;
+  background: #181818;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.demo-stage img {
+  max-width: 100%;
+  max-height: 240px;
+  object-fit: contain;
+}
+
 .glyph {
   font-family: "SignPinyin", sans-serif;
   font-size: 180px;
@@ -85,6 +101,26 @@ main {
   letter-spacing: 0;
 }
 
+.font-badge {
+  position: absolute;
+  right: 10px;
+  bottom: 8px;
+  font-family: "SignPinyin", sans-serif;
+  font-size: 40px;
+  line-height: 1;
+  opacity: 0.9;
+  pointer-events: none;
+}
+.font-badge[data-wide="true"] {
+  font-size: 28px;
+}
+
+.demo-stage[data-mode="font"] img,
+.demo-stage[data-mode="font"] .font-badge,
+.demo-stage[data-mode="image"] .glyph {
+  display: none;
+}
+
 .demo-label { margin: 8px 0 0; font-size: 20px; }
 .how { color: var(--muted); line-height: 1.5; min-height: 3em; }
 
@@ -92,7 +128,27 @@ main {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  max-height: 220px;
+}
+
+.atlas {
+  margin-top: 14px;
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+.atlas summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+.atlas-note {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+  margin: 8px 0;
+}
+.atlas .letter-btns {
+  max-height: 180px;
   overflow: auto;
 }
 .letter-btns button,
@@ -112,6 +168,10 @@ main {
 .letter-btns button[data-active="true"] {
   border-color: var(--ok);
   color: var(--ok);
+}
+.letter-btns button[data-unstable="true"] {
+  font-size: 12px;
+  opacity: 0.9;
 }
 
 .stage {
@@ -183,6 +243,7 @@ footer {
   font-size: 12px;
   padding: 0 0 28px;
 }
+footer a { color: var(--ok); }
 
 @media (max-width: 860px) {
   main { grid-template-columns: 1fr; }

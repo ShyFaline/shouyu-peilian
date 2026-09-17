@@ -9,7 +9,7 @@
 <body>
   <header>
     <div>
-      <p class="kicker">GF 0021—2019 · 32 个手指字母</p>
+      <p class="kicker">GF 0021—2019 · 主路径 8 个字母</p>
       <h1>国标手指字母陪练</h1>
     </div>
     <p id="status" class="status">先开摄像头看识别，不对再改规则</p>
@@ -18,10 +18,19 @@
   <main>
     <section class="panel demo">
       <p class="panel-label">示范</p>
-      <div id="demo-glyph" class="glyph">u</div>
+      <div id="demo-stage" class="demo-stage" data-mode="font">
+        <img id="demo-image" alt="" />
+        <div id="demo-glyph" class="glyph">u</div>
+        <span id="demo-badge" class="font-badge" aria-hidden="true"></span>
+      </div>
       <p id="demo-label" class="demo-label">字母 U</p>
       <p id="how" class="how"></p>
       <div id="letter-btns" class="letter-btns"></div>
+      <details id="atlas" class="atlas">
+        <summary>图鉴 · 其余字母</summary>
+        <p class="atlas-note">主路径以外的国标字母，默认不练。M / N / S 和 E / ê 规则尚未能稳定分开，只对照外形，不作为过关依据。</p>
+        <div id="atlas-btns" class="letter-btns"></div>
+      </details>
     </section>
 
     <section class="panel live">
@@ -36,7 +45,7 @@
         </div>
       </div>
       <div class="feedback">
-        <p class="feedback-note">评价在画面左下角。J / Z 只核静态手型。M / N / S 和 E / ê 容易混，以左边国标示范为准。</p>
+        <p class="feedback-note">评价在画面左下角，只有到位 / 还不到位和一句提示，不显示分数。无摄像头也可看左边示范。J / Z 只核静态手型。</p>
       </div>
       <div class="toolbar">
         <button id="start-btn" type="button">打开摄像头</button>
@@ -46,7 +55,9 @@
   </main>
 
   <footer>
-    感知：MediaPipe Hand Landmarker（本机）· 理解：几何规则，不显示分数 · 内容：公开国标，字体 SignPinyin 仅作示范
+    感知：MediaPipe Hand Landmarker（本机）· 理解：几何规则，不显示分数 · 内容：GF 0021—2019 ·
+    <a href="./sources.html">来源与许可</a>
+    · 示范图按国标摆，不是识别模型
   </footer>
 
   <script type="module" src="./app.js"></script>

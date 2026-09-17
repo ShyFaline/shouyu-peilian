@@ -2,7 +2,9 @@
 
 浏览器本地跑的国标手指字母陪练：摄像头变成手的几何，几何再变成「像不像、差在哪」。识别在本机完成，默认不上传视频。
 
-字母包覆盖 GF 0021—2019 的 **32 个手指字母**（A–Z 以及 zh / ch / sh / ng / ê / ü）。反馈只有「到位 / 还不到位」和一句提示，不显示分数。J、Z 带轨迹，第一期只核静态手型。
+字母包覆盖 GF 0021—2019 的 **32 个手指字母**（A–Z 以及 zh / ch / sh / ng / ê / ü）。主路径只练 **A B U V L Y I W**，其余进可折叠图鉴。反馈只有「到位 / 还不到位」和一句提示，不显示分数。J、Z 带轨迹，第一期只核静态手型。示范优先读 `practice/content/demos/{字母ID}_front.png`；没有图时回退 SignPinyin 字体（字体不是识别模型）。
+
+规划总稿：`总体目标与并行拆分.md`。
 
 ## 本地运行
 
@@ -14,13 +16,33 @@ python -m http.server 8765
 
 打开：http://127.0.0.1:8765/practice/index.html
 
-点「打开摄像头」，先比 U，再切 V。模型文件已放在 `practice/models` 与 `practice/vendor`，断网后刷新仍应能加载。
+点「打开摄像头」，先比 U，再切 V。模型文件已放在 `practice/models` 与 `practice/vendor`，断网后刷新仍应能加载。来源页：http://127.0.0.1:8765/practice/sources.html
+
+## 测试
+
+几何判定是纯函数，不依赖摄像头（本机有 bun 或 Node 即可）：
+
+```bash
+bun practice/src/evaluate.test.js
+```
+
+或：
+
+```bash
+node practice/src/evaluate.test.js
+```
+
+夹具：U 并拢通过；同一只手拿去判 V 必须失败并给出手指分开类 hint；缺手不得判到位。
 
 ## 目录
 
 | 路径 | 说明 |
 |---|---|
 | `practice/` | 可运行的初版 |
+| `practice/src/evaluate.js` | 几何与 `evaluate()` 纯函数 |
+| `practice/src/evaluate.test.js` | U / V / 缺手夹具 |
+| `practice/content/demos/` | 标准手 PNG，文件名 `{id}_front.png` |
+| `practice/sources.html` | 来源与许可 |
 | `技术栈前期规划.md` | 技术选型 |
 | `手语陪练-项目日志与框架.md` | 产品框架与日志 |
 

@@ -1,20 +1,267 @@
 {
   "standard": "GF 0021-2019",
-  "notes": "第一期只做一对易混手型：U 并拢 / V 分开。规则按国标外形写，允许不完美。",
+  "notes": "32 个汉语手指字母（26 个拉丁字母 + zh/ch/sh/ng/ê/ü）。规则是国标外形的几何近似，不是新发明的手语。J、Z 带轨迹，第一期只核静态手型。M/N/S、E/F、ê/E 容易混，以国标图为准。",
   "letters": [
+    {
+      "id": "GF0021.A",
+      "standard": "GF 0021-2019",
+      "label": "A",
+      "title": "字母 A",
+      "how": "握拳，拇指伸出。",
+      "demo": "a",
+      "rules": {
+        "extended": ["thumb"],
+        "curled": ["index", "middle", "ring", "pinky"]
+      }
+    },
+    {
+      "id": "GF0021.B",
+      "standard": "GF 0021-2019",
+      "label": "B",
+      "title": "字母 B",
+      "how": "四指并拢伸直，拇指弯曲贴掌心。",
+      "demo": "b",
+      "rules": {
+        "extended": ["index", "middle", "ring", "pinky"],
+        "curled": ["thumb"],
+        "spread": { "index_middle": "together", "middle_ring": "together", "ring_pinky": "together" }
+      }
+    },
+    {
+      "id": "GF0021.C",
+      "standard": "GF 0021-2019",
+      "label": "C",
+      "title": "字母 C",
+      "how": "五指弯曲，留出开口，整体像 C。",
+      "demo": "c",
+      "rules": { "shape": "c" }
+    },
+    {
+      "id": "GF0021.D",
+      "standard": "GF 0021-2019",
+      "label": "D",
+      "title": "字母 D",
+      "how": "食指伸直，其余弯曲，拇指与中指相抵。",
+      "demo": "d",
+      "rules": {
+        "extended": ["index"],
+        "curled": ["middle", "ring", "pinky"],
+        "pinch": "middle"
+      }
+    },
+    {
+      "id": "GF0021.E",
+      "standard": "GF 0021-2019",
+      "label": "E",
+      "title": "字母 E",
+      "how": "中指、无名指、小指并拢伸直，食指弯曲与拇指相抵。",
+      "demo": "e",
+      "rules": {
+        "extended": ["middle", "ring", "pinky"],
+        "curled": ["index"],
+        "pinch": "index",
+        "spread": { "middle_ring": "together", "ring_pinky": "together" }
+      }
+    },
+    {
+      "id": "GF0021.F",
+      "standard": "GF 0021-2019",
+      "label": "F",
+      "title": "字母 F",
+      "how": "拇指与食指成圆，其余三指伸直。",
+      "demo": "f",
+      "rules": {
+        "extended": ["middle", "ring", "pinky"],
+        "curled": ["index"],
+        "shape": "o"
+      }
+    },
+    {
+      "id": "GF0021.G",
+      "standard": "GF 0021-2019",
+      "label": "G",
+      "title": "字母 G",
+      "how": "拇指、食指伸出，手侧向，其余手指收起。",
+      "demo": "g",
+      "rules": {
+        "extended": ["thumb", "index"],
+        "curled": ["middle", "ring", "pinky"],
+        "pointing": "side"
+      }
+    },
+    {
+      "id": "GF0021.H",
+      "standard": "GF 0021-2019",
+      "label": "H",
+      "title": "字母 H",
+      "how": "食指、中指并拢伸直，手侧放，其余收起。",
+      "demo": "h",
+      "rules": {
+        "extended": ["index", "middle"],
+        "curled": ["ring", "pinky"],
+        "spread": { "index_middle": "together" },
+        "pointing": "side"
+      }
+    },
+    {
+      "id": "GF0021.I",
+      "standard": "GF 0021-2019",
+      "label": "I",
+      "title": "字母 I",
+      "how": "小指伸直，其余握拳。",
+      "demo": "i",
+      "rules": {
+        "extended": ["pinky"],
+        "curled": ["thumb", "index", "middle", "ring"]
+      }
+    },
+    {
+      "id": "GF0021.J",
+      "standard": "GF 0021-2019",
+      "label": "J",
+      "title": "字母 J",
+      "how": "静态同 I（小指伸直）。完整字母还要顺势画钩，第一期只核手型。",
+      "demo": "j",
+      "rules": {
+        "extended": ["pinky"],
+        "curled": ["thumb", "index", "middle", "ring"]
+      }
+    },
+    {
+      "id": "GF0021.K",
+      "standard": "GF 0021-2019",
+      "label": "K",
+      "title": "字母 K",
+      "how": "食指、中指分开伸直，拇指贴中指，指尖朝上。",
+      "demo": "k",
+      "rules": {
+        "extended": ["index", "middle"],
+        "curled": ["ring", "pinky"],
+        "spread": { "index_middle": "apart" },
+        "pointing": "up"
+      }
+    },
+    {
+      "id": "GF0021.L",
+      "standard": "GF 0021-2019",
+      "label": "L",
+      "title": "字母 L",
+      "how": "拇指、食指伸直成直角，其余收起。",
+      "demo": "l",
+      "rules": {
+        "extended": ["thumb", "index"],
+        "curled": ["middle", "ring", "pinky"],
+        "thumb_index": "right_angle",
+        "pointing": "up"
+      }
+    },
+    {
+      "id": "GF0021.M",
+      "standard": "GF 0021-2019",
+      "label": "M",
+      "title": "字母 M",
+      "how": "食指、中指、无名指弯曲包住拇指，小指收起。",
+      "demo": "m",
+      "rules": {
+        "curled": ["index", "middle", "ring", "pinky", "thumb"]
+      }
+    },
+    {
+      "id": "GF0021.N",
+      "standard": "GF 0021-2019",
+      "label": "N",
+      "title": "字母 N",
+      "how": "食指、中指弯曲包住拇指，其余收起。",
+      "demo": "n",
+      "rules": {
+        "curled": ["index", "middle", "ring", "pinky", "thumb"]
+      }
+    },
+    {
+      "id": "GF0021.O",
+      "standard": "GF 0021-2019",
+      "label": "O",
+      "title": "字母 O",
+      "how": "五指弯曲，拇指食指相抵成 O。",
+      "demo": "o",
+      "rules": { "shape": "o" }
+    },
+    {
+      "id": "GF0021.P",
+      "standard": "GF 0021-2019",
+      "label": "P",
+      "title": "字母 P",
+      "how": "手型近 K，指尖朝下。",
+      "demo": "p",
+      "rules": {
+        "extended": ["index", "middle"],
+        "curled": ["ring", "pinky"],
+        "spread": { "index_middle": "apart" },
+        "pointing": "down"
+      }
+    },
+    {
+      "id": "GF0021.Q",
+      "standard": "GF 0021-2019",
+      "label": "Q",
+      "title": "字母 Q",
+      "how": "拇指、食指伸出，指尖朝下，其余收起。",
+      "demo": "q",
+      "rules": {
+        "extended": ["thumb", "index"],
+        "curled": ["middle", "ring", "pinky"],
+        "pointing": "down"
+      }
+    },
+    {
+      "id": "GF0021.R",
+      "standard": "GF 0021-2019",
+      "label": "R",
+      "title": "字母 R",
+      "how": "食指、中指交叉伸直，其余收起。",
+      "demo": "r",
+      "rules": {
+        "extended": ["index", "middle"],
+        "curled": ["ring", "pinky"],
+        "cross": "index_middle"
+      }
+    },
+    {
+      "id": "GF0021.S",
+      "standard": "GF 0021-2019",
+      "label": "S",
+      "title": "字母 S",
+      "how": "握拳，拇指贴在四指前面，不要把拇指竖起来。",
+      "demo": "s",
+      "rules": {
+        "curled": ["index", "middle", "ring", "pinky", "thumb"]
+      }
+    },
+    {
+      "id": "GF0021.T",
+      "standard": "GF 0021-2019",
+      "label": "T",
+      "title": "字母 T",
+      "how": "握拳，拇指从食指和中指之间伸出。",
+      "demo": "t",
+      "rules": {
+        "extended": ["thumb"],
+        "curled": ["index", "middle", "ring", "pinky"],
+        "thumb_between": true
+      }
+    },
     {
       "id": "GF0021.U",
       "standard": "GF 0021-2019",
       "label": "U",
       "title": "字母 U",
-      "how": "食指、中指并拢伸直，其余手指收起。",
+      "how": "食指、中指并拢伸直朝上，其余收起。",
       "demo": "u",
       "rules": {
-        "index": { "curl": "none" },
-        "middle": { "curl": "none" },
-        "ring": { "curl": "full" },
-        "pinky": { "curl": "full" },
-        "spread": "together"
+        "extended": ["index", "middle"],
+        "curled": ["ring", "pinky"],
+        "spread": { "index_middle": "together" },
+        "pointing": "up"
       }
     },
     {
@@ -22,14 +269,140 @@
       "standard": "GF 0021-2019",
       "label": "V",
       "title": "字母 V",
-      "how": "食指、中指分开伸直成 V，其余手指收起。",
+      "how": "食指、中指分开伸直成 V，其余收起。",
       "demo": "v",
       "rules": {
-        "index": { "curl": "none" },
-        "middle": { "curl": "none" },
-        "ring": { "curl": "full" },
-        "pinky": { "curl": "full" },
-        "spread": "apart"
+        "extended": ["index", "middle"],
+        "curled": ["ring", "pinky"],
+        "spread": { "index_middle": "apart" },
+        "pointing": "up"
+      }
+    },
+    {
+      "id": "GF0021.W",
+      "standard": "GF 0021-2019",
+      "label": "W",
+      "title": "字母 W",
+      "how": "食指、中指、无名指分开伸直，拇指和小指收起。",
+      "demo": "w",
+      "rules": {
+        "extended": ["index", "middle", "ring"],
+        "curled": ["thumb", "pinky"],
+        "spread": { "index_middle": "apart", "middle_ring": "apart" }
+      }
+    },
+    {
+      "id": "GF0021.X",
+      "standard": "GF 0021-2019",
+      "label": "X",
+      "title": "字母 X",
+      "how": "食指弯曲成钩，其余握拳。",
+      "demo": "x",
+      "rules": {
+        "curled": ["thumb", "middle", "ring", "pinky"],
+        "hook": "index"
+      }
+    },
+    {
+      "id": "GF0021.Y",
+      "standard": "GF 0021-2019",
+      "label": "Y",
+      "title": "字母 Y",
+      "how": "拇指、小指伸出，其余收起。",
+      "demo": "y",
+      "rules": {
+        "extended": ["thumb", "pinky"],
+        "curled": ["index", "middle", "ring"]
+      }
+    },
+    {
+      "id": "GF0021.Z",
+      "standard": "GF 0021-2019",
+      "label": "Z",
+      "title": "字母 Z",
+      "how": "静态：食指伸直，其余收起。完整字母还要画 Z，第一期只核手型。",
+      "demo": "z",
+      "rules": {
+        "extended": ["index"],
+        "curled": ["middle", "ring", "pinky"]
+      }
+    },
+    {
+      "id": "GF0021.ZH",
+      "standard": "GF 0021-2019",
+      "label": "ZH",
+      "title": "字母 ZH",
+      "how": "食指、中指、无名指并拢伸直，拇指和小指收起。",
+      "demo": "zh",
+      "rules": {
+        "extended": ["index", "middle", "ring"],
+        "curled": ["thumb", "pinky"],
+        "spread": { "index_middle": "together", "middle_ring": "together" }
+      }
+    },
+    {
+      "id": "GF0021.CH",
+      "standard": "GF 0021-2019",
+      "label": "CH",
+      "title": "字母 CH",
+      "how": "拇指、食指、中指伸出，无名指和小指收起（2019 年后手形）。",
+      "demo": "ch",
+      "rules": {
+        "extended": ["thumb", "index", "middle"],
+        "curled": ["ring", "pinky"]
+      }
+    },
+    {
+      "id": "GF0021.SH",
+      "standard": "GF 0021-2019",
+      "label": "SH",
+      "title": "字母 SH",
+      "how": "拇指与食指伸直，夹角小于 L，其余收起。",
+      "demo": "sh",
+      "rules": {
+        "extended": ["thumb", "index"],
+        "curled": ["middle", "ring", "pinky"],
+        "thumb_index": "parallel",
+        "pointing": "up"
+      }
+    },
+    {
+      "id": "GF0021.NG",
+      "standard": "GF 0021-2019",
+      "label": "NG",
+      "title": "字母 NG",
+      "how": "中指伸直，其余手指收起。",
+      "demo": "ng",
+      "rules": {
+        "extended": ["middle"],
+        "curled": ["thumb", "index", "ring", "pinky"]
+      }
+    },
+    {
+      "id": "GF0021.EH",
+      "standard": "GF 0021-2019",
+      "label": "Ê",
+      "title": "字母 ê",
+      "how": "近 E：中指、无名指、小指并拢伸直，食指弯曲贴拇指。与 E 很接近。",
+      "demo": "ê",
+      "rules": {
+        "extended": ["middle", "ring", "pinky"],
+        "curled": ["index"],
+        "pinch": "index",
+        "spread": { "middle_ring": "together", "ring_pinky": "together" }
+      }
+    },
+    {
+      "id": "GF0021.UE",
+      "standard": "GF 0021-2019",
+      "label": "Ü",
+      "title": "字母 ü",
+      "how": "食指、中指并拢伸直，同时拇指伸出。",
+      "demo": "ü",
+      "rules": {
+        "extended": ["thumb", "index", "middle"],
+        "curled": ["ring", "pinky"],
+        "spread": { "index_middle": "together" }
       }
     }
   ]

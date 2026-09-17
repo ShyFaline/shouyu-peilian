@@ -19,23 +19,6 @@ const EXTENDED_DEG = 142;
 const CURLED_DEG = 100;
 const TOGETHER_DEG = 22;
 const APART_DEG = 24;
-const SPREAD_PAIRS = [
-  ["index", "middle"],
-  ["middle", "ring"],
-  ["ring", "pinky"],
-];
-const CURL_HINT = {
-  thumb: { none: "拇指再伸直", full: "拇指收一点" },
-  index: { none: "食指再伸直", full: "食指收起来" },
-  middle: { none: "中指再伸直", full: "中指收起来" },
-  ring: { none: "无名指再伸直", full: "无名指收起来" },
-  pinky: { none: "小指再伸直", full: "小指收起来" },
-};
-const SPREAD_HINT = {
-  index_middle: { together: "食指中指并拢", apart: "食指中指分开" },
-  middle_ring: { together: "中指无名指并拢", apart: "中指无名指分开" },
-  ring_pinky: { together: "无名指小指并拢", apart: "无名指小指分开" },
-};
 
 const els = {
   video: document.getElementById("video"),
@@ -103,50 +86,12 @@ function classifyCurl(deg) {
   return "half";
 }
 
-function handScale(lm) {
-  return dist(lm[0], lm[9]) || dist(lm[0], lm[5]) || 0.2;
-}
-
-function fingerDir(lm, name) {
-  const mcp = lm[FINGER_MCPS[name]];
-  const tip = lm[FINGER_TIPS[name]];
-  return { x: tip.x - mcp.x, y: tip.y - mcp.y };
-}
-
-function spreadBetween(lm, a, b) {
-  const da = fingerDir(lm, a);
-  const db = fingerDir(lm, b);
-  return vecAngle(da.x, da.y, db.x, db.y);
-}
-
-function pointingOf(lm, name) {
-  const d = fingerDir(lm, name || "index");
-  if (Math.abs(d.x) > Math.abs(d.y) * 1.15) return "side";
-  return d.y < 0 ? "up" : "down";
-}
-
-function cross2d(ax, ay, bx, by) {
-  return ax * by - ay * bx;
-}
-
-function segsIntersect(a, b, c, d) {
-  const d1 = cross2d(b.x - a.x, b.y - a.y, c.x - a.x, c.y - a.y);
-  const d2 = cross2d(b.x - a.x, b.y - a.y, d.x - a.x, d.y - a.y);
-  const d3 = cross2d(d.x - c.x, d.y - c.y, a.x - c.x, a.y - c.y);
-  const d4 = cross2d(d.x - c.x, d.y - c.y, b.x - c.x, b.y - c.y);
-  return d1 * d2 < 0 && d3 * d4 < 0;
-}
-
-function indexMiddleCrossed(lm) {
-  return segsIntersect(lm[6], lm[8], lm[10], lm[12]);
-}
-
-function thumbBetweenIndexMiddle(lm) {
-  const mid = {
-    x: (lm[6].x + lm[10].x) / 2,
-    y: (lm[6].y + lm[10].y) / 2,
-  };
-  return dist(lm[4], mid) / handScale(lm) < 0.38;
+function indexMiddleSpread(lm) {
+  const iMcp = lm[5];
+  const iTip = lm[8];
+  const mMcp = lm[9];
+  const mTip = lm[12];
+  return vecAngle(iTip.x - iMcp.x, iTip.y - iMcp.y, mTip.x - mMcp.x, mTip.y - mMcp.y);
 }
 
 function inFrameOf(lm) {
@@ -161,131 +106,56 @@ function inFrameOf(lm) {
 }
 
 function evaluate(letter, lm) {
-  if (!letter || !lm || lm.length < 21) {
-    return { issues: [{ code: "no_hand", hint: "还没看到完整的手" }], curls: {} };
-  }
   const issues = [];
   const curls = {};
   for (const name of FINGERS) {
     curls[name] = classifyCurl(fingerCurlDeg(lm, name));
   }
-  const rules = letter.rules || {};
-  const scale = handScale(lm);
+  const spread = indexMiddleSpread(lm);
+  const rules = letter.rules;
 
-  for (const finger of rules.extended || []) {
-    if (curls[finger] !== "none") {
+  const curlHint = {
+    index: { none: "食指再伸直", full: "食指收起来" },
+    middle: { none: "中指再伸直", full: "中指收起来" },
+    ring: { none: "无名指再伸直", full: "无名指收起来" },
+    pinky: { none: "小指再伸直", full: "小指收起来" },
+    thumb: { none: "拇指再伸直", full: "拇指收一点" },
+  };
+
+  for (const finger of ["index", "middle", "ring", "pinky"]) {
+    const want = rules[finger]?.curl;
+    if (!want) continue;
+    const got = curls[finger];
+    if (want === "none" && got !== "none") {
       issues.push({
         finger,
         code: `${finger}.not_extended`,
-        hint: CURL_HINT[finger]?.none || "这根手指再伸直",
+        hint: curlHint[finger].none,
       });
     }
-  }
-  for (const finger of rules.curled || []) {
-    if (curls[finger] === "none") {
+    if (want === "full" && got !== "full" && got !== "half") {
       issues.push({
         finger,
         code: `${finger}.not_curled`,
-        hint: CURL_HINT[finger]?.full || "这根手指收起来",
+        hint: curlHint[finger].full,
       });
     }
   }
 
-  const spreadSpec = rules.spread;
-  if (typeof spreadSpec === "string") {
-    const deg = spreadBetween(lm, "index", "middle");
-    if (spreadSpec === "together" && deg > TOGETHER_DEG) {
-      issues.push({ code: "fingers.not_together", hint: SPREAD_HINT.index_middle.together });
-    }
-    if (spreadSpec === "apart" && deg < APART_DEG) {
-      issues.push({ code: "fingers.not_spread", hint: SPREAD_HINT.index_middle.apart });
-    }
-  } else if (spreadSpec) {
-    for (const [a, b] of SPREAD_PAIRS) {
-      const key = `${a}_${b}`;
-      const want = spreadSpec[key];
-      if (!want) continue;
-      const deg = spreadBetween(lm, a, b);
-      if (want === "together" && deg > TOGETHER_DEG) {
-        issues.push({ code: `${key}.not_together`, hint: SPREAD_HINT[key].together });
-      }
-      if (want === "apart" && deg < APART_DEG) {
-        issues.push({ code: `${key}.not_apart`, hint: SPREAD_HINT[key].apart });
-      }
-    }
+  if (rules.spread === "together" && spread > TOGETHER_DEG) {
+    issues.push({
+      code: "fingers.not_together",
+      hint: "食指中指并拢",
+    });
+  }
+  if (rules.spread === "apart" && spread < APART_DEG) {
+    issues.push({
+      code: "fingers.not_spread",
+      hint: "食指中指分开成 V",
+    });
   }
 
-  if (rules.pinch) {
-    const p = dist(lm[4], lm[FINGER_TIPS[rules.pinch]]) / scale;
-    if (p > 0.42) {
-      issues.push({
-        code: `pinch.${rules.pinch}`,
-        hint: rules.pinch === "middle" ? "拇指贴住中指" : "拇指贴住食指",
-      });
-    }
-  }
-
-  if (rules.shape === "o") {
-    const p = dist(lm[4], lm[8]) / scale;
-    if (p > 0.42) {
-      issues.push({ code: "shape.o.open", hint: "拇指食指靠拢成圆" });
-    }
-  }
-  if (rules.shape === "c") {
-    const p = dist(lm[4], lm[8]) / scale;
-    if (p < 0.28) {
-      issues.push({ code: "shape.c.closed", hint: "C 要留开口，不要捏成 O" });
-    }
-    const straight = FINGERS.filter((f) => curls[f] === "none").length;
-    if (straight >= 3) {
-      issues.push({ code: "shape.c.straight", hint: "五指再弯曲成 C" });
-    }
-  }
-
-  if (rules.pointing) {
-    const probe = (rules.extended || []).includes("index") ? "index" : (rules.extended || ["index"])[0];
-    const got = pointingOf(lm, probe);
-    if (got !== rules.pointing) {
-      const hint =
-        rules.pointing === "up"
-          ? "指尖朝上"
-          : rules.pointing === "down"
-            ? "指尖朝下"
-            : "手侧过来，指尖朝旁边";
-      issues.push({ code: `pointing.${rules.pointing}`, hint });
-    }
-  }
-
-  if (rules.cross === "index_middle" && !indexMiddleCrossed(lm)) {
-    issues.push({ code: "cross.index_middle", hint: "食指中指交叉" });
-  }
-
-  if (rules.thumb_between && !thumbBetweenIndexMiddle(lm)) {
-    issues.push({ code: "thumb.between", hint: "拇指从食指和中指之间伸出来" });
-  }
-
-  if (rules.thumb_index) {
-    const deg = vecAngle(
-      fingerDir(lm, "thumb").x,
-      fingerDir(lm, "thumb").y,
-      fingerDir(lm, "index").x,
-      fingerDir(lm, "index").y,
-    );
-    if (rules.thumb_index === "right_angle" && (deg < 48 || deg > 130)) {
-      issues.push({ code: "thumb_index.angle", hint: "拇指和食指张开成 L" });
-    }
-    if (rules.thumb_index === "parallel" && deg > 48) {
-      issues.push({ code: "thumb_index.parallel", hint: "拇指靠近食指，不要张成 L" });
-    }
-  }
-
-  if (rules.hook === "index") {
-    if (curls.index === "none") {
-      issues.push({ code: "index.not_hooked", hint: "食指弯成钩，不要完全伸直" });
-    }
-  }
-
-  return { issues: issues.slice(0, 2), curls };
+  return { issues: issues.slice(0, 2), curls, spread };
 }
 
 function setStatus(text, kind) {
@@ -318,7 +188,6 @@ function selectLetter(letter) {
   current = letter;
   passStreak = 0;
   els.demoGlyph.textContent = letter.demo;
-  els.demoGlyph.dataset.wide = letter.demo.length > 1 ? "true" : "false";
   els.demoLabel.textContent = `${letter.title} · ${letter.standard}`;
   els.how.textContent = letter.how;
   setVerdict(false, [], { title: "比这个手型", state: "idle", hint: letter.how });
@@ -409,7 +278,7 @@ async function loop() {
       setVerdict(false, [], {
         title: "先选一个字母",
         state: "idle",
-        hint: "点左边的字母。",
+        hint: "点左边的 U 或 V。",
       });
       requestAnimationFrame(loop);
       return;
@@ -497,26 +366,8 @@ function applyMirror() {
 }
 
 async function main() {
-  let pack;
-  try {
-    const res = await fetch("./content/letters.json");
-    if (!res.ok) throw new Error(`字母包加载失败 (${res.status})`);
-    pack = await res.json();
-  } catch (err) {
-    console.error(err);
-    setStatus("字母包没读到", "bad");
-    setVerdict(false, [], {
-      title: "内容层失败",
-      state: "bad",
-      hint: String(err && err.message ? err.message : err),
-    });
-    return;
-  }
-  letters = pack.letters || [];
-  if (!letters.length) {
-    setStatus("字母包是空的", "bad");
-    return;
-  }
+  const pack = await fetch("./content/letters.json").then((r) => r.json());
+  letters = pack.letters;
   for (const letter of letters) {
     const btn = document.createElement("button");
     btn.type = "button";

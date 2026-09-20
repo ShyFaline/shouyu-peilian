@@ -308,6 +308,14 @@
 
 检索 GF 0021 开源视频与 MediaPipe 21 点集，无合法可用项。B 站可看，不可当数据集。ASL 不当国标。Jiang 论文图未公开。不下载未授权录像。真人样本仍无。
 
+**【2026-09-20 S1.5：渲染图过 Landmarker】**
+
+路径：`practice/src/render-loop/RESULTS.md`。渲染图，不是真人。IMAGE 模式，阈值与 `practice/app.js` 相同。不报准确率。夹具仍 12 passed。`practice/src/fixtures/` 仍空。
+
+A：1 手，pass。B / U / V / L / Y / W：0 手，no_hand。I：1 手，fail（pinky.not_extended, thumb.not_curled）。
+
+S1.5 完成。自渲图多数不能当感知输入，不替代 S2。A pass 不是准确率。S2 未开始。S3 不因本次结果去讨好检测器。
+
 **【仍待补（真人，不要预填）】**
 
 - U/V 在至少两人、两种光照下的原始记录。空表：`docs/试用户记录.md`。

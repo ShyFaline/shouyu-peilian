@@ -1,5 +1,5 @@
 import { FilesetResolver, HandLandmarker } from "./vendor/vision_bundle.mjs";
-import { evaluate } from "./src/evaluate.js";
+import { evaluate, inFrameOf, isReadyToScore } from "./src/evaluate.js";
 
 const MAIN_PATH_FALLBACK = [
   "GF0021.A",
@@ -40,6 +40,8 @@ const els = {
   atlasBtns: document.getElementById("atlas-btns"),
   startBtn: document.getElementById("start-btn"),
   mirrorToggle: document.getElementById("mirror-toggle"),
+  exportToggle: document.getElementById("export-toggle"),
+  exportBtn: document.getElementById("export-btn"),
   stage: document.getElementById("stage"),
 };
 
@@ -53,17 +55,8 @@ let lastVideoTime = -1;
 let lastTimestamp = 0;
 let passStreak = 0;
 let mirror = true;
-
-function inFrameOf(lm) {
-  const keys = [0, 5, 9, 13, 17];
-  let inside = 0;
-  for (const i of keys) {
-    const p = lm[i];
-    if (!p) continue;
-    if (p.x > -0.05 && p.x < 1.05 && p.y > -0.08 && p.y < 1.12) inside += 1;
-  }
-  return inside >= 3;
-}
+let lastFrame = null;
+let exportEnabled = false;
 
 function setStatus(text, kind) {
   els.status.textContent = text;
@@ -223,6 +216,7 @@ async function loop() {
       handedness[0]?.[0]?.score ??
       handedness[0]?.score ??
       1;
+    captureFrame(lm, handedness, conf, now);
     drawHand(lm, w, h, conf > 0.5 ? "#7ee0c6" : "#f0c36a");
 
     if (!current) {
@@ -235,7 +229,7 @@ async function loop() {
       return;
     }
 
-    if (conf < 0.35 || !inFrameOf(lm)) {
+    if (!isReadyToScore({ handCount: 1, conf, lm }) || !inFrameOf(lm)) {
       passStreak = 0;
       setVerdict(false, [], {
         title: "手再进一点",
@@ -247,7 +241,7 @@ async function loop() {
     }
 
     const judged = evaluate(current, lm);
-    if (judged.pass) {
+    if (judged.pass && isReadyToScore({ handCount: hands.length, conf, lm })) {
       passStreak += 1;
       if (passStreak >= PASS_FRAMES) setVerdict(true, []);
       else {
@@ -316,6 +310,52 @@ function applyMirror() {
   els.stage.dataset.mirror = mirror ? "true" : "false";
 }
 
+function handednessOf(handedness) {
+  const raw =
+    handedness?.[0]?.[0]?.categoryName ??
+    handedness?.[0]?.categoryName ??
+    handedness?.[0]?.[0]?.displayName ??
+    "";
+  if (raw === "Left" || raw === "Right") return raw;
+  return "Unknown";
+}
+
+function captureFrame(lm, handedness, conf, t) {
+  lastFrame = {
+    t,
+    handedness: handednessOf(handedness),
+    landmarks: Array.from(lm, (p) => ({ x: p.x, y: p.y, z: p.z ?? 0 })),
+    conf,
+  };
+}
+
+function downloadHandFrame() {
+  if (!exportEnabled) {
+    setStatus("导出默认关闭，先勾选再下载", "idle");
+    return;
+  }
+  if (!lastFrame || !lastFrame.landmarks || lastFrame.landmarks.length < 21) {
+    setStatus("还没看到完整的手，没法导出", "bad");
+    return;
+  }
+  const letterId = current?.id || "unknown";
+  const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+  const payload = {
+    t: lastFrame.t,
+    handedness: lastFrame.handedness,
+    landmarks: lastFrame.landmarks,
+    conf: lastFrame.conf,
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `handframe-${letterId}-${stamp}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  setStatus("已在本机下载 JSON，未上传", "ok");
+}
+
 async function main() {
   let pack;
   try {
@@ -360,6 +400,14 @@ async function main() {
     mirror = els.mirrorToggle.checked;
     applyMirror();
   });
+
+  els.exportToggle.checked = false;
+  els.exportBtn.disabled = true;
+  els.exportToggle.addEventListener("change", () => {
+    exportEnabled = els.exportToggle.checked;
+    els.exportBtn.disabled = !exportEnabled;
+  });
+  els.exportBtn.addEventListener("click", downloadHandFrame);
 
   els.startBtn.addEventListener("click", async () => {
     els.startBtn.disabled = true;

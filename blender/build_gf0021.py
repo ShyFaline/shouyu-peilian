@@ -23,30 +23,25 @@ def clear_scene():
         bpy.data.materials,
         bpy.data.actions,
         bpy.data.curves,
+        bpy.data.worlds,
     ):
         for item in list(coll):
             coll.remove(item)
 
 
-def look_at(obj, target: Vector):
-    direction = (target - obj.location).normalized()
-    obj.rotation_euler = direction.to_track_quat("-Z", "Y").to_euler()
-
-
 def joint_map():
+    # 右手、掌心 +Y（朝镜头）。拇指在 +X；相机从 +Y 看向 -Y 时，画面左侧是拇指。
     j = {
         "wrist": Vector((0.0, 0.0, 0.0)),
-        "palm": Vector((0.004, 0.006, 0.050)),
-        "palm_radial": Vector((-0.032, 0.010, 0.058)),
-        "palm_ulnar": Vector((0.042, 0.004, 0.054)),
-        "index.MCP": Vector((-0.026, 0.012, 0.096)),
-        "middle.MCP": Vector((-0.002, 0.014, 0.102)),
-        "ring.MCP": Vector((0.022, 0.012, 0.097)),
-        "pinky.MCP": Vector((0.044, 0.007, 0.086)),
-        "thumb.CMC": Vector((-0.016, 0.018, 0.022)),
-        "thumb.MCP": Vector((-0.044, 0.024, 0.052)),
-        "thumb.IP": Vector((-0.062, 0.020, 0.078)),
-        "thumb.TIP": Vector((-0.074, 0.014, 0.100)),
+        "palm": Vector((-0.004, 0.006, 0.050)),
+        "index.MCP": Vector((0.026, 0.012, 0.096)),
+        "middle.MCP": Vector((0.002, 0.014, 0.102)),
+        "ring.MCP": Vector((-0.022, 0.012, 0.097)),
+        "pinky.MCP": Vector((-0.044, 0.007, 0.086)),
+        "thumb.CMC": Vector((0.016, 0.018, 0.022)),
+        "thumb.MCP": Vector((0.044, 0.024, 0.052)),
+        "thumb.IP": Vector((0.062, 0.020, 0.078)),
+        "thumb.TIP": Vector((0.074, 0.014, 0.100)),
     }
     lengths = {
         "index": (0.044, 0.027, 0.020),
@@ -54,7 +49,7 @@ def joint_map():
         "ring": (0.045, 0.028, 0.020),
         "pinky": (0.034, 0.021, 0.017),
     }
-    splay = {"index": -0.011, "middle": 0.0, "ring": 0.012, "pinky": 0.024}
+    splay = {"index": 0.011, "middle": 0.0, "ring": -0.012, "pinky": -0.024}
     for name, (l0, l1, l2) in lengths.items():
         mcp = j[f"{name}.MCP"]
         dx = splay[name]
@@ -94,7 +89,7 @@ def build_armature(j):
         data,
         "thumb.TIP",
         j["thumb.TIP"],
-        j["thumb.TIP"] + Vector((-0.006, -0.002, 0.008)),
+        j["thumb.TIP"] + Vector((0.006, -0.002, 0.008)),
         thumb_ip,
         True,
     )
@@ -122,7 +117,7 @@ def aligned_cone(name, p0: Vector, p1: Vector, r0: float, r1: float):
     length = max(vec.length, 0.004)
     mid = (p0 + p1) * 0.5
     bpy.ops.mesh.primitive_cone_add(
-        vertices=18,
+        vertices=20,
         radius1=r0,
         radius2=r1,
         depth=length * 0.96,
@@ -138,7 +133,7 @@ def aligned_cone(name, p0: Vector, p1: Vector, r0: float, r1: float):
 
 def sphere(name, loc: Vector, radius: float):
     bpy.ops.mesh.primitive_uv_sphere_add(
-        segments=16, ring_count=10, radius=radius, location=loc
+        segments=18, ring_count=12, radius=radius, location=loc
     )
     obj = bpy.context.active_object
     obj.name = name
@@ -163,38 +158,21 @@ def bind_piece(obj, arm, bone_name, mat):
     bpy.ops.object.shade_smooth()
 
 
-def make_palm(j):
-    verts = []
-    thickness = 0.015
-    cores = [
-        j["wrist"] + Vector((0.008, 0.0, 0.012)),
-        j["palm"],
-        j["palm_radial"],
-        j["palm_ulnar"],
-        j["index.MCP"] + Vector((0.0, 0.0, -0.01)),
-        j["middle.MCP"] + Vector((0.0, 0.0, -0.01)),
-        j["ring.MCP"] + Vector((0.0, 0.0, -0.01)),
-        j["pinky.MCP"] + Vector((0.0, 0.0, -0.01)),
-        j["thumb.CMC"] + Vector((0.0, 0.0, 0.006)),
-    ]
-    for v in cores:
-        verts.append((v + Vector((0.0, thickness, 0.0))).to_tuple())
-        verts.append((v + Vector((0.0, -thickness, 0.0))).to_tuple())
-    mesh = bpy.data.meshes.new("PalmMesh")
-    mesh.from_pydata(verts, [], [])
-    obj = bpy.data.objects.new("Palm", mesh)
-    bpy.context.collection.objects.link(obj)
-    bpy.context.view_layer.objects.active = obj
-    obj.select_set(True)
-    bpy.ops.object.mode_set(mode="EDIT")
-    bpy.ops.mesh.select_all(action="SELECT")
-    bpy.ops.mesh.convex_hull()
-    bpy.ops.object.mode_set(mode="OBJECT")
-    return obj
+def make_palm(mat):
+    bpy.ops.mesh.primitive_cube_add(size=1.0, location=(-0.006, 0.006, 0.058))
+    palm = bpy.context.active_object
+    palm.name = "Palm"
+    palm.scale = (0.058, 0.018, 0.055)
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    bevel = palm.modifiers.new("Bevel", "BEVEL")
+    bevel.width = 0.012
+    bevel.segments = 5
+    bpy.ops.object.modifier_apply(modifier="Bevel")
+    return palm
 
 
 def build_meshes(j, arm, mat):
-    palm = make_palm(j)
+    palm = make_palm(mat)
     bind_piece(palm, arm, "palm", mat)
 
     finger_r = {
@@ -246,23 +224,24 @@ def skin_material():
     mat = bpy.data.materials.new("HandSkin")
     mat.use_nodes = True
     bsdf = mat.node_tree.nodes.get("Principled BSDF")
-    bsdf.inputs["Base Color"].default_value = (0.78, 0.58, 0.46, 1.0)
-    bsdf.inputs["Roughness"].default_value = 0.48
+    bsdf.inputs["Base Color"].default_value = (0.62, 0.44, 0.34, 1.0)
+    bsdf.inputs["Roughness"].default_value = 0.55
     if "Specular IOR Level" in bsdf.inputs:
-        bsdf.inputs["Specular IOR Level"].default_value = 0.18
+        bsdf.inputs["Specular IOR Level"].default_value = 0.12
     if "Subsurface Weight" in bsdf.inputs:
-        bsdf.inputs["Subsurface Weight"].default_value = 0.12
+        bsdf.inputs["Subsurface Weight"].default_value = 0.08
     return mat
 
 
 def setup_camera_lights():
     cam_data = bpy.data.cameras.new("FrontCam")
     cam_data.type = "ORTHO"
-    cam_data.ortho_scale = 0.28
+    cam_data.ortho_scale = 0.30
     cam = bpy.data.objects.new("FrontCam", cam_data)
     bpy.context.collection.objects.link(cam)
-    cam.location = (0.04, 0.34, 0.11)
-    look_at(cam, Vector((0.0, 0.0, 0.08)))
+    # 从 +Y 看向掌心；90°X + 180°Z 让世界 +X 落在画面左侧（右手拇指）。
+    cam.location = (0.0, 0.40, 0.085)
+    cam.rotation_euler = (math.radians(90.0), 0.0, math.radians(180.0))
     bpy.context.scene.camera = cam
 
     def area(name, loc, energy, size, color=(1.0, 0.97, 0.93)):
@@ -273,18 +252,19 @@ def setup_camera_lights():
         obj = bpy.data.objects.new(name, light)
         bpy.context.collection.objects.link(obj)
         obj.location = loc
-        look_at(obj, Vector((0.0, 0.0, 0.07)))
+        direction = (Vector((0.0, 0.0, 0.07)) - Vector(loc)).normalized()
+        obj.rotation_euler = direction.to_track_quat("-Z", "Y").to_euler()
         return obj
 
-    area("Key", (0.14, 0.26, 0.24), 4.0, 0.35)
-    area("Fill", (-0.20, 0.20, 0.10), 1.4, 0.45, (0.85, 0.90, 1.0))
-    area("Rim", (0.0, -0.28, 0.16), 2.0, 0.25, (1.0, 0.95, 0.88))
+    area("Key", (0.12, 0.28, 0.22), 1.1, 0.40)
+    area("Fill", (-0.18, 0.22, 0.10), 0.35, 0.50, (0.85, 0.90, 1.0))
+    area("Rim", (0.0, -0.26, 0.16), 0.45, 0.30, (1.0, 0.95, 0.88))
 
     world = bpy.data.worlds.new("Studio")
     world.use_nodes = True
     bg = world.node_tree.nodes["Background"]
-    bg.inputs[0].default_value = (0.90, 0.89, 0.86, 1.0)
-    bg.inputs[1].default_value = 0.2
+    bg.inputs[0].default_value = (0.86, 0.85, 0.82, 1.0)
+    bg.inputs[1].default_value = 0.12
     bpy.context.scene.world = world
 
 
@@ -317,9 +297,9 @@ def reset_pose(arm):
 
 
 def curl_finger(arm, name, curl, spread=0.0):
-    set_euler(arm.pose.bones[f"{name}.MCP"], (curl * 78.0, 0.0, spread))
-    set_euler(arm.pose.bones[f"{name}.PIP"], (curl * 96.0, 0.0, 0.0))
-    set_euler(arm.pose.bones[f"{name}.DIP"], (curl * 52.0, 0.0, 0.0))
+    set_euler(arm.pose.bones[f"{name}.MCP"], (curl * 82.0, 0.0, spread))
+    set_euler(arm.pose.bones[f"{name}.PIP"], (curl * 108.0, 0.0, 0.0))
+    set_euler(arm.pose.bones[f"{name}.DIP"], (curl * 70.0, 0.0, 0.0))
 
 
 def apply_thumb(arm, preset):
@@ -327,32 +307,32 @@ def apply_thumb(arm, preset):
         set_euler(arm.pose.bones[bone], xyz)
 
 
-# 草稿姿态：外形按 GF 0021—2019，角度待人对照国标图微调。
-THUMB_FIST_UP = {  # A 握拳，拇指伸出
-    "thumb.CMC": (-8.0, 12.0, -38.0),
-    "thumb.MCP": (12.0, 0.0, -8.0),
+# GF 0021—2019 草稿姿态（不是 ASL）。人对照国标图再调。
+THUMB_UP = {  # A：握拳，拇指沿食指侧伸出朝上
+    "thumb.CMC": (-10.0, -20.0, -25.0),
+    "thumb.MCP": (15.0, -15.0, 15.0),
+    "thumb.IP": (5.0, 0.0, 0.0),
+}
+THUMB_ACROSS = {  # 拇指弯贴掌心：B / U / V / I / W
+    "thumb.CMC": (5.0, 5.0, -5.0),
+    "thumb.MCP": (0.0, 10.0, -110.0),
     "thumb.IP": (10.0, 0.0, 0.0),
 }
-THUMB_ACROSS = {  # 拇指收在掌侧：B / U / V / I / W
-    "thumb.CMC": (42.0, 18.0, 48.0),
-    "thumb.MCP": (38.0, 6.0, 12.0),
-    "thumb.IP": (28.0, 0.0, 0.0),
+THUMB_L = {  # L：拇指水平，与食指成直角
+    "thumb.CMC": (-10.0, -15.0, 30.0),
+    "thumb.MCP": (10.0, 0.0, 15.0),
+    "thumb.IP": (25.0, 0.0, 0.0),
 }
-THUMB_L = {  # L 拇指与食指成直角
-    "thumb.CMC": (6.0, 8.0, -62.0),
-    "thumb.MCP": (6.0, 0.0, 0.0),
-    "thumb.IP": (0.0, 0.0, 0.0),
-}
-THUMB_Y = {  # Y 拇指、小指伸出
-    "thumb.CMC": (8.0, 10.0, -52.0),
-    "thumb.MCP": (8.0, 0.0, 0.0),
-    "thumb.IP": (0.0, 0.0, 0.0),
+THUMB_Y = {  # Y：拇指、小指伸出
+    "thumb.CMC": (10.0, 20.0, 50.0),
+    "thumb.MCP": (-10.0, 0.0, -10.0),
+    "thumb.IP": (10.0, 0.0, 0.0),
 }
 
 
 def pose_A(arm):
     """握拳，拇指伸出。"""
-    apply_thumb(arm, THUMB_FIST_UP)
+    apply_thumb(arm, THUMB_UP)
     for f in ("index", "middle", "ring", "pinky"):
         curl_finger(arm, f, 1.0)
 
@@ -360,17 +340,17 @@ def pose_A(arm):
 def pose_B(arm):
     """四指并拢伸直，拇指弯曲贴掌心。"""
     apply_thumb(arm, THUMB_ACROSS)
-    curl_finger(arm, "index", 0.0, 7.0)
-    curl_finger(arm, "middle", 0.0, 0.0)
-    curl_finger(arm, "ring", 0.0, -5.0)
-    curl_finger(arm, "pinky", 0.0, -9.0)
+    curl_finger(arm, "index", 0.0, -12.0)
+    curl_finger(arm, "middle", 0.0, -2.0)
+    curl_finger(arm, "ring", 0.0, 8.0)
+    curl_finger(arm, "pinky", 0.0, 14.0)
 
 
 def pose_U(arm):
     """食指、中指并拢伸直朝上，其余收起。"""
     apply_thumb(arm, THUMB_ACROSS)
-    curl_finger(arm, "index", 0.0, 6.0)
-    curl_finger(arm, "middle", 0.0, -6.0)
+    curl_finger(arm, "index", 0.0, -11.0)
+    curl_finger(arm, "middle", 0.0, 11.0)
     curl_finger(arm, "ring", 1.0)
     curl_finger(arm, "pinky", 1.0)
 
@@ -378,8 +358,8 @@ def pose_U(arm):
 def pose_V(arm):
     """食指、中指分开伸直成 V，其余收起。"""
     apply_thumb(arm, THUMB_ACROSS)
-    curl_finger(arm, "index", 0.0, -20.0)
-    curl_finger(arm, "middle", 0.0, 20.0)
+    curl_finger(arm, "index", 0.0, 26.0)
+    curl_finger(arm, "middle", 0.0, -26.0)
     curl_finger(arm, "ring", 1.0)
     curl_finger(arm, "pinky", 1.0)
 
@@ -387,7 +367,7 @@ def pose_V(arm):
 def pose_L(arm):
     """拇指、食指伸直成直角，其余收起。"""
     apply_thumb(arm, THUMB_L)
-    curl_finger(arm, "index", 0.0, -4.0)
+    curl_finger(arm, "index", 0.0, 0.0)
     curl_finger(arm, "middle", 1.0)
     curl_finger(arm, "ring", 1.0)
     curl_finger(arm, "pinky", 1.0)
@@ -399,7 +379,7 @@ def pose_Y(arm):
     curl_finger(arm, "index", 1.0)
     curl_finger(arm, "middle", 1.0)
     curl_finger(arm, "ring", 1.0)
-    curl_finger(arm, "pinky", 0.0, 8.0)
+    curl_finger(arm, "pinky", 0.0, -16.0)
 
 
 def pose_I(arm):
@@ -408,15 +388,15 @@ def pose_I(arm):
     curl_finger(arm, "index", 1.0)
     curl_finger(arm, "middle", 1.0)
     curl_finger(arm, "ring", 1.0)
-    curl_finger(arm, "pinky", 0.0, 10.0)
+    curl_finger(arm, "pinky", 0.0, -16.0)
 
 
 def pose_W(arm):
     """食指、中指、无名指分开伸直，拇指和小指收起。"""
     apply_thumb(arm, THUMB_ACROSS)
-    curl_finger(arm, "index", 0.0, -16.0)
+    curl_finger(arm, "index", 0.0, 22.0)
     curl_finger(arm, "middle", 0.0, 0.0)
-    curl_finger(arm, "ring", 0.0, 16.0)
+    curl_finger(arm, "ring", 0.0, -22.0)
     curl_finger(arm, "pinky", 1.0)
 
 
@@ -455,7 +435,6 @@ def ensure_action(arm):
 
 
 def keyframe_pose(arm, frame):
-    # 不要先 frame_set：会把刚摆好的 pose 冲成已有动画。
     for pb in arm.pose.bones:
         pb.rotation_mode = "XYZ"
         pb.keyframe_insert(data_path="rotation_euler", frame=frame)
@@ -467,7 +446,7 @@ def keyframe_pose(arm, frame):
 def build_pose_library(arm):
     bpy.context.view_layer.objects.active = arm
     bpy.ops.object.mode_set(mode="POSE")
-    action = ensure_action(arm)
+    ensure_action(arm)
     scene = bpy.context.scene
     scene.timeline_markers.clear()
     for frame, name, fn in POSES:
@@ -477,13 +456,16 @@ def build_pose_library(arm):
         keyframe_pose(arm, frame)
         scene.timeline_markers.new(name, frame=frame)
     bpy.ops.object.mode_set(mode="OBJECT")
-    ncurves = len(action.fcurves) if hasattr(action, "fcurves") else -1
-    print("action fcurves", ncurves)
+    cam = scene.camera
     for frame, name, _fn in POSES:
         scene.frame_set(frame)
         bpy.context.view_layer.update()
-        ring = arm.pose.bones["ring.TIP"].matrix.to_translation()
-        print(name, "frame", frame, "ring.TIP", tuple(round(c, 4) for c in ring))
+        thumb = arm.pose.bones["thumb.TIP"].matrix.to_translation()
+        pinky = arm.pose.bones["pinky.TIP"].matrix.to_translation()
+        print(name, "frame", frame, "thumb.x", round(thumb.x, 4), "pinky.x", round(pinky.x, 4))
+    if cam is not None:
+        fwd = cam.matrix_world.to_quaternion() @ Vector((0.0, 0.0, -1.0))
+        print("cam forward", tuple(round(c, 3) for c in fwd), "loc", tuple(round(c, 3) for c in cam.location))
 
 
 def main():

@@ -116,6 +116,27 @@ export function thumbBetweenIndexMiddle(lm) {
   return dist(lm[4], mid) / handScale(lm) < 0.38;
 }
 
+export function inFrameOf(lm) {
+  if (!lm || lm.length < 21) return false;
+  const keys = [0, 5, 9, 13, 17];
+  let inside = 0;
+  for (const i of keys) {
+    const p = lm[i];
+    if (!p) continue;
+    if (p.x > -0.05 && p.x < 1.05 && p.y > -0.08 && p.y < 1.12) inside += 1;
+  }
+  return inside >= 3;
+}
+
+/** 没手 / 两只手 / 出框 / 低置信度时不能判到位。阈值不改。 */
+export const MIN_HAND_CONF = 0.35;
+
+export function isReadyToScore({ handCount, conf, lm } = {}) {
+  if (handCount !== 1) return false;
+  if (!(conf >= MIN_HAND_CONF)) return false;
+  return inFrameOf(lm);
+}
+
 /**
  * @param {{ rules?: object } | null | undefined} letter
  * @param {Array<{x:number,y:number,z?:number}> | null | undefined} lm

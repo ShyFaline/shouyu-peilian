@@ -3,6 +3,7 @@
 from pathlib import Path
 
 import bpy
+from mathutils import Vector
 
 MAIN = [
     "GF0021.A",
@@ -42,13 +43,50 @@ def main():
     scene.render.film_transparent = True
     scene.view_settings.view_transform = "Standard"
     if hasattr(scene, "eevee"):
-        scene.eevee.taa_render_samples = 32
+        scene.eevee.taa_render_samples = 64
+        if hasattr(scene.eevee, "use_shadows"):
+            scene.eevee.use_shadows = True
 
     arm = bpy.data.objects.get("HandRig")
+    cam = scene.camera
+    home = cam.location.copy() if cam is not None else Vector((0.0, 0.40, 0.085))
+    home_scale = cam.data.ortho_scale if cam is not None else 0.30
+
+    def mesh_xz(arm_obj):
+        deps = bpy.context.evaluated_depsgraph_get()
+        xs, zs = [], []
+        for obj in bpy.data.objects:
+            if obj.type != "MESH" or obj.parent != arm_obj:
+                continue
+            ev = obj.evaluated_get(deps)
+            mesh = ev.to_mesh()
+            mw = ev.matrix_world
+            for v in mesh.vertices:
+                w = mw @ v.co
+                xs.append(w.x)
+                zs.append(w.z)
+            ev.to_mesh_clear()
+        return xs, zs
+
+    def recenter():
+        if cam is None or arm is None:
+            return
+        xs, zs = mesh_xz(arm)
+        if not xs:
+            pts = [arm.matrix_world @ pb.tail for pb in arm.pose.bones]
+            xs = [p.x for p in pts]
+            zs = [p.z for p in pts]
+        cx = (min(xs) + max(xs)) * 0.5
+        cz = (min(zs) + max(zs)) * 0.5
+        span = max(max(xs) - min(xs), max(zs) - min(zs)) * 1.12
+        cam.location = Vector((cx, home.y, cz))
+        cam.data.ortho_scale = max(span, 0.10)
+
     for name in MAIN:
         frame = markers[name]
         scene.frame_set(frame)
         bpy.context.view_layer.update()
+        recenter()
         if arm is not None:
             tip = arm.pose.bones["ring.TIP"].matrix.to_translation()
             print(name, "frame", frame, "ring.TIP", tuple(round(c, 4) for c in tip))
@@ -56,6 +94,9 @@ def main():
         scene.render.filepath = str(path)
         bpy.ops.render.render(write_still=True)
         print("wrote", path)
+        if cam is not None:
+            cam.location = home
+            cam.data.ortho_scale = home_scale
 
 
 if __name__ == "__main__":

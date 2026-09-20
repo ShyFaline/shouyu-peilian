@@ -32,7 +32,25 @@ bun practice/src/evaluate.test.js
 node practice/src/evaluate.test.js
 ```
 
-夹具：U 并拢通过；同一只手拿去判 V 必须失败并给出手指分开类 hint；缺手不得判到位。
+12 passed（含 fixtures 空目录用例）。夹具：U 并拢通过；V 并拢失败并提示分开；缺手不得到位；V 分开通过；U 分开失败并提示并拢；主路径 A B L Y I W 各一条正例。不是真人实验，不报准确率。
+
+`practice/src/fixtures/` 当前为空，不是真人数据。放入导出的 HandFrame JSON（`t`、`handedness`、`landmarks` 长度 21、`conf`）后，同一条测试命令会读取并调用 `evaluate()`。
+
+```
+bun practice/src/eval-handframe.mjs <json路径> <字母ID>
+读 HandFrame JSON，从 letters.json 取字母，调用 evaluate。
+打印 pass 与 issues[].code / hint。缺手或缺字母时 pass=false。
+```
+
+## 导出当前手 JSON
+
+练习页摄像头下方工具栏，「导出当前手 JSON（本机下载，不上传）」**默认关闭**。勾选后点「下载 JSON」，浏览器只在本机保存一帧 HandFrame：
+
+```json
+{ "t": 0, "handedness": "Right", "landmarks": [{ "x": 0, "y": 0, "z": 0 }], "conf": 0.9 }
+```
+
+`landmarks` 长度 21。视频和 JSON 都不上传。明天真人试时把下载文件放进 `practice/src/fixtures/`，即可当夹具喂给 `evaluate()`。
 
 ## 目录
 
@@ -40,7 +58,8 @@ node practice/src/evaluate.test.js
 |---|---|
 | `practice/` | 可运行的初版 |
 | `practice/src/evaluate.js` | 几何与 `evaluate()` 纯函数 |
-| `practice/src/evaluate.test.js` | U / V / 缺手夹具 |
+| `practice/src/evaluate.test.js` | U / V / 缺手 + A B L Y I W 正例夹具 |
+| `practice/src/fixtures/` | 真人试导出的 HandFrame JSON |
 | `practice/content/demos/` | 标准手 PNG，文件名 `{id}_front.png` |
 | `practice/sources.html` | 来源与许可 |
 | `技术栈前期规划.md` | 技术选型 |

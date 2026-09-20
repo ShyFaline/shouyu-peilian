@@ -42,6 +42,12 @@ bun practice/src/eval-handframe.mjs <json路径> <字母ID>
 打印 pass 与 issues[].code / hint。缺手或缺字母时 pass=false。
 ```
 
+S1.5 渲染图闭环（不是真人，不是 S2）。对主路径 8 张 `practice/content/demos/GF0021.*_front.png` 跑 Hand Landmarker IMAGE 模式。有手写出 `practice/src/render-loop/out/<id>.json`，再调用上面的 eval。无手或检测失败记 `no_hand`，不编 landmarks。不写 `fixtures/`。阈值与 `practice/app.js` 相同。汇总：`practice/src/render-loop/RESULTS.md`。渲染图，不是真人。不报准确率。
+
+```bash
+python practice/src/render-loop/run.py
+```
+
 ## 导出当前手 JSON
 
 练习页摄像头下方工具栏，「导出当前手 JSON（本机下载，不上传）」**默认关闭**。勾选后点「下载 JSON」，浏览器只在本机保存一帧 HandFrame：
@@ -60,6 +66,7 @@ bun practice/src/eval-handframe.mjs <json路径> <字母ID>
 | `practice/src/evaluate.js` | 几何与 `evaluate()` 纯函数 |
 | `practice/src/evaluate.test.js` | U / V / 缺手 + A B L Y I W 正例夹具 |
 | `practice/src/fixtures/` | 真人试导出的 HandFrame JSON |
+| `practice/src/render-loop/` | S1.5：渲染 PNG → Hand Landmarker → evaluate。结果在 `RESULTS.md` 与 `out/`。不是真人。 |
 | `practice/content/demos/` | 标准手 PNG，文件名 `{id}_front.png` |
 | `practice/sources.html` | 来源与许可 |
 | `技术栈前期规划.md` | 技术选型 |

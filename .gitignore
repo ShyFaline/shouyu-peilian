@@ -13,3 +13,6 @@ __pycache__/
 
 # B 站教学片本机抽检，视频不入库
 tmp-media/
+
+# Blender 自动备份
+*.blend1

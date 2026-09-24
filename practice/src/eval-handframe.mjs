@@ -20,10 +20,37 @@ try {
 } catch {
   frame = null;
 }
-const lm = Array.isArray(frame?.landmarks) ? frame.landmarks : null;
-const result = evaluate(letter, lm);
+const imageWidth = frame?.imageWidth;
+const imageHeight = frame?.imageHeight;
+const hasSize =
+  typeof imageWidth === "number" &&
+  Number.isFinite(imageWidth) &&
+  imageWidth > 0 &&
+  typeof imageHeight === "number" &&
+  Number.isFinite(imageHeight) &&
+  imageHeight > 0;
+if (!hasSize) {
+  console.log("geometry_pass false");
+  console.log("missing_size");
+  process.exit(0);
+}
 
-console.log(`pass ${result.pass}`);
-for (const issue of result.issues) {
+const lm = Array.isArray(frame?.landmarks) ? frame.landmarks : null;
+const geom = {
+  width: imageWidth,
+  height: imageHeight,
+  imageWidth,
+  imageHeight,
+  coordSpace: frame?.coordSpace || "image_normalized",
+};
+const result = evaluate(letter, lm, geom);
+const audit = result.audit || result.issues || [];
+
+console.log(`geometry_pass ${result.pass}`);
+console.log(`ruleStatus ${result.ruleStatus || ""}`);
+if (Object.prototype.hasOwnProperty.call(frame || {}, "expectedVerdict")) {
+  console.log("expectedVerdict ignored; not a pass label");
+}
+for (const issue of audit) {
   console.log(`${issue.code} ${issue.hint}`);
 }

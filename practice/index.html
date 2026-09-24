@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>手语学习陪练 · 初版</title>
+  <title>国标手指字母陪练</title>
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
@@ -12,7 +12,7 @@
       <p class="kicker">GF 0021—2019 · 主路径 8 个字母</p>
       <h1>国标手指字母陪练</h1>
     </div>
-    <p id="status" class="status">先开摄像头看识别，不对再改规则</p>
+    <p id="status" class="status">打开摄像头，对照左边示范。识别在本机，视频不上传。</p>
   </header>
 
   <main>
@@ -26,6 +26,7 @@
       <p id="demo-label" class="demo-label">字母 U</p>
       <p id="how" class="how"></p>
       <div id="letter-btns" class="letter-btns"></div>
+      <p class="atlas-note">「练」可对照手型；「待」只看示范、不判定；「示」只对照外形。</p>
       <details id="atlas" class="atlas">
         <summary>图鉴 · 其余字母</summary>
         <p class="atlas-note">主路径以外的国标字母，默认不练。M / N / S 和 E / ê 规则尚未能稳定分开，只对照外形，不作为过关依据。</p>
@@ -36,30 +37,36 @@
     <section class="panel live">
       <p class="panel-label">你的手</p>
       <div id="stage" class="stage" data-mirror="true">
-        <video id="video" playsinline autoplay muted></video>
-        <canvas id="overlay"></canvas>
-        <div class="placeholder">打开摄像头后，这里画 21 点骨架</div>
+        <div class="stage-media">
+          <video id="video" playsinline autoplay muted></video>
+          <canvas id="overlay"></canvas>
+          <div class="placeholder">打开摄像头后，这里会出现你的手</div>
+        </div>
         <div class="live-verdict">
-          <p id="verdict" data-state="idle">比这个手型</p>
-          <p id="hint">对照左边，把手指放到位。看到骨架后应出现「到位」或「还不到位」。</p>
+          <p id="verdict" data-state="idle">暂不判定</p>
+          <p id="hint">这个字母还不能判定对错，先对照左边示范。可改练带「练」的字母。</p>
         </div>
       </div>
       <div class="feedback">
-        <p class="feedback-note">评价在画面左下角，只有到位 / 还不到位和一句提示，不显示分数。无摄像头也可看左边示范。J / Z 只核静态手型。</p>
+        <p class="feedback-note">左边示范，右边你的手。看不清会说「暂时无法判断」，不打分。</p>
       </div>
       <div class="toolbar">
         <button id="start-btn" type="button">打开摄像头</button>
+        <button id="stop-btn" type="button" disabled>停止摄像头</button>
         <label><input id="mirror-toggle" type="checkbox" checked /> 镜像</label>
+      </div>
+      <details class="export">
+        <summary>导出当前手 JSON（本机，不上传）</summary>
         <label title="默认关闭。勾选后可把当前 21 点下载到本机，不上传。">
           <input id="export-toggle" type="checkbox" /> 导出当前手 JSON（本机下载，不上传）
         </label>
         <button id="export-btn" type="button" disabled>下载 JSON</button>
-      </div>
+      </details>
     </section>
   </main>
 
   <footer>
-    感知：MediaPipe Hand Landmarker（本机）· 理解：几何规则，不显示分数 · 内容：GF 0021—2019 ·
+    内容：GF 0021—2019 ·
     <a href="./sources.html">来源与许可</a>
     · 示范图按国标摆，不是识别模型
   </footer>

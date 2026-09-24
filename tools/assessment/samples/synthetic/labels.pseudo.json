@@ -1,0 +1,28 @@
+{
+  "labelVersion": "pseudo-1",
+  "note": "反面夹具：标签来自工具自身预测，必须被拒收，不得进准确率。",
+  "labels": [
+    {
+      "sampleId": "syn-v-pos",
+      "expectedVerdict": "correct",
+      "level": "geometry",
+      "reviewedBy": "auto",
+      "independent": false,
+      "derivedFrom": "u_pass"
+    },
+    {
+      "sampleId": "syn-v-neg-spread",
+      "expectedVerdict": "correct",
+      "level": "geometry",
+      "reviewedBy": "model:judge",
+      "independent": true
+    },
+    {
+      "sampleId": "syn-l-pos",
+      "expectedVerdict": "correct",
+      "level": "not_a_level",
+      "reviewedBy": "human:h1",
+      "independent": true
+    }
+  ]
+}

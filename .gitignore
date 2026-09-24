@@ -16,3 +16,10 @@ tmp-media/
 
 # Blender 自动备份
 *.blend1
+
+# 官方 CC0 Human Base Meshes 体积大，本机重建用，不入库
+blender/vendor/
+
+# 本机临时文件
+.~lock.*#
+_probe*.mjs

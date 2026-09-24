@@ -1,0 +1,94 @@
+{
+  "generatedAt": "2026-09-24T15:12:33.997Z",
+  "level": "auto",
+  "coreFingerprint": {
+    "files": {
+      "practice/src/coords.js": "7a607fa98b4e85bb",
+      "practice/src/evaluate.js": "3e8034a89051d512",
+      "practice/src/inputQuality.js": "f51d4e865a33f5d3",
+      "practice/src/passState.js": "2ec4dd2140973c00",
+      "practice/src/judge.js": "2b4d64b26f60f529",
+      "practice/src/snapshot.js": "366bedb9b808a325",
+      "practice/src/types.js": "295fbd56b7a3c4ae",
+      "practice/content/letters.json": "e9caa89406134442"
+    },
+    "digest": "7a5f6608f0316517"
+  },
+  "labelInfo": {
+    "provided": false
+  },
+  "holdThresholds": {
+    "passFrames": 6,
+    "maxGapMs": 400,
+    "unverified": true,
+    "source": "practice/src/passState.js"
+  },
+  "totals": {
+    "key": "ALL",
+    "samples": 0,
+    "labeled": 0,
+    "scored": 0,
+    "predicted": 0,
+    "blocked": 0,
+    "unknown": 0,
+    "invalid": 0,
+    "statusCounts": {
+      "scored": 0,
+      "blocked": 0,
+      "unknown": 0,
+      "invalid": 0
+    },
+    "truthCorrect": 0,
+    "truthIncorrect": 0,
+    "predictedCorrect": 0,
+    "predictedIncorrect": 0,
+    "truePositive": 0,
+    "falseAccept": 0,
+    "falseReject": 0,
+    "trueNegative": 0,
+    "issueAgreementNum": 0,
+    "issueAgreementDen": 0,
+    "replayCoverage": {
+      "num": 0,
+      "den": 0,
+      "value": null
+    },
+    "scoredCoverage": {
+      "num": 0,
+      "den": 0,
+      "value": null
+    },
+    "falseAcceptRate": {
+      "num": 0,
+      "den": 0,
+      "value": null
+    },
+    "falseRejectRate": {
+      "num": 0,
+      "den": 0,
+      "value": null
+    },
+    "agreement": {
+      "num": 0,
+      "den": 0,
+      "value": null
+    },
+    "issueAgreement": {
+      "num": 0,
+      "den": 0,
+      "value": null
+    }
+  },
+  "byLevel": [],
+  "byTruthOrigin": [],
+  "bySourceType": [],
+  "blockReasons": {},
+  "humanEvaluation": {
+    "executed": false,
+    "buckets": [],
+    "note": "没有真人来源标签。未执行真人评估，本报告不含任何真人准确率。"
+  },
+  "syntheticBuckets": [],
+  "syntheticNote": null,
+  "samples": []
+}

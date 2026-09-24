@@ -1,0 +1,198 @@
+{
+  "labelVersion": "synthetic-labels-1",
+  "truthOrigin": "synthetic-construction",
+  "humanReviewed": false,
+  "note": "合成夹具标签，不是真人标注。只验证回放骨架接线，不得当准确率。序列标签的期望来自 passState spec。",
+  "labels": [
+    {
+      "sampleId": "syn-v-pos",
+      "expectedVerdict": "correct",
+      "expectedIssueCodes": [],
+      "level": "geometry",
+      "reviewedBy": "fixture-author:synthetic",
+      "reviewedAt": "2026-09-24T00:00:00Z",
+      "independent": true,
+      "labelVersion": "synthetic-labels-1",
+      "truthOrigin": "synthetic-construction",
+      "humanReviewed": false
+    },
+    {
+      "sampleId": "syn-v-neg-spread",
+      "expectedVerdict": "incorrect",
+      "expectedIssueCodes": [
+        "index_middle.not_apart"
+      ],
+      "level": "geometry",
+      "reviewedBy": "fixture-author:synthetic",
+      "reviewedAt": "2026-09-24T00:00:00Z",
+      "independent": true,
+      "labelVersion": "synthetic-labels-1",
+      "truthOrigin": "synthetic-construction",
+      "humanReviewed": false
+    },
+    {
+      "sampleId": "syn-l-pos",
+      "expectedVerdict": "correct",
+      "expectedIssueCodes": [],
+      "level": "geometry",
+      "reviewedBy": "fixture-author:synthetic",
+      "reviewedAt": "2026-09-24T00:00:00Z",
+      "independent": true,
+      "labelVersion": "synthetic-labels-1",
+      "truthOrigin": "synthetic-construction",
+      "humanReviewed": false
+    },
+    {
+      "sampleId": "syn-l-neg-angle",
+      "expectedVerdict": "incorrect",
+      "expectedIssueCodes": [
+        "thumb_index.angle"
+      ],
+      "level": "geometry",
+      "reviewedBy": "fixture-author:synthetic",
+      "reviewedAt": "2026-09-24T00:00:00Z",
+      "independent": true,
+      "labelVersion": "synthetic-labels-1",
+      "truthOrigin": "synthetic-construction",
+      "humanReviewed": false
+    },
+    {
+      "sampleId": "syn-y-pos",
+      "expectedVerdict": "correct",
+      "expectedIssueCodes": [],
+      "level": "geometry",
+      "reviewedBy": "fixture-author:synthetic",
+      "reviewedAt": "2026-09-24T00:00:00Z",
+      "independent": true,
+      "labelVersion": "synthetic-labels-1",
+      "truthOrigin": "synthetic-construction",
+      "humanReviewed": false
+    },
+    {
+      "sampleId": "syn-a-pos",
+      "expectedVerdict": "correct",
+      "expectedIssueCodes": [],
+      "level": "geometry",
+      "reviewedBy": "fixture-author:synthetic",
+      "reviewedAt": "2026-09-24T00:00:00Z",
+      "independent": true,
+      "labelVersion": "synthetic-labels-1",
+      "truthOrigin": "synthetic-construction",
+      "humanReviewed": false
+    },
+    {
+      "sampleId": "syn-b-pos",
+      "expectedVerdict": "correct",
+      "expectedIssueCodes": [],
+      "level": "geometry",
+      "reviewedBy": "fixture-author:synthetic",
+      "reviewedAt": "2026-09-24T00:00:00Z",
+      "independent": true,
+      "labelVersion": "synthetic-labels-1",
+      "truthOrigin": "synthetic-construction",
+      "humanReviewed": false
+    },
+    {
+      "sampleId": "syn-w-pos",
+      "expectedVerdict": "correct",
+      "expectedIssueCodes": [],
+      "level": "geometry",
+      "reviewedBy": "fixture-author:synthetic",
+      "reviewedAt": "2026-09-24T00:00:00Z",
+      "independent": true,
+      "labelVersion": "synthetic-labels-1",
+      "truthOrigin": "synthetic-construction",
+      "humanReviewed": false
+    },
+    {
+      "sampleId": "syn-i-pos",
+      "expectedVerdict": "correct",
+      "expectedIssueCodes": [],
+      "level": "geometry",
+      "reviewedBy": "fixture-author:synthetic",
+      "reviewedAt": "2026-09-24T00:00:00Z",
+      "independent": true,
+      "labelVersion": "synthetic-labels-1",
+      "truthOrigin": "synthetic-construction",
+      "humanReviewed": false
+    },
+    {
+      "sampleId": "syn-seq-v-pass",
+      "expectedVerdict": "correct",
+      "expectedIssueCodes": [],
+      "level": "sequence",
+      "reviewedBy": "fixture-author:synthetic",
+      "reviewedAt": "2026-09-24T00:00:00Z",
+      "independent": true,
+      "labelVersion": "synthetic-labels-1",
+      "truthOrigin": "spec-derived-gate",
+      "humanReviewed": false,
+      "note": "6 帧 100ms 间隔，门应开放"
+    },
+    {
+      "sampleId": "syn-seq-v-short",
+      "expectedVerdict": "incorrect",
+      "expectedIssueCodes": [],
+      "level": "sequence",
+      "reviewedBy": "fixture-author:synthetic",
+      "reviewedAt": "2026-09-24T00:00:00Z",
+      "independent": true,
+      "labelVersion": "synthetic-labels-1",
+      "truthOrigin": "spec-derived-gate",
+      "humanReviewed": false,
+      "note": "只有 5 帧，门不应开放"
+    },
+    {
+      "sampleId": "syn-seq-v-expired",
+      "expectedVerdict": "incorrect",
+      "expectedIssueCodes": [],
+      "level": "sequence",
+      "reviewedBy": "fixture-author:synthetic",
+      "reviewedAt": "2026-09-24T00:00:00Z",
+      "independent": true,
+      "labelVersion": "synthetic-labels-1",
+      "truthOrigin": "spec-derived-gate",
+      "humanReviewed": false,
+      "note": "间隔 401ms 超时清零，门不应开放"
+    },
+    {
+      "sampleId": "syn-seq-v-dup",
+      "expectedVerdict": "incorrect",
+      "expectedIssueCodes": [],
+      "level": "sequence",
+      "reviewedBy": "fixture-author:synthetic",
+      "reviewedAt": "2026-09-24T00:00:00Z",
+      "independent": true,
+      "labelVersion": "synthetic-labels-1",
+      "truthOrigin": "spec-derived-gate",
+      "humanReviewed": false,
+      "note": "重复 videoTime 不计数，门不应开放"
+    },
+    {
+      "sampleId": "syn-seq-v-backwards",
+      "expectedVerdict": "incorrect",
+      "expectedIssueCodes": [],
+      "level": "sequence",
+      "reviewedBy": "fixture-author:synthetic",
+      "reviewedAt": "2026-09-24T00:00:00Z",
+      "independent": true,
+      "labelVersion": "synthetic-labels-1",
+      "truthOrigin": "spec-derived-gate",
+      "humanReviewed": false,
+      "note": "videoTime 倒退清零，门不应开放"
+    },
+    {
+      "sampleId": "syn-seq-v-nohand-then-pass",
+      "expectedVerdict": "correct",
+      "expectedIssueCodes": [],
+      "level": "sequence",
+      "reviewedBy": "fixture-author:synthetic",
+      "reviewedAt": "2026-09-24T00:00:00Z",
+      "independent": true,
+      "labelVersion": "synthetic-labels-1",
+      "truthOrigin": "spec-derived-gate",
+      "humanReviewed": false,
+      "note": "前两帧没手不算损坏，后 6 帧应开放"
+    }
+  ]
+}

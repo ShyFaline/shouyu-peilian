@@ -35,15 +35,15 @@ def main():
         raise SystemExit(f"blend 里缺少时间轴标记: {missing}")
 
     scene.render.engine = "BLENDER_EEVEE_NEXT"
-    scene.render.resolution_x = 768
-    scene.render.resolution_y = 768
+    scene.render.resolution_x = 1024
+    scene.render.resolution_y = 1024
     scene.render.resolution_percentage = 100
     scene.render.image_settings.file_format = "PNG"
-    scene.render.image_settings.color_mode = "RGBA"
-    scene.render.film_transparent = True
+    scene.render.image_settings.color_mode = "RGB"
+    scene.render.film_transparent = False
     scene.view_settings.view_transform = "Standard"
     if hasattr(scene, "eevee"):
-        scene.eevee.taa_render_samples = 64
+        scene.eevee.taa_render_samples = 128
         if hasattr(scene.eevee, "use_shadows"):
             scene.eevee.use_shadows = True
 

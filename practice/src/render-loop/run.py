@@ -60,12 +60,13 @@ def find_bun() -> str:
     raise FileNotFoundError("未找到 bun")
 
 
-def png_to_srgb(path: Path) -> mp.Image:
+def png_to_srgb(path: Path) -> tuple[mp.Image, int, int]:
     rgba = Image.open(path).convert("RGBA")
+    width, height = rgba.size
     bg = Image.new("RGB", rgba.size, (0, 0, 0))
     bg.paste(rgba, mask=rgba.split()[-1])
     arr = np.ascontiguousarray(np.array(bg), dtype=np.uint8)
-    return mp.Image(image_format=mp.ImageFormat.SRGB, data=arr)
+    return mp.Image(image_format=mp.ImageFormat.SRGB, data=arr), width, height
 
 
 def handedness_of(cats) -> tuple[str, float]:
@@ -92,12 +93,11 @@ def pick_hand(result) -> tuple[int, dict | None]:
     lm = hands[best_i]
     if len(lm) < 21:
         return n, None
-    name, conf = handedness_of(result.handedness[best_i] if result.handedness else None)
+    name, _score = handedness_of(result.handedness[best_i] if result.handedness else None)
     frame = {
         "t": 0,
-        "handedness": name,
+        "handedness": {"category": name},
         "landmarks": [{"x": float(p.x), "y": float(p.y), "z": float(p.z or 0.0)} for p in lm[:21]],
-        "conf": conf,
     }
     return n, frame
 
@@ -118,7 +118,7 @@ def eval_json(bun: str, json_path: Path, letter_id: str) -> tuple[bool, list[str
         line = line.strip()
         if not line:
             continue
-        if line.startswith("pass "):
+        if line.startswith("geometry_pass "):
             passed = line.split(None, 1)[1].strip() == "true"
             continue
         codes.append(line.split(None, 1)[0])
@@ -172,9 +172,12 @@ def main() -> int:
             print(f"{letter_id} 缺图")
             continue
         try:
-            image = png_to_srgb(png)
+            image, width, height = png_to_srgb(png)
             result = detector.detect(image)
             hands, frame = pick_hand(result)
+            if frame is not None:
+                frame["imageWidth"] = width
+                frame["imageHeight"] = height
         except Exception as exc:
             print(f"{letter_id} 检测失败：{exc}")
             rows.append({"id": letter_id, "hands": 0, "pass": False, "issues": ["no_hand"]})

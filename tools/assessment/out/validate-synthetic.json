@@ -1,0 +1,338 @@
+{
+  "dir": "C:\\Users\\15424\\Desktop\\2026.9.15\\tools\\assessment\\samples\\synthetic",
+  "generatedAt": "2026-09-24T15:12:33.872Z",
+  "coreFingerprint": {
+    "files": {
+      "practice/src/coords.js": "7a607fa98b4e85bb",
+      "practice/src/evaluate.js": "3e8034a89051d512",
+      "practice/src/inputQuality.js": "f51d4e865a33f5d3",
+      "practice/src/passState.js": "2ec4dd2140973c00",
+      "practice/src/judge.js": "2b4d64b26f60f529",
+      "practice/src/snapshot.js": "366bedb9b808a325",
+      "practice/src/types.js": "295fbd56b7a3c4ae",
+      "practice/content/letters.json": "e9caa89406134442"
+    },
+    "digest": "7a5f6608f0316517"
+  },
+  "totals": {
+    "files": 24,
+    "ok": 19,
+    "blocked": 5,
+    "warnings": 2
+  },
+  "blockerCodes": {
+    "missing_xy": 2,
+    "landmark_count": 1,
+    "missing_size": 1,
+    "unsupported_coord_space": 2
+  },
+  "warningCodes": {
+    "pseudo_label_field": 1,
+    "frames_without_hand": 1
+  },
+  "files": [
+    {
+      "file": "syn-a-pos.json",
+      "ok": true,
+      "kind": "single",
+      "target": "GF0021.A",
+      "coordSpace": "image_normalized",
+      "size": "640x480",
+      "sourceType": "synthetic",
+      "blockerCount": 0,
+      "blockers": [],
+      "warnings": []
+    },
+    {
+      "file": "syn-b-pos.json",
+      "ok": true,
+      "kind": "single",
+      "target": "GF0021.B",
+      "coordSpace": "image_normalized",
+      "size": "640x480",
+      "sourceType": "synthetic",
+      "blockerCount": 0,
+      "blockers": [],
+      "warnings": []
+    },
+    {
+      "file": "syn-bad-number-nan.json",
+      "ok": false,
+      "kind": "single",
+      "target": "GF0021.V",
+      "coordSpace": "image_normalized",
+      "size": "640x480",
+      "sourceType": "synthetic",
+      "blockerCount": 1,
+      "blockers": [
+        "missing_xy@landmarks[8]"
+      ],
+      "warnings": []
+    },
+    {
+      "file": "syn-bad-number-null.json",
+      "ok": false,
+      "kind": "single",
+      "target": "GF0021.V",
+      "coordSpace": "image_normalized",
+      "size": "640x480",
+      "sourceType": "synthetic",
+      "blockerCount": 1,
+      "blockers": [
+        "missing_xy@landmarks[12]"
+      ],
+      "warnings": []
+    },
+    {
+      "file": "syn-bad-number-short.json",
+      "ok": false,
+      "kind": "single",
+      "target": "GF0021.V",
+      "coordSpace": "image_normalized",
+      "size": "640x480",
+      "sourceType": "synthetic",
+      "blockerCount": 1,
+      "blockers": [
+        "landmark_count@landmarks"
+      ],
+      "warnings": []
+    },
+    {
+      "file": "syn-equal-scale-unit.json",
+      "ok": true,
+      "kind": "single",
+      "target": "GF0021.V",
+      "coordSpace": "equal_scale_unit",
+      "size": null,
+      "sourceType": "synthetic",
+      "blockerCount": 0,
+      "blockers": [],
+      "warnings": []
+    },
+    {
+      "file": "syn-i-pos.json",
+      "ok": true,
+      "kind": "single",
+      "target": "GF0021.I",
+      "coordSpace": "image_normalized",
+      "size": "640x480",
+      "sourceType": "synthetic",
+      "blockerCount": 0,
+      "blockers": [],
+      "warnings": []
+    },
+    {
+      "file": "syn-l-neg-angle.json",
+      "ok": true,
+      "kind": "single",
+      "target": "GF0021.L",
+      "coordSpace": "image_normalized",
+      "size": "640x480",
+      "sourceType": "synthetic",
+      "blockerCount": 0,
+      "blockers": [],
+      "warnings": []
+    },
+    {
+      "file": "syn-l-pos.json",
+      "ok": true,
+      "kind": "single",
+      "target": "GF0021.L",
+      "coordSpace": "image_normalized",
+      "size": "640x480",
+      "sourceType": "synthetic",
+      "blockerCount": 0,
+      "blockers": [],
+      "warnings": []
+    },
+    {
+      "file": "syn-missing-size.json",
+      "ok": false,
+      "kind": "single",
+      "target": "GF0021.V",
+      "coordSpace": "image_normalized",
+      "size": null,
+      "sourceType": "synthetic",
+      "blockerCount": 1,
+      "blockers": [
+        "missing_size@imageWidth/imageHeight"
+      ],
+      "warnings": []
+    },
+    {
+      "file": "syn-pseudo-label.json",
+      "ok": true,
+      "kind": "single",
+      "target": "GF0021.V",
+      "coordSpace": "image_normalized",
+      "size": "640x480",
+      "sourceType": "synthetic",
+      "blockerCount": 0,
+      "blockers": [],
+      "warnings": [
+        "pseudo_label_field"
+      ]
+    },
+    {
+      "file": "syn-seq-v-backwards.json",
+      "ok": true,
+      "kind": "sequence",
+      "target": "GF0021.V",
+      "coordSpace": "image_normalized",
+      "size": "640x480",
+      "sourceType": "synthetic",
+      "blockerCount": 0,
+      "blockers": [],
+      "warnings": []
+    },
+    {
+      "file": "syn-seq-v-dup.json",
+      "ok": true,
+      "kind": "sequence",
+      "target": "GF0021.V",
+      "coordSpace": "image_normalized",
+      "size": "640x480",
+      "sourceType": "synthetic",
+      "blockerCount": 0,
+      "blockers": [],
+      "warnings": []
+    },
+    {
+      "file": "syn-seq-v-expired.json",
+      "ok": true,
+      "kind": "sequence",
+      "target": "GF0021.V",
+      "coordSpace": "image_normalized",
+      "size": "640x480",
+      "sourceType": "synthetic",
+      "blockerCount": 0,
+      "blockers": [],
+      "warnings": []
+    },
+    {
+      "file": "syn-seq-v-nohand-then-pass.json",
+      "ok": true,
+      "kind": "sequence",
+      "target": "GF0021.V",
+      "coordSpace": "image_normalized",
+      "size": "640x480",
+      "sourceType": "synthetic",
+      "blockerCount": 0,
+      "blockers": [],
+      "warnings": [
+        "frames_without_hand"
+      ]
+    },
+    {
+      "file": "syn-seq-v-pass.json",
+      "ok": true,
+      "kind": "sequence",
+      "target": "GF0021.V",
+      "coordSpace": "image_normalized",
+      "size": "640x480",
+      "sourceType": "synthetic",
+      "blockerCount": 0,
+      "blockers": [],
+      "warnings": []
+    },
+    {
+      "file": "syn-seq-v-short.json",
+      "ok": true,
+      "kind": "sequence",
+      "target": "GF0021.V",
+      "coordSpace": "image_normalized",
+      "size": "640x480",
+      "sourceType": "synthetic",
+      "blockerCount": 0,
+      "blockers": [],
+      "warnings": []
+    },
+    {
+      "file": "syn-u-geom-pass-judge-blocked.json",
+      "ok": true,
+      "kind": "single",
+      "target": "GF0021.U",
+      "coordSpace": "image_normalized",
+      "size": "640x480",
+      "sourceType": "synthetic",
+      "blockerCount": 0,
+      "blockers": [],
+      "warnings": []
+    },
+    {
+      "file": "syn-unlabeled.json",
+      "ok": true,
+      "kind": "single",
+      "target": "GF0021.Y",
+      "coordSpace": "image_normalized",
+      "size": "640x480",
+      "sourceType": "synthetic",
+      "blockerCount": 0,
+      "blockers": [],
+      "warnings": []
+    },
+    {
+      "file": "syn-unsupported-space.json",
+      "ok": false,
+      "kind": "single",
+      "target": "GF0021.V",
+      "coordSpace": "screen_px",
+      "size": "640x480",
+      "sourceType": "synthetic",
+      "blockerCount": 2,
+      "blockers": [
+        "unsupported_coord_space@coordSpace",
+        "unsupported_coord_space@coordSpace"
+      ],
+      "warnings": []
+    },
+    {
+      "file": "syn-v-neg-spread.json",
+      "ok": true,
+      "kind": "single",
+      "target": "GF0021.V",
+      "coordSpace": "image_normalized",
+      "size": "640x480",
+      "sourceType": "synthetic",
+      "blockerCount": 0,
+      "blockers": [],
+      "warnings": []
+    },
+    {
+      "file": "syn-v-pos.json",
+      "ok": true,
+      "kind": "single",
+      "target": "GF0021.V",
+      "coordSpace": "image_normalized",
+      "size": "640x480",
+      "sourceType": "synthetic",
+      "blockerCount": 0,
+      "blockers": [],
+      "warnings": []
+    },
+    {
+      "file": "syn-w-pos.json",
+      "ok": true,
+      "kind": "single",
+      "target": "GF0021.W",
+      "coordSpace": "image_normalized",
+      "size": "640x480",
+      "sourceType": "synthetic",
+      "blockerCount": 0,
+      "blockers": [],
+      "warnings": []
+    },
+    {
+      "file": "syn-y-pos.json",
+      "ok": true,
+      "kind": "single",
+      "target": "GF0021.Y",
+      "coordSpace": "image_normalized",
+      "size": "640x480",
+      "sourceType": "synthetic",
+      "blockerCount": 0,
+      "blockers": [],
+      "warnings": []
+    }
+  ]
+}

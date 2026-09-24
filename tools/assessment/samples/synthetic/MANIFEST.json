@@ -1,0 +1,19 @@
+{
+  "generatedBy": "tools/assessment/samples/generate-synthetic.mjs",
+  "generatedAt": "2026-09-24T15:12:33.764Z",
+  "warning": "全部为合成样本。不是真人数据、不是渲染图、不是视频抽帧。禁止与其它来源混算，禁止当准确率。",
+  "synthetic": true,
+  "humanReviewed": false,
+  "singles": [
+    "syn-v-pos",
+    "syn-v-neg-spread",
+    "syn-u-geom-pass-judge-blocked",
+    "syn-l-pos",
+    "syn-l-neg-angle",
+    "syn-y-pos",
+    "syn-a-pos",
+    "syn-b-pos",
+    "syn-w-pos",
+    "syn-i-pos"
+  ]
+}

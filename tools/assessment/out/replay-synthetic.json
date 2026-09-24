@@ -1,0 +1,935 @@
+{
+  "generatedAt": "2026-09-24T15:12:33.914Z",
+  "level": "auto",
+  "coreFingerprint": {
+    "files": {
+      "practice/src/coords.js": "7a607fa98b4e85bb",
+      "practice/src/evaluate.js": "3e8034a89051d512",
+      "practice/src/inputQuality.js": "f51d4e865a33f5d3",
+      "practice/src/passState.js": "2ec4dd2140973c00",
+      "practice/src/judge.js": "2b4d64b26f60f529",
+      "practice/src/snapshot.js": "366bedb9b808a325",
+      "practice/src/types.js": "295fbd56b7a3c4ae",
+      "practice/content/letters.json": "e9caa89406134442"
+    },
+    "digest": "7a5f6608f0316517"
+  },
+  "labelInfo": {
+    "provided": true,
+    "path": "C:\\Users\\15424\\Desktop\\2026.9.15\\tools\\assessment\\samples\\synthetic\\labels.json",
+    "truthOrigin": "synthetic-construction",
+    "humanReviewed": false,
+    "accepted": 15,
+    "rejected": 0,
+    "rejectedReasons": {},
+    "aligned": 15,
+    "orphaned": 0,
+    "rejectedDetail": [],
+    "orphanedDetail": [],
+    "wholeSetRejected": false
+  },
+  "holdThresholds": {
+    "passFrames": 6,
+    "maxGapMs": 400,
+    "unverified": true,
+    "source": "practice/src/passState.js"
+  },
+  "totals": {
+    "key": "ALL",
+    "samples": 24,
+    "labeled": 15,
+    "scored": 15,
+    "predicted": 19,
+    "blocked": 0,
+    "unknown": 0,
+    "invalid": 5,
+    "statusCounts": {
+      "scored": 19,
+      "blocked": 0,
+      "unknown": 0,
+      "invalid": 5
+    },
+    "truthCorrect": 9,
+    "truthIncorrect": 6,
+    "predictedCorrect": 9,
+    "predictedIncorrect": 6,
+    "truePositive": 9,
+    "falseAccept": 0,
+    "falseReject": 0,
+    "trueNegative": 6,
+    "issueAgreementNum": 2,
+    "issueAgreementDen": 2,
+    "replayCoverage": {
+      "num": 19,
+      "den": 24,
+      "value": 0.7916666666666666
+    },
+    "scoredCoverage": {
+      "num": 15,
+      "den": 15,
+      "value": 1
+    },
+    "falseAcceptRate": {
+      "num": 0,
+      "den": 6,
+      "value": 0
+    },
+    "falseRejectRate": {
+      "num": 0,
+      "den": 9,
+      "value": 0
+    },
+    "agreement": {
+      "num": 15,
+      "den": 15,
+      "value": 1
+    },
+    "issueAgreement": {
+      "num": 2,
+      "den": 2,
+      "value": 1
+    }
+  },
+  "byLevel": [
+    {
+      "key": "geometry",
+      "samples": 18,
+      "labeled": 9,
+      "scored": 9,
+      "predicted": 13,
+      "blocked": 0,
+      "unknown": 0,
+      "invalid": 5,
+      "statusCounts": {
+        "scored": 13,
+        "blocked": 0,
+        "unknown": 0,
+        "invalid": 5
+      },
+      "truthCorrect": 7,
+      "truthIncorrect": 2,
+      "predictedCorrect": 7,
+      "predictedIncorrect": 2,
+      "truePositive": 7,
+      "falseAccept": 0,
+      "falseReject": 0,
+      "trueNegative": 2,
+      "issueAgreementNum": 2,
+      "issueAgreementDen": 2,
+      "replayCoverage": {
+        "num": 13,
+        "den": 18,
+        "value": 0.7222222222222222
+      },
+      "scoredCoverage": {
+        "num": 9,
+        "den": 9,
+        "value": 1
+      },
+      "falseAcceptRate": {
+        "num": 0,
+        "den": 2,
+        "value": 0
+      },
+      "falseRejectRate": {
+        "num": 0,
+        "den": 7,
+        "value": 0
+      },
+      "agreement": {
+        "num": 9,
+        "den": 9,
+        "value": 1
+      },
+      "issueAgreement": {
+        "num": 2,
+        "den": 2,
+        "value": 1
+      }
+    },
+    {
+      "key": "sequence",
+      "samples": 6,
+      "labeled": 6,
+      "scored": 6,
+      "predicted": 6,
+      "blocked": 0,
+      "unknown": 0,
+      "invalid": 0,
+      "statusCounts": {
+        "scored": 6,
+        "blocked": 0,
+        "unknown": 0,
+        "invalid": 0
+      },
+      "truthCorrect": 2,
+      "truthIncorrect": 4,
+      "predictedCorrect": 2,
+      "predictedIncorrect": 4,
+      "truePositive": 2,
+      "falseAccept": 0,
+      "falseReject": 0,
+      "trueNegative": 4,
+      "issueAgreementNum": 0,
+      "issueAgreementDen": 0,
+      "replayCoverage": {
+        "num": 6,
+        "den": 6,
+        "value": 1
+      },
+      "scoredCoverage": {
+        "num": 6,
+        "den": 6,
+        "value": 1
+      },
+      "falseAcceptRate": {
+        "num": 0,
+        "den": 4,
+        "value": 0
+      },
+      "falseRejectRate": {
+        "num": 0,
+        "den": 2,
+        "value": 0
+      },
+      "agreement": {
+        "num": 6,
+        "den": 6,
+        "value": 1
+      },
+      "issueAgreement": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      }
+    }
+  ],
+  "byTruthOrigin": [
+    {
+      "key": "synthetic-construction",
+      "samples": 9,
+      "labeled": 9,
+      "scored": 9,
+      "predicted": 9,
+      "blocked": 0,
+      "unknown": 0,
+      "invalid": 0,
+      "statusCounts": {
+        "scored": 9,
+        "blocked": 0,
+        "unknown": 0,
+        "invalid": 0
+      },
+      "truthCorrect": 7,
+      "truthIncorrect": 2,
+      "predictedCorrect": 7,
+      "predictedIncorrect": 2,
+      "truePositive": 7,
+      "falseAccept": 0,
+      "falseReject": 0,
+      "trueNegative": 2,
+      "issueAgreementNum": 2,
+      "issueAgreementDen": 2,
+      "replayCoverage": {
+        "num": 9,
+        "den": 9,
+        "value": 1
+      },
+      "scoredCoverage": {
+        "num": 9,
+        "den": 9,
+        "value": 1
+      },
+      "falseAcceptRate": {
+        "num": 0,
+        "den": 2,
+        "value": 0
+      },
+      "falseRejectRate": {
+        "num": 0,
+        "den": 7,
+        "value": 0
+      },
+      "agreement": {
+        "num": 9,
+        "den": 9,
+        "value": 1
+      },
+      "issueAgreement": {
+        "num": 2,
+        "den": 2,
+        "value": 1
+      }
+    },
+    {
+      "key": "unlabeled",
+      "samples": 9,
+      "labeled": 0,
+      "scored": 0,
+      "predicted": 4,
+      "blocked": 0,
+      "unknown": 0,
+      "invalid": 5,
+      "statusCounts": {
+        "scored": 4,
+        "blocked": 0,
+        "unknown": 0,
+        "invalid": 5
+      },
+      "truthCorrect": 0,
+      "truthIncorrect": 0,
+      "predictedCorrect": 0,
+      "predictedIncorrect": 0,
+      "truePositive": 0,
+      "falseAccept": 0,
+      "falseReject": 0,
+      "trueNegative": 0,
+      "issueAgreementNum": 0,
+      "issueAgreementDen": 0,
+      "replayCoverage": {
+        "num": 4,
+        "den": 9,
+        "value": 0.4444444444444444
+      },
+      "scoredCoverage": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "falseAcceptRate": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "falseRejectRate": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "agreement": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "issueAgreement": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      }
+    },
+    {
+      "key": "spec-derived-gate",
+      "samples": 6,
+      "labeled": 6,
+      "scored": 6,
+      "predicted": 6,
+      "blocked": 0,
+      "unknown": 0,
+      "invalid": 0,
+      "statusCounts": {
+        "scored": 6,
+        "blocked": 0,
+        "unknown": 0,
+        "invalid": 0
+      },
+      "truthCorrect": 2,
+      "truthIncorrect": 4,
+      "predictedCorrect": 2,
+      "predictedIncorrect": 4,
+      "truePositive": 2,
+      "falseAccept": 0,
+      "falseReject": 0,
+      "trueNegative": 4,
+      "issueAgreementNum": 0,
+      "issueAgreementDen": 0,
+      "replayCoverage": {
+        "num": 6,
+        "den": 6,
+        "value": 1
+      },
+      "scoredCoverage": {
+        "num": 6,
+        "den": 6,
+        "value": 1
+      },
+      "falseAcceptRate": {
+        "num": 0,
+        "den": 4,
+        "value": 0
+      },
+      "falseRejectRate": {
+        "num": 0,
+        "den": 2,
+        "value": 0
+      },
+      "agreement": {
+        "num": 6,
+        "den": 6,
+        "value": 1
+      },
+      "issueAgreement": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      }
+    }
+  ],
+  "bySourceType": [
+    {
+      "key": "synthetic",
+      "samples": 24,
+      "labeled": 15,
+      "scored": 15,
+      "predicted": 19,
+      "blocked": 0,
+      "unknown": 0,
+      "invalid": 5,
+      "statusCounts": {
+        "scored": 19,
+        "blocked": 0,
+        "unknown": 0,
+        "invalid": 5
+      },
+      "truthCorrect": 9,
+      "truthIncorrect": 6,
+      "predictedCorrect": 9,
+      "predictedIncorrect": 6,
+      "truePositive": 9,
+      "falseAccept": 0,
+      "falseReject": 0,
+      "trueNegative": 6,
+      "issueAgreementNum": 2,
+      "issueAgreementDen": 2,
+      "replayCoverage": {
+        "num": 19,
+        "den": 24,
+        "value": 0.7916666666666666
+      },
+      "scoredCoverage": {
+        "num": 15,
+        "den": 15,
+        "value": 1
+      },
+      "falseAcceptRate": {
+        "num": 0,
+        "den": 6,
+        "value": 0
+      },
+      "falseRejectRate": {
+        "num": 0,
+        "den": 9,
+        "value": 0
+      },
+      "agreement": {
+        "num": 15,
+        "den": 15,
+        "value": 1
+      },
+      "issueAgreement": {
+        "num": 2,
+        "den": 2,
+        "value": 1
+      }
+    }
+  ],
+  "blockReasons": {
+    "missing_xy": 2,
+    "landmark_count": 1,
+    "missing_size": 1,
+    "unsupported_coord_space": 1
+  },
+  "humanEvaluation": {
+    "executed": false,
+    "buckets": [],
+    "note": "没有真人来源标签。未执行真人评估，本报告不含任何真人准确率。"
+  },
+  "syntheticBuckets": [
+    "synthetic-construction"
+  ],
+  "syntheticNote": "合成桶（truthOrigin=synthetic-construction）只验证回放接线，不是准确率，不得与真人混算。",
+  "samples": [
+    {
+      "sampleId": "syn-a-pos",
+      "file": "syn-a-pos.json",
+      "level": "geometry",
+      "status": "scored",
+      "reason": "geometry_evaluated",
+      "predicted": "correct",
+      "targetLetterId": "GF0021.A",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [],
+      "issueCodes": [],
+      "productDecision": "fail",
+      "hold": null,
+      "thresholds": null
+    },
+    {
+      "sampleId": "syn-b-pos",
+      "file": "syn-b-pos.json",
+      "level": "geometry",
+      "status": "scored",
+      "reason": "geometry_evaluated",
+      "predicted": "correct",
+      "targetLetterId": "GF0021.B",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [],
+      "issueCodes": [],
+      "productDecision": "fail",
+      "hold": null,
+      "thresholds": null
+    },
+    {
+      "sampleId": "syn-bad-number-nan",
+      "file": "syn-bad-number-nan.json",
+      "level": "geometry",
+      "status": "invalid",
+      "reason": "missing_xy",
+      "predicted": null,
+      "targetLetterId": "GF0021.V",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [
+        "missing_xy"
+      ],
+      "warnings": [],
+      "issueCodes": [],
+      "productDecision": null,
+      "hold": null,
+      "thresholds": null
+    },
+    {
+      "sampleId": "syn-bad-number-null",
+      "file": "syn-bad-number-null.json",
+      "level": "geometry",
+      "status": "invalid",
+      "reason": "missing_xy",
+      "predicted": null,
+      "targetLetterId": "GF0021.V",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [
+        "missing_xy"
+      ],
+      "warnings": [],
+      "issueCodes": [],
+      "productDecision": null,
+      "hold": null,
+      "thresholds": null
+    },
+    {
+      "sampleId": "syn-bad-number-short",
+      "file": "syn-bad-number-short.json",
+      "level": "geometry",
+      "status": "invalid",
+      "reason": "landmark_count",
+      "predicted": null,
+      "targetLetterId": "GF0021.V",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [
+        "landmark_count"
+      ],
+      "warnings": [],
+      "issueCodes": [],
+      "productDecision": null,
+      "hold": null,
+      "thresholds": null
+    },
+    {
+      "sampleId": "syn-equal-scale-unit",
+      "file": "syn-equal-scale-unit.json",
+      "level": "geometry",
+      "status": "scored",
+      "reason": "geometry_evaluated",
+      "predicted": "correct",
+      "targetLetterId": "GF0021.V",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [],
+      "issueCodes": [],
+      "productDecision": "fail",
+      "hold": null,
+      "thresholds": null
+    },
+    {
+      "sampleId": "syn-i-pos",
+      "file": "syn-i-pos.json",
+      "level": "geometry",
+      "status": "scored",
+      "reason": "geometry_evaluated",
+      "predicted": "correct",
+      "targetLetterId": "GF0021.I",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [],
+      "issueCodes": [],
+      "productDecision": "fail",
+      "hold": null,
+      "thresholds": null
+    },
+    {
+      "sampleId": "syn-l-neg-angle",
+      "file": "syn-l-neg-angle.json",
+      "level": "geometry",
+      "status": "scored",
+      "reason": "geometry_evaluated",
+      "predicted": "incorrect",
+      "targetLetterId": "GF0021.L",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [],
+      "issueCodes": [
+        "thumb_index.angle"
+      ],
+      "productDecision": "fail",
+      "hold": null,
+      "thresholds": null
+    },
+    {
+      "sampleId": "syn-l-pos",
+      "file": "syn-l-pos.json",
+      "level": "geometry",
+      "status": "scored",
+      "reason": "geometry_evaluated",
+      "predicted": "correct",
+      "targetLetterId": "GF0021.L",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [],
+      "issueCodes": [],
+      "productDecision": "fail",
+      "hold": null,
+      "thresholds": null
+    },
+    {
+      "sampleId": "syn-missing-size",
+      "file": "syn-missing-size.json",
+      "level": "geometry",
+      "status": "invalid",
+      "reason": "missing_size",
+      "predicted": null,
+      "targetLetterId": "GF0021.V",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [
+        "missing_size"
+      ],
+      "warnings": [],
+      "issueCodes": [],
+      "productDecision": null,
+      "hold": null,
+      "thresholds": null
+    },
+    {
+      "sampleId": "syn-pseudo-label",
+      "file": "syn-pseudo-label.json",
+      "level": "geometry",
+      "status": "scored",
+      "reason": "geometry_evaluated",
+      "predicted": "correct",
+      "targetLetterId": "GF0021.V",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [
+        "pseudo_label_field"
+      ],
+      "issueCodes": [],
+      "productDecision": "fail",
+      "hold": null,
+      "thresholds": null
+    },
+    {
+      "sampleId": "syn-seq-v-backwards",
+      "file": "syn-seq-v-backwards.json",
+      "level": "sequence",
+      "status": "scored",
+      "reason": "hold_not_ready",
+      "predicted": "incorrect",
+      "targetLetterId": "GF0021.V",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [],
+      "issueCodes": [
+        "hold.pending"
+      ],
+      "productDecision": null,
+      "hold": {
+        "frames": 1,
+        "elapsedMs": 0
+      },
+      "thresholds": {
+        "passFrames": 6,
+        "maxGapMs": 400,
+        "unverified": true,
+        "source": "practice/src/passState.js"
+      }
+    },
+    {
+      "sampleId": "syn-seq-v-dup",
+      "file": "syn-seq-v-dup.json",
+      "level": "sequence",
+      "status": "scored",
+      "reason": "hold_not_ready",
+      "predicted": "incorrect",
+      "targetLetterId": "GF0021.V",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [],
+      "issueCodes": [
+        "hold.pending"
+      ],
+      "productDecision": null,
+      "hold": {
+        "frames": 4,
+        "elapsedMs": 600
+      },
+      "thresholds": {
+        "passFrames": 6,
+        "maxGapMs": 400,
+        "unverified": true,
+        "source": "practice/src/passState.js"
+      }
+    },
+    {
+      "sampleId": "syn-seq-v-expired",
+      "file": "syn-seq-v-expired.json",
+      "level": "sequence",
+      "status": "scored",
+      "reason": "hold_not_ready",
+      "predicted": "incorrect",
+      "targetLetterId": "GF0021.V",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [],
+      "issueCodes": [
+        "hold.pending"
+      ],
+      "productDecision": null,
+      "hold": {
+        "frames": 1,
+        "elapsedMs": 0
+      },
+      "thresholds": {
+        "passFrames": 6,
+        "maxGapMs": 400,
+        "unverified": true,
+        "source": "practice/src/passState.js"
+      }
+    },
+    {
+      "sampleId": "syn-seq-v-nohand-then-pass",
+      "file": "syn-seq-v-nohand-then-pass.json",
+      "level": "sequence",
+      "status": "scored",
+      "reason": "hold_ready",
+      "predicted": "correct",
+      "targetLetterId": "GF0021.V",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [
+        "frames_without_hand"
+      ],
+      "issueCodes": [],
+      "productDecision": null,
+      "hold": {
+        "frames": 6,
+        "elapsedMs": 500
+      },
+      "thresholds": {
+        "passFrames": 6,
+        "maxGapMs": 400,
+        "unverified": true,
+        "source": "practice/src/passState.js"
+      }
+    },
+    {
+      "sampleId": "syn-seq-v-pass",
+      "file": "syn-seq-v-pass.json",
+      "level": "sequence",
+      "status": "scored",
+      "reason": "hold_ready",
+      "predicted": "correct",
+      "targetLetterId": "GF0021.V",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [],
+      "issueCodes": [],
+      "productDecision": null,
+      "hold": {
+        "frames": 6,
+        "elapsedMs": 500
+      },
+      "thresholds": {
+        "passFrames": 6,
+        "maxGapMs": 400,
+        "unverified": true,
+        "source": "practice/src/passState.js"
+      }
+    },
+    {
+      "sampleId": "syn-seq-v-short",
+      "file": "syn-seq-v-short.json",
+      "level": "sequence",
+      "status": "scored",
+      "reason": "hold_not_ready",
+      "predicted": "incorrect",
+      "targetLetterId": "GF0021.V",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [],
+      "issueCodes": [
+        "hold.pending"
+      ],
+      "productDecision": null,
+      "hold": {
+        "frames": 5,
+        "elapsedMs": 400
+      },
+      "thresholds": {
+        "passFrames": 6,
+        "maxGapMs": 400,
+        "unverified": true,
+        "source": "practice/src/passState.js"
+      }
+    },
+    {
+      "sampleId": "syn-u-geom-pass-judge-blocked",
+      "file": "syn-u-geom-pass-judge-blocked.json",
+      "level": "geometry",
+      "status": "scored",
+      "reason": "geometry_evaluated",
+      "predicted": "correct",
+      "targetLetterId": "GF0021.U",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [],
+      "issueCodes": [],
+      "productDecision": "blocked",
+      "hold": null,
+      "thresholds": null
+    },
+    {
+      "sampleId": "syn-unlabeled",
+      "file": "syn-unlabeled.json",
+      "level": "geometry",
+      "status": "scored",
+      "reason": "geometry_evaluated",
+      "predicted": "correct",
+      "targetLetterId": "GF0021.Y",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [],
+      "issueCodes": [],
+      "productDecision": "fail",
+      "hold": null,
+      "thresholds": null
+    },
+    {
+      "sampleId": "syn-unsupported-space",
+      "file": "syn-unsupported-space.json",
+      "level": "geometry",
+      "status": "invalid",
+      "reason": "unsupported_coord_space",
+      "predicted": null,
+      "targetLetterId": "GF0021.V",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [
+        "unsupported_coord_space",
+        "unsupported_coord_space"
+      ],
+      "warnings": [],
+      "issueCodes": [],
+      "productDecision": null,
+      "hold": null,
+      "thresholds": null
+    },
+    {
+      "sampleId": "syn-v-neg-spread",
+      "file": "syn-v-neg-spread.json",
+      "level": "geometry",
+      "status": "scored",
+      "reason": "geometry_evaluated",
+      "predicted": "incorrect",
+      "targetLetterId": "GF0021.V",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [],
+      "issueCodes": [
+        "index_middle.not_apart"
+      ],
+      "productDecision": "fail",
+      "hold": null,
+      "thresholds": null
+    },
+    {
+      "sampleId": "syn-v-pos",
+      "file": "syn-v-pos.json",
+      "level": "geometry",
+      "status": "scored",
+      "reason": "geometry_evaluated",
+      "predicted": "correct",
+      "targetLetterId": "GF0021.V",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [],
+      "issueCodes": [],
+      "productDecision": "fail",
+      "hold": null,
+      "thresholds": null
+    },
+    {
+      "sampleId": "syn-w-pos",
+      "file": "syn-w-pos.json",
+      "level": "geometry",
+      "status": "scored",
+      "reason": "geometry_evaluated",
+      "predicted": "correct",
+      "targetLetterId": "GF0021.W",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [],
+      "issueCodes": [],
+      "productDecision": "fail",
+      "hold": null,
+      "thresholds": null
+    },
+    {
+      "sampleId": "syn-y-pos",
+      "file": "syn-y-pos.json",
+      "level": "geometry",
+      "status": "scored",
+      "reason": "geometry_evaluated",
+      "predicted": "correct",
+      "targetLetterId": "GF0021.Y",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [],
+      "issueCodes": [],
+      "productDecision": "fail",
+      "hold": null,
+      "thresholds": null
+    }
+  ]
+}

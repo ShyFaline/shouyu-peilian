@@ -127,7 +127,82 @@ U/V 与存档一致 67/68（唯一那个 true 翻转成 false）
 
 ---
 
-## 回执格式请求
+---
 
-请按条回：`R1 接受/拒绝/改法` … `R7 接受/拒绝/改法`。
-若 R1 采用方案 A，请告知补尺寸的时间点，本席会重跑 `validate-captures` 与 `replay` 并更新 `CONTRACT-DIFF.md` 的矩阵。
+# 第二轮重核（2026-09-25）
+
+核对方式：逐条比对当前磁盘（含 Grok 未提交的工作区改动）与本席实现。**已解决的不再包装成阻塞。**
+
+| 编号 | 第一轮定级 | 当前状态 | 依据 |
+|---|---|---|---|
+| R1 | 阻塞 | ✅ **关闭**（本席自行解决） | 本席已获授权迁移 `eval-handframe.mjs` / `bili-loop/eval-frames.mjs` / `render-loop/run.py`。缺尺寸现在明确 `unevaluable` + 退出码 2，不再写成动作负例。实测见 `ROUND2-VERIFICATION.md` 第 6 节。 |
+| R2 | 阻塞 | ⚠ **部分解决，且引入新错误** | 你把「`ruleStatus !== "ok"` 不是几何负例」写进了 `types.js`，方向对。**但你写的取值名与代码不符**（见下）。 |
+| R3 | 阻塞 | ✅ **关闭** | `snapshot.js` 新增 `FORBIDDEN` 集合，`createSnapshot` 命中即返回 `{ok:false, reason:"forbidden_field"}`。实测在案。 |
+| R4 | 非阻塞 | ✅ **关闭** | `passState.js` 的 `holdView` 现在透出 `passFrames` / `maxGapMs`。本席的 `holdThresholds()` 可改为优先读 `judge().hold`，但保留直读常量作为兜底（两处同源，值一致）。 |
+| R5 | 非阻塞 | ✅ **关闭** | `types.js` 已把 `decision` 写成 `"pass"|"fail"|"blocked"|"undetermined"` 四值联合。本席映射表按白名单实现，未知值落 `blocked` 并报出。 |
+| R6 | 非阻塞 | ⏸ **未处理，仍建议** | mainPath 里的 `GF0021.U` 仍是 `pending_review`，`judge` 对 U 恒 `blocked`。本席已把它固化成断言（几何 `correct` / 产品 `blocked` 不混算）。**不阻塞**，只是采集者会踩坑。 |
+| R7 | 阻塞 | ⚠ **部分解决** | 你已把 `fixtures 目录可空` 框架改成 A08 严格 schema 断言，但**尚未提交**，且三个「真人数据一到就炸」的门槛仍在（见下）。 |
+
+## R2 的新问题（请修）
+
+`practice/src/types.js` 当前写：
+
+```
+@returns {string} ruleStatus - one of no_letter/no_rules/unknown_rule_fields/
+  missing_size/no_hand/unsupported_coord_space/invalid_input/ok
+```
+
+但 `practice/src/evaluate.js` 实际只返回：
+
+```
+ok, no_hand, empty, unsupported, invalid_input
+（几何拒绝时另带 missing_size / unsupported_coord_space）
+```
+
+`no_letter`、`no_rules`、`unknown_rule_fields` **在代码里一次都没出现**（已 grep 确认计数为 0）。
+`empty` 与 `unsupported` 才是真实取值，但注释里没有。
+
+**影响**：任何按注释写白名单的调用方（包括本席，以及将来任何离线工具）会把真实的
+`empty` / `unsupported` 当成未知值。本席按**代码**实现并已把 `empty`/`unsupported` 归入
+`blocked_rules`（不是几何负例），所以本席不受影响；但注释是错的，会误导后来人。
+
+**请求**：把 `types.js` 的 `ruleStatus` 枚举改成代码实际的取值集合：
+`ok / no_hand / empty / unsupported / missing_size / unsupported_coord_space / invalid_input`。
+只改注释，不动逻辑。
+
+## R7 的剩余部分（总控指定，仍阻塞真人数据入库）
+
+`evaluate.test.js` 的 A08 已改成严格 schema 断言，方向对。但三条门槛仍会在**真人数据到达时**触发：
+
+| 位置 | 断言 | 风险 |
+|---|---|---|
+| A08 | `typeof frame.handedness.category === "string"` | 要求 `handedness` 是对象。历史产物是字符串（`"Left"`）。真人导出若沿用旧形状会抛 `undefined`。 |
+| A08 | `codeVersion` / `rulesVersion` / `sourceType` 必须非空字符串 | `snapshot.js` 的 `CODE_VERSION` 当前是字面量 `"unversioned"`，与 `versions.js` 的 manifest 机制不是一回事。真人导出该填哪个？ |
+| A08 | `expectedVerdict`/`pass`/`decision`/`practiceStatus` 必须不存在 | 与 R3 同源，方向正确。R3 已在 `snapshot.js` 侧挡住，两边一致。 |
+
+**请求**：
+1. 提交工作区的 A08 改动（本席不改 `evaluate.test.js`，不在写锁内）。
+2. 确认 `handedness` 的正式形状，并让 `handednessOf` 对字符串输入**显式报错**而不是静默产出无 `category` 的对象。
+3. 明确 `codeVersion` / `rulesVersion` 在真人导出时怎么填。
+
+## R1 关闭后的连带事项（新请求）
+
+本席迁移后，`bili-loop/eval-frames.mjs` **不再原地写回输入文件**，也**不再产出 `u_pass`/`v_pass`**。
+但 `practice/src/bili-loop/run.py`（**不在本席写锁**）仍然：
+
+1. 调用旧式命令（不传尺寸），且
+2. 期望输出里有 `u_pass`/`v_pass`。
+
+**请求**：把 `bili-loop/run.py` 的抽帧环节改为写入 `imageWidth`/`imageHeight`
+（`cv2.VideoCapture` 的 `CAP_PROP_FRAME_WIDTH`/`CAP_PROP_FRAME_HEIGHT` 即可），
+并让 eval 步骤传 `--out` 到新路径、读 `referenceTargets`。
+否则 bili 路径会一直停在「不可评估」，且 `run.py` 与新 CLI 的接口不匹配。
+
+> 这是 R1 的自然延伸：入口改了，调用方要跟上。本席已把新 CLI 的接口写在
+> `ROUND2.md` 第 4.2 节，可直接照抄。
+
+## 回执格式请求（第二轮）
+
+请按条回：`R2 接受/拒绝`、`R6 接受/拒绝`、`R7 接受/拒绝`、`R1-连带 接受/拒绝`。
+R1/R3/R4/R5 已关闭，无需回执。
+

@@ -1,0 +1,67 @@
+{
+  "labelVersion": "counterexample-labels-1",
+  "truthOrigin": "synthetic-construction",
+  "humanReviewed": false,
+  "sequenceJudgmentLevel": "product_decision",
+  "sequenceJudgmentNote": "序列标签的 expectedVerdict 指「整次尝试是否应被产品放行」，即 judge().decision==='pass'，不是单帧几何 pass。三个失败原因必须分开记：动作错误 / 保持未完成 / 无效时间轴。",
+  "labels": [
+    {
+      "sampleId": "ce-seq-action-error",
+      "expectedVerdict": "incorrect",
+      "expectedIssueCodes": [
+        "index_middle.not_apart"
+      ],
+      "level": "sequence",
+      "reviewedBy": "annotator:ce-fixture",
+      "reviewedAt": "2026-09-25T00:00:00Z",
+      "independent": true,
+      "labelVersion": "counterexample-labels-1",
+      "truthOrigin": "synthetic-construction",
+      "humanReviewed": false,
+      "note": "动作错误"
+    },
+    {
+      "sampleId": "ce-seq-hold-pending",
+      "expectedVerdict": "incorrect",
+      "expectedIssueCodes": [
+        "hold.pending"
+      ],
+      "level": "sequence",
+      "reviewedBy": "annotator:ce-fixture",
+      "reviewedAt": "2026-09-25T00:00:00Z",
+      "independent": true,
+      "labelVersion": "counterexample-labels-1",
+      "truthOrigin": "synthetic-construction",
+      "humanReviewed": false,
+      "note": "保持未完成"
+    },
+    {
+      "sampleId": "ce-seq-invalid-timeline",
+      "expectedVerdict": "incorrect",
+      "expectedIssueCodes": [
+        "missing_timestamps"
+      ],
+      "level": "sequence",
+      "reviewedBy": "annotator:ce-fixture",
+      "reviewedAt": "2026-09-25T00:00:00Z",
+      "independent": true,
+      "labelVersion": "counterexample-labels-1",
+      "truthOrigin": "synthetic-construction",
+      "humanReviewed": false,
+      "note": "无效时间轴（校验层）"
+    },
+    {
+      "sampleId": "ce-seq-pass",
+      "expectedVerdict": "correct",
+      "expectedIssueCodes": [],
+      "level": "sequence",
+      "reviewedBy": "annotator:ce-fixture",
+      "reviewedAt": "2026-09-25T00:00:00Z",
+      "independent": true,
+      "labelVersion": "counterexample-labels-1",
+      "truthOrigin": "synthetic-construction",
+      "humanReviewed": false,
+      "note": "序列通过"
+    }
+  ]
+}

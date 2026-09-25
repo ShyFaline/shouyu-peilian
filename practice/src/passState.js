@@ -30,6 +30,9 @@ export function holdView(hold) {
   return {
     frames: hold?.frames || 0,
     elapsedMs: hold?.elapsedMs || 0,
+    // 透出保持门阈值，供离线统计与调试读取；值仍为 UNVERIFIED 初值，不代表实验结论。
+    passFrames: hold?.passFrames ?? PASS_FRAMES,
+    maxGapMs: hold?.maxGapMs ?? MAX_GAP_MS,
   };
 }
 

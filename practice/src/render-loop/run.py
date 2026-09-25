@@ -2,8 +2,10 @@
 
 渲染图，不是真人。不报准确率。
 阈值与 practice/app.js createLandmarker 相同，禁止改。
-有手才写 HandFrame JSON；无手或检测失败记 no_hand，不编 landmarks。
+有手才写 HandFrame JSON；无手/检测失败/缺尺寸一律记「不可评估」，不编 landmarks，也不当动作负例。
 输出：practice/src/render-loop/out/<id>.json 与 RESULTS.md。
+迁移说明：out/ 是历史产物目录，本脚本会清空重建；需要留档时先自行复制。
+缺尺寸/无手的帧标为「不可评估」而非动作负例，退出码语义见 eval-handframe.mjs。
 不要写入 practice/src/fixtures/。
 """
 
@@ -102,27 +104,41 @@ def pick_hand(result) -> tuple[int, dict | None]:
     return n, frame
 
 
-def eval_json(bun: str, json_path: Path, letter_id: str) -> tuple[bool, list[str]]:
+def eval_json(bun: str, json_path: Path, letter_id: str, image_path: Path) -> dict:
+    """调用迁移后的 eval-handframe。--image 让尺寸从渲染图文件头可追溯，不猜尺寸。
+
+    退出码 0 = 已评估；2 = 不可评估（缺尺寸/无手等），**不是动作负例**；3 = 用法/解析错误。
+    """
     proc = subprocess.run(
-        [bun, str(EVAL_JS), str(json_path), letter_id],
+        [bun, str(EVAL_JS), str(json_path), letter_id, "--image", str(image_path)],
         cwd=str(ROOT),
         capture_output=True,
         text=True,
         check=False,
     )
-    if proc.returncode != 0:
-        raise RuntimeError(f"eval-handframe 失败 {letter_id}: {proc.stderr or proc.stdout}")
-    passed = False
-    codes: list[str] = []
+    if proc.returncode == 3:
+        raise RuntimeError(f"eval-handframe 用法/解析错误 {letter_id}: {proc.stderr or proc.stdout}")
+    if proc.returncode not in (0, 2):
+        raise RuntimeError(f"eval-handframe 异常退出 {letter_id} code={proc.returncode}: {proc.stderr or proc.stdout}")
+
+    out: dict = {"evaluated": False, "pass": None, "status": None, "reason": None, "codes": []}
     for line in proc.stdout.splitlines():
         line = line.strip()
         if not line:
             continue
-        if line.startswith("geometry_pass "):
-            passed = line.split(None, 1)[1].strip() == "true"
+        head, _, rest = line.partition(" ")
+        if head == "status":
+            out["status"] = rest.strip()
+        elif head == "reason":
+            out["reason"] = rest.strip()
+        elif head == "geometry_pass":
+            out["pass"] = rest.strip() == "true"
+        elif head in ("unevaluable", "not_an_action_negative", "note", "ruleStatus", "size"):
             continue
-        codes.append(line.split(None, 1)[0])
-    return passed, codes
+        else:
+            out["codes"].append(head)
+    out["evaluated"] = out["status"] == "evaluated"
+    return out
 
 
 def write_results(rows: list[dict]) -> None:
@@ -134,12 +150,19 @@ def write_results(rows: list[dict]) -> None:
         "阈值：与 practice/app.js 相同（numHands=2, minHandDetectionConfidence=0.6, minHandPresenceConfidence=0.5, minTrackingConfidence=0.5）",
         "JSON：practice/src/render-loop/out/<id>.json（有手才写；不写 fixtures/）",
         "",
-        "| 字母 | 手数 | pass | issue codes |",
-        "|---|---|---|---|",
+        "| 字母 | 手数 | 已评估 | 几何 pass | 不可评估原因 | issue codes |",
+        "|---|---|---|---|---|---|",
+        "",
+        "「已评估」= 尺寸可追溯且核心真的算完。`几何 pass` 只在已评估时有意义；",
+        "不可评估的行**不是动作负例**，不得计入任何通过率分子分母。",
     ]
     for row in rows:
         codes = ",".join(row["issues"]) if row["issues"] else "—"
-        lines.append(f"| {row['id']} | {row['hands']} | {str(row['pass']).lower()} | {codes} |")
+        if row.get("evaluated"):
+            lines.append(f"| {row['id']} | {row['hands']} | 是 | {str(row['pass']).lower()} | — | {codes} |")
+        else:
+            reason = row.get("reason") or (row["issues"][0] if row["issues"] else "—")
+            lines.append(f"| {row['id']} | {row['hands']} | **否** | n/a | {reason} | {codes} |")
     lines.append("")
     RESULTS.write_text("\n".join(lines), encoding="utf-8")
 
@@ -168,7 +191,7 @@ def main() -> int:
         png = DEMOS / f"{letter_id}_front.png"
         json_path = OUT_DIR / f"{letter_id}.json"
         if not png.exists():
-            rows.append({"id": letter_id, "hands": 0, "pass": False, "issues": ["no_hand"]})
+            rows.append({"id": letter_id, "hands": 0, "evaluated": False, "pass": None, "reason": "missing_image", "issues": ["missing_image"]})
             print(f"{letter_id} 缺图")
             continue
         try:
@@ -180,16 +203,28 @@ def main() -> int:
                 frame["imageHeight"] = height
         except Exception as exc:
             print(f"{letter_id} 检测失败：{exc}")
-            rows.append({"id": letter_id, "hands": 0, "pass": False, "issues": ["no_hand"]})
+            rows.append({"id": letter_id, "hands": 0, "evaluated": False, "pass": None, "reason": "detect_error", "issues": ["detect_error"]})
             continue
         if frame is None:
-            rows.append({"id": letter_id, "hands": hands, "pass": False, "issues": ["no_hand"]})
-            print(f"{letter_id} hands={hands} pass=false issues=no_hand")
+            rows.append({"id": letter_id, "hands": hands, "evaluated": False, "pass": None, "reason": "no_hand", "issues": ["no_hand"]})
+            print(f"{letter_id} hands={hands} evaluated=false reason=no_hand")
             continue
         json_path.write_text(json.dumps(frame, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-        passed, codes = eval_json(bun, json_path, letter_id)
-        rows.append({"id": letter_id, "hands": hands, "pass": passed, "issues": codes})
-        print(f"{letter_id} hands={hands} pass={str(passed).lower()} issues={','.join(codes) or '—'}")
+        res = eval_json(bun, json_path, letter_id, png)
+        rows.append(
+            {
+                "id": letter_id,
+                "hands": hands,
+                "evaluated": res["evaluated"],
+                "pass": res["pass"],
+                "reason": res["reason"],
+                "issues": res["codes"],
+            }
+        )
+        if res["evaluated"]:
+            print(f"{letter_id} hands={hands} evaluated=true pass={str(res['pass']).lower()} issues={','.join(res['codes']) or '-'}")
+        else:
+            print(f"{letter_id} hands={hands} evaluated=false reason={res['reason']} (不可评估，不是动作负例)")
 
     write_results(rows)
     print(f"wrote {RESULTS}")

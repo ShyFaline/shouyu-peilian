@@ -41,6 +41,8 @@
  * @property {Issue[]} audit
  * @property {object} curls
  * @property {string} ruleStatus
+ * ruleStatus!=="ok"（no_letter/no_rules/unknown_rule_fields）时 pass 必为 false：
+ * 这是状态门阻断，不构成几何判负，统计层不得计入失败样本。
  */
 
 /**
@@ -49,7 +51,8 @@
  * @property {"pending_review"|"demo_only"|"pose_practice"|"accepted_practice"} practiceStatus
  * @property {Issue[]} issues
  * @property {{ ok: boolean, reason: string }} quality
- * @property {{ frames: number, elapsedMs: number }} hold
+ * @property {{ frames: number, elapsedMs: number, passFrames: number, maxGapMs: number }} hold
+ * hold.passFrames/maxGapMs 为保持门阈值透出（UNVERIFIED 初值），供离线统计读取。
  */
 
 /**

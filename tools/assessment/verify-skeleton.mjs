@@ -1,5 +1,6 @@
 /**
- * 回放骨架自检。覆盖：缺尺寸、坏数值、伪标签、无标签、零样本、合成正负例。
+ * 回放骨架自检。覆盖：缺尺寸、坏数值、伪标签、无标签、零样本、合成正负例，
+ * 以及第二轮新增的：来源/标签正交、全体 vs conditional 口径、序列判定层级。
  *
  * 只验证「骨架接线是否正确」，不产生准确率。全部样本为合成。
  * 用法：bun tools/assessment/verify-skeleton.mjs
@@ -168,11 +169,11 @@ check("坏数值不产生任何预测", ["syn-bad-number-nan", "syn-bad-number-n
   check(
     "无标签时不报准确率（评分分母 0 => null，回放覆盖仍如实）",
     noLabelReport.totals.scored === 0 &&
-      noLabelReport.totals.agreement.value === null &&
+      noLabelReport.totals.conditionalOnDecidable.agreement.value === null &&
       noLabelReport.totals.scoredCoverage.value === null &&
       noLabelReport.totals.scoredCoverage.den === 0 &&
       noLabelReport.totals.replayCoverage.value !== null,
-    `scored=${noLabelReport.totals.scored} agree=${JSON.stringify(noLabelReport.totals.agreement)} replayCoverage=${JSON.stringify(noLabelReport.totals.replayCoverage)}`,
+    `scored=${noLabelReport.totals.scored} agree=${JSON.stringify(noLabelReport.totals.conditionalOnDecidable.agreement)} replayCoverage=${JSON.stringify(noLabelReport.totals.replayCoverage)}`,
   );
   check("无标签时 humanEvaluation.executed=false", noLabelReport.humanEvaluation.executed === false);
 }
@@ -192,9 +193,12 @@ check("坏数值不产生任何预测", ["syn-bad-number-nan", "syn-bad-number-n
   check("零样本不报真人评估", emptyReport.humanEvaluation.executed === false);
 }
 
-// ---------------------------------------------------------------- 真人评估未执行
+// ---------------------------------------------------------------- 来源与标签正交（修 bug 1）
+// 旧断言把「只要标签来源是 human-annotation 就置 executed=true」当成正确行为，
+// 这恰好就是 bug 1。这里改成：标签来源与样本来源正交，人工标注合成样本 ≠ 现场真人评估。
 {
-  const humanLabeled = buildReport({
+  // 合成样本 + 人工标签：不得宣称已执行真人评估
+  const syntheticWithHumanLabels = buildReport({
     replays: synReplays,
     labels: synAligned.aligned.map((l) => ({ ...l, truthOrigin: "human-annotation" })),
     level: "auto",
@@ -202,9 +206,182 @@ check("坏数值不产生任何预测", ["syn-bad-number-nan", "syn-bad-number-n
     labelInfo: { provided: true },
   });
   check(
-    "真人来源桶存在时才置 executed=true（合成桶不算真人）",
-    synReport.humanEvaluation.executed === false && humanLabeled.humanEvaluation.executed === true,
-    `synthetic=${synReport.humanEvaluation.executed} human=${humanLabeled.humanEvaluation.executed}`,
+    "合成样本 + human-annotation 标签不得宣称真人评估已执行",
+    syntheticWithHumanLabels.humanEvaluation.executed === false,
+    `executed=${syntheticWithHumanLabels.humanEvaluation.executed} 现场采集=${syntheticWithHumanLabels.humanEvaluation.onSiteHuman.collected}`,
+  );
+  check(
+    "合成样本 + human-annotation 时 onSiteHuman.collected=0",
+    syntheticWithHumanLabels.humanEvaluation.onSiteHuman.collected === 0 &&
+      syntheticWithHumanLabels.humanEvaluation.onSiteHuman.independentlyLabeled === 0,
+  );
+  check(
+    "标签来源仍如实记录为 human-annotation（正交，不是被抹掉）",
+    syntheticWithHumanLabels.byTruthOrigin.some((b) => b.key === "human-annotation" && b.samples > 0),
+  );
+  check(
+    "来源轴仍如实记录为 constructed（标签变了，来源没变）",
+    syntheticWithHumanLabels.bySourceAxis.some((b) => b.key === "constructed" && b.samples > 0),
+  );
+  check("合成集本身 executed=false", synReport.humanEvaluation.executed === false);
+}
+
+// ---------------------------------------------------------------- 反例夹具（四组）
+const CE = join(HERE, "samples", "counterexamples");
+function runGroup(group) {
+  const dir = join(CE, group);
+  const raw = JSON.parse(readFileSync(join(dir, "labels.json"), "utf8"));
+  const reps = replayAll(loadSamples(dir), letters);
+  const lb = loadLabels(raw);
+  const { aligned, orphaned } = alignLabels(lb.accepted, reps.map((r) => r.sampleId));
+  const rep = buildReport({
+    replays: reps,
+    labels: aligned,
+    level: "auto",
+    coreFingerprint: coreFingerprint(ROOT),
+    labelInfo: { provided: true },
+  });
+  return { reps, byId: byId(reps), lb, raw, aligned, orphaned, rep };
+}
+
+// --- 反例 1：只有人工标签，没有现场采集 => executed 必须 false
+{
+  const g = runGroup("label-only-human");
+  check(
+    "反例1 仅人工标签(合成/渲染/视频) => executed=false",
+    g.rep.humanEvaluation.executed === false,
+    `executed=${g.rep.humanEvaluation.executed} collected=${g.rep.humanEvaluation.onSiteHuman.collected}`,
+  );
+  check(
+    "反例1 标签确实是 human-annotation（不是没标签）",
+    g.rep.byTruthOrigin.some((b) => b.key === "human-annotation" && b.samples === 3),
+    JSON.stringify(g.rep.byTruthOrigin.map((b) => [b.key, b.samples])),
+  );
+  check(
+    "反例1 第三方视频单独成桶，不与现场真人合并",
+    g.rep.bySourceAxis.some((b) => b.key === "third_party_real" && b.samples === 1) &&
+      g.rep.bySourceAxis.every((b) => !(b.key === "on_site_human" && b.samples > 0)),
+    JSON.stringify(g.rep.bySourceAxis.map((b) => [b.key, b.samples])),
+  );
+}
+
+// --- 反例 2：四来源 × 同批人工标签 => 只有 camera 能推 executed
+{
+  const g = runGroup("source-orthogonality");
+  const he = g.rep.humanEvaluation;
+  check(
+    "反例2 render 不得混入现场真人桶",
+    g.rep.bySourceAxis.some((b) => b.key === "constructed" && b.samples === 2) && he.onSiteHuman.collected === 1,
+    `constructed=${g.rep.bySourceAxis.find((b) => b.key === "constructed")?.samples} onSite=${he.onSiteHuman.collected}`,
+  );
+  check(
+    "反例2 现场采集样本声明了协议 => executed=true 且四件事分开报",
+    he.executed === true &&
+      he.onSiteHuman.collected === 1 &&
+      he.onSiteHuman.independentlyLabeled === 1 &&
+      he.onSiteHuman.decidable === 1 &&
+      he.onSiteHuman.protocolDeclared === true,
+    JSON.stringify(he.onSiteHuman),
+  );
+  check(
+    "反例2 第三方实拍单独统计，不与现场真人合并",
+    he.thirdPartyVideo.collected === 1 && he.thirdPartyVideo.separateFromHuman === true,
+  );
+}
+
+// --- 反例 3：全体口径 vs conditional 口径
+{
+  const g = runGroup("metric-cells");
+  const t = g.rep.totals;
+  // 错误组 2 个：一个误放行、一个被阻断 => 全体 1/2；条件 1/1
+  check(
+    "反例3 全体口径 误放行 = 1/2（含被阻断的错误样本）",
+    t.falseAcceptAll.num === 1 && t.falseAcceptAll.den === 2,
+    `${t.falseAcceptAll.num}/${t.falseAcceptAll.den}`,
+  );
+  check(
+    "反例3 conditional 口径 误放行 = 1/1（仅可判定）",
+    t.conditionalOnDecidable.falseAccept.num === 1 && t.conditionalOnDecidable.falseAccept.den === 1,
+    `${t.conditionalOnDecidable.falseAccept.num}/${t.conditionalOnDecidable.falseAccept.den}`,
+  );
+  check(
+    "反例3 全体口径 明确失败 = 1/5（正确组含阻断/invalid/unknown）",
+    t.falseRejectAll.num === 1 && t.falseRejectAll.den === 5,
+    `${t.falseRejectAll.num}/${t.falseRejectAll.den}`,
+  );
+  check(
+    "反例3 conditional 口径 明确失败 = 1/2（仅可判定）",
+    t.conditionalOnDecidable.falseReject.num === 1 && t.conditionalOnDecidable.falseReject.den === 2,
+    `${t.conditionalOnDecidable.falseReject.num}/${t.conditionalOnDecidable.falseReject.den}`,
+  );
+  check(
+    "反例3 可判定覆盖率 错误组 1/2、正确组 2/5",
+    t.decidableCoverage.incorrect.num === 1 &&
+      t.decidableCoverage.incorrect.den === 2 &&
+      t.decidableCoverage.correct.num === 2 &&
+      t.decidableCoverage.correct.den === 5,
+    `err=${t.decidableCoverage.incorrect.num}/${t.decidableCoverage.incorrect.den} ok=${t.decidableCoverage.correct.num}/${t.decidableCoverage.correct.den}`,
+  );
+  check(
+    "反例3 blocked / undetermined / invalid / unknown 分开计数",
+    t.blocked === 2 && t.invalid === 1 && t.unknown === 1 && t.undetermined === 0,
+    `blocked=${t.blocked} undetermined=${t.undetermined} invalid=${t.invalid} unknown=${t.unknown}`,
+  );
+  check(
+    "反例3 blocked 原因可查（fingertip_oob）",
+    g.rep.blockReasons.fingertip_oob === 2,
+    JSON.stringify(g.rep.blockReasons),
+  );
+  check(
+    "反例3 全体口径与 conditional 口径不是同一个数（禁止互换引用）",
+    t.falseAcceptAll.value !== t.conditionalOnDecidable.falseAccept.value ||
+      t.falseRejectAll.value !== t.conditionalOnDecidable.falseReject.value,
+  );
+  check(
+    "反例3 缺尺寸样本进 invalid 且 reason=missing_size",
+    g.byId.get("ce-ok-invalid")?.status === "invalid" && g.byId.get("ce-ok-invalid")?.reason === "missing_size",
+  );
+  check(
+    "反例3 未知目标字母 => unknown，不折算成 incorrect",
+    g.byId.get("ce-ok-unknown")?.status === "unknown" && g.byId.get("ce-ok-unknown")?.predicted === null,
+  );
+}
+
+// --- 反例 4：序列判定层级（动作错误 / 保持未完成 / 无效时间轴 必须分开）
+{
+  const g = runGroup("sequence-levels");
+  check(
+    "反例4 序列标签先声明预期判定层级 product_decision",
+    g.raw.sequenceJudgmentLevel === "product_decision",
+    String(g.raw.sequenceJudgmentLevel),
+  );
+  check(
+    "反例4 动作错误 => action_error（不是保持未完成）",
+    g.byId.get("ce-seq-action-error")?.failureClass === "action_error",
+    String(g.byId.get("ce-seq-action-error")?.failureClass),
+  );
+  check(
+    "反例4 保持未完成 => hold_incomplete（不是动作错误）",
+    g.byId.get("ce-seq-hold-pending")?.failureClass === "hold_incomplete",
+    String(g.byId.get("ce-seq-hold-pending")?.failureClass),
+  );
+  check(
+    "反例4 无效时间轴 => invalid_timeline（不是动作错误）",
+    g.byId.get("ce-seq-invalid-timeline")?.status === "invalid" &&
+      g.byId.get("ce-seq-invalid-timeline")?.failureClass === "invalid_timeline",
+    `${g.byId.get("ce-seq-invalid-timeline")?.status}/${g.byId.get("ce-seq-invalid-timeline")?.failureClass}`,
+  );
+  check(
+    "反例4 三种失败原因互不相同",
+    new Set([
+      g.byId.get("ce-seq-action-error")?.failureClass,
+      g.byId.get("ce-seq-hold-pending")?.failureClass,
+      g.byId.get("ce-seq-invalid-timeline")?.failureClass,
+    ]).size === 3,
+  );
+  check(
+    "反例4 序列通过 => none + decision=pass",
+    g.byId.get("ce-seq-pass")?.failureClass === "none" && g.byId.get("ce-seq-pass")?.decision === "pass",
   );
 }
 
@@ -214,19 +391,24 @@ console.log("\n=== 合成集指标（不是准确率，只验接线）===");
 console.log(`样本 ${t.samples} | 有标签 ${t.labeled} | 已评分 ${t.scored} | blocked ${t.blocked} | unknown ${t.unknown} | invalid ${t.invalid}`);
 console.log(`回放覆盖率    ${fmtRate(t.replayCoverage)}   (分子=能产出预测的样本)`);
 console.log(`评分覆盖率    ${fmtRate(t.scoredCoverage)}   (分子=有标签且已评分)`);
-console.log(`误接收        ${fmtRate(t.falseAcceptRate)}   (分子=预测correct但真值incorrect)`);
-console.log(`误拒绝        ${fmtRate(t.falseRejectRate)}   (分子=预测incorrect但真值correct)`);
-console.log(`一致率        ${fmtRate(t.agreement)}`);
-console.log(`问题码一致    ${fmtRate(t.issueAgreement)}`);
+console.log(`[全体] 误放行      ${fmtRate(t.falseAcceptAll)}   (分子=预测correct但真值incorrect；分母=全部错误样本)`);
+console.log(`[全体] 明确失败    ${fmtRate(t.falseRejectAll)}   (分子=预测incorrect但真值correct；分母=全部正确样本)`);
+console.log(`[全体] 可判定覆盖  错误组 ${fmtRate(t.decidableCoverage.incorrect)} 正确组 ${fmtRate(t.decidableCoverage.correct)}`);
+console.log(`[cond] 误放行      ${fmtRate(t.conditionalOnDecidable.falseAccept)}`);
+console.log(`[cond] 明确失败    ${fmtRate(t.conditionalOnDecidable.falseReject)}`);
+console.log(`[cond] 一致率      ${fmtRate(t.conditionalOnDecidable.agreement)}`);
+console.log(`[cond] 问题码一致  ${fmtRate(t.conditionalOnDecidable.issueAgreement)}`);
+console.log(`结果分布      blocked=${t.blocked} undetermined=${t.undetermined} unknown=${t.unknown} invalid=${t.invalid}`);
+console.log(`失败分类      ${JSON.stringify(t.failureClassCounts)}`);
 for (const b of synReport.byLevel) {
   console.log(
     `  level=${b.key.padEnd(9)} n=${b.samples} scored=${b.scored} TP=${b.truePositive} FA=${b.falseAccept} FR=${b.falseReject} TN=${b.trueNegative} blocked=${b.blocked} invalid=${b.invalid}`,
   );
 }
 for (const b of synReport.byTruthOrigin) {
-  console.log(`  origin=${b.key.padEnd(24)} n=${b.samples} scored=${b.scored} 一致=${b.agreement.num}/${b.agreement.den}`);
+  console.log(`  origin=${b.key.padEnd(24)} n=${b.samples} scored=${b.scored} 一致=${b.conditionalOnDecidable.agreement.num}/${b.conditionalOnDecidable.agreement.den}`);
 }
-console.log(`真人评估: ${synReport.humanEvaluation.note}`);
+console.log(`真人评估 executed=${synReport.humanEvaluation.executed}`);
 
 const failed = results.filter((r) => !r.ok);
 console.log(`\n${results.length - failed.length}/${results.length} 断言通过`);

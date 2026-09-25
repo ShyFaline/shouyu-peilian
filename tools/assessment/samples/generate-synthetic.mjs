@@ -11,92 +11,14 @@ import { writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { POSES, SYNTHETIC_SIZE, buildHand } from "./lib/hand.mjs";
+
 const HERE = dirname(fileURLToPath(import.meta.url));
 const OUT = join(HERE, "synthetic");
 
-const rad = (d) => (d * Math.PI) / 180;
-const S = 0.22;
-const WRIST = [0.5, 0.86];
-
-/** 0° = 指尖朝上（-y）。turns 是逐关节累计转角，0 表示伸直。 */
-function buildFinger(origin, baseDeg, turns, segs) {
-  const pts = [origin.slice()];
-  let a = baseDeg;
-  for (let i = 0; i < 3; i += 1) {
-    a += turns[i];
-    const p = pts[pts.length - 1];
-    pts.push([p[0] + segs[i] * Math.sin(rad(a)), p[1] - segs[i] * Math.cos(rad(a))]);
-  }
-  return pts;
-}
-
-const MCP_X = { index: -0.22, middle: 0.0, ring: 0.22, pinky: 0.44 };
-const MCP_Y = -0.55;
-const SEG = [0.36, 0.24, 0.18];
-
-/**
- * @param {Record<string, "extended"|"half"|"curled">} fingers
- * @param {{ index?:number, middle?:number, ring?:number, pinky?:number, thumb?:number }} base
- * @param {{ thumb?:number }} thumbTurn 仅覆盖拇指 IP 转角
- */
-function buildHand({ fingers, base = {}, thumbTurn }) {
-  const lm = new Array(21);
-  lm[0] = { x: WRIST[0], y: WRIST[1] };
-
-  const turnsFor = (state) =>
-    state === "extended" ? [0, 0, 0] : state === "half" ? [0, 40, 40] : [0, 90, 90];
-
-  for (const name of ["index", "middle", "ring", "pinky"]) {
-    const origin = [WRIST[0] + MCP_X[name] * S, WRIST[1] + MCP_Y * S];
-    const pts = buildFinger(origin, base[name] ?? 0, turnsFor(fingers[name]), SEG.map((s) => s * S));
-    const first = { index: 5, middle: 9, ring: 13, pinky: 17 }[name];
-    for (let i = 0; i < 4; i += 1) lm[first + i] = { x: pts[i][0], y: pts[i][1] };
-  }
-
-  // 拇指的 curl 只由 IP 折叠角决定（evaluate 量的是 lm[2],lm[3],lm[4] 的夹角），
-  // 所以前两段保持朝外，只折最后一段：0°→180°(伸直)、50°→130°(半屈)、120°→60°(屈)。
-  const thumbOrigin = [WRIST[0] - 0.3 * S, WRIST[1] - 0.3 * S];
-  const tState = fingers.thumb;
-  const tTurns =
-    tState === "extended"
-      ? [0, 0, 0]
-      : tState === "half"
-        ? [0, 0, 50]
-        : [0, 0, thumbTurn ?? 120];
-  const tPts = buildFinger(thumbOrigin, base.thumb ?? -90, tTurns, [0.3, 0.26, 0.22].map((s) => s * S));
-  for (let i = 0; i < 4; i += 1) lm[1 + i] = { x: tPts[i][0], y: tPts[i][1] };
-
-  return lm.map((p) => ({ x: Number(p.x.toFixed(9)), y: Number(p.y.toFixed(9)), z: 0 }));
-}
-
-// 手型意图：与 letters.json 的规则同名，但生成器不判定，只给形状。
-const POSES = {
-  // V：食指中指分开伸直朝上，其余收起
-  V_OK: { fingers: { index: "extended", middle: "extended", ring: "curled", pinky: "curled", thumb: "curled" }, base: { index: -18, middle: 18, thumb: -40 } },
-  // V 的错例：两指并拢，spread 违规
-  V_TOGETHER: { fingers: { index: "extended", middle: "extended", ring: "curled", pinky: "curled", thumb: "curled" }, base: { index: -5, middle: 5, thumb: -40 } },
-  // U：两指并拢朝上（规则与 V 只差 spread）
-  U_OK: { fingers: { index: "extended", middle: "extended", ring: "curled", pinky: "curled", thumb: "curled" }, base: { index: -5, middle: 5, thumb: -40 } },
-  // L：拇指食指成直角，其余收起
-  L_OK: { fingers: { index: "extended", middle: "curled", ring: "curled", pinky: "curled", thumb: "extended" }, base: { index: 0, thumb: -90 } },
-  // L 的错例：拇指贴向食指，right_angle 违规
-  L_PARALLEL: { fingers: { index: "extended", middle: "curled", ring: "curled", pinky: "curled", thumb: "extended" }, base: { index: 0, thumb: -12 } },
-  // Y：拇指小指伸出
-  Y_OK: { fingers: { index: "curled", middle: "curled", ring: "curled", pinky: "extended", thumb: "extended" }, base: { pinky: 12, thumb: -70 } },
-  // A：握拳，拇指伸出
-  A_OK: { fingers: { index: "curled", middle: "curled", ring: "curled", pinky: "curled", thumb: "extended" }, base: { thumb: -60 } },
-  // B：四指并拢伸直，拇指收起
-  B_OK: { fingers: { index: "extended", middle: "extended", ring: "extended", pinky: "extended", thumb: "curled" }, base: { index: -6, middle: -2, ring: 2, pinky: 6, thumb: -30 } },
-  // W：三指分开
-  W_OK: { fingers: { index: "extended", middle: "extended", ring: "extended", pinky: "curled", thumb: "curled" }, base: { index: -26, middle: 0, ring: 26, thumb: -30 } },
-  // I：只有小指伸出
-  I_OK: { fingers: { index: "curled", middle: "curled", ring: "curled", pinky: "extended", thumb: "curled" }, base: { pinky: 0, thumb: -30 } },
-};
-
-const SIZE = { imageWidth: 640, imageHeight: 480 };
 
 function frameOf(poseName, extra = {}) {
-  return { schemaVersion: 2, coordSpace: "image_normalized", ...SIZE, mirrored: false, sourceType: "synthetic", ...extra, landmarks: buildHand(POSES[poseName]) };
+  return { schemaVersion: 2, coordSpace: "image_normalized", ...SYNTHETIC_SIZE, mirrored: false, sourceType: "synthetic", ...extra, landmarks: buildHand(POSES[poseName]) };
 }
 
 function write(name, obj) {
@@ -173,7 +95,7 @@ addSingle("syn-i-pos", "GF0021.I", "I_OK", { _intent: "I 几何正例" });
     sampleId: "syn-bad-number-nan",
     schemaVersion: 2,
     coordSpace: "image_normalized",
-    ...SIZE,
+    ...SYNTHETIC_SIZE,
     sourceType: "synthetic",
     capturedAt: 1758700012000,
     frameId: 102,
@@ -186,7 +108,7 @@ addSingle("syn-i-pos", "GF0021.I", "I_OK", { _intent: "I 几何正例" });
     sampleId: "syn-bad-number-short",
     schemaVersion: 2,
     coordSpace: "image_normalized",
-    ...SIZE,
+    ...SYNTHETIC_SIZE,
     sourceType: "synthetic",
     capturedAt: 1758700013000,
     frameId: 103,
@@ -200,7 +122,7 @@ addSingle("syn-i-pos", "GF0021.I", "I_OK", { _intent: "I 几何正例" });
     sampleId: "syn-bad-number-null",
     schemaVersion: 2,
     coordSpace: "image_normalized",
-    ...SIZE,
+    ...SYNTHETIC_SIZE,
     sourceType: "synthetic",
     capturedAt: 1758700014000,
     frameId: 104,
@@ -256,7 +178,7 @@ function writeSeq(id, targetLetterId, frames, intent, patch = {}) {
     targetLetterId,
     sourceType: "synthetic",
     coordSpace: "image_normalized",
-    ...SIZE,
+    ...SYNTHETIC_SIZE,
     frames: frames.map((f, i) => ({ frameId: i, ...f })),
     _synthetic: { ...SYNTH, intent, ...patch },
   });

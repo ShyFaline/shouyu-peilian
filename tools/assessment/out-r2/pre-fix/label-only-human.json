@@ -1,0 +1,48 @@
+{
+  "baseline": "5b56abd",
+  "group": "label-only-human",
+  "humanEvaluation": {
+    "executed": true,
+    "note": "存在真人来源标签桶，见 byTruthOrigin。"
+  },
+  "totals": {
+    "samples": 3,
+    "labeled": 3,
+    "scored": 3,
+    "falseAcceptRate": {
+      "num": 0,
+      "den": 0,
+      "value": null
+    },
+    "falseRejectRate": {
+      "num": 0,
+      "den": 3,
+      "value": 0
+    },
+    "agreement": {
+      "num": 3,
+      "den": 3,
+      "value": 1
+    }
+  },
+  "byTruthOrigin": [
+    {
+      "key": "human-annotation",
+      "samples": 3
+    }
+  ],
+  "bySourceType": [
+    {
+      "key": "render",
+      "samples": 1
+    },
+    {
+      "key": "synthetic",
+      "samples": 1
+    },
+    {
+      "key": "video",
+      "samples": 1
+    }
+  ]
+}

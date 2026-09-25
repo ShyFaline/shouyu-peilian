@@ -1,0 +1,44 @@
+{
+  "labelVersion": "counterexample-labels-1",
+  "truthOrigin": "human-annotation",
+  "humanReviewed": true,
+  "note": "全部样本都带人工标签，但一个现场采集样本都没有 => executed 必须为 false。",
+  "labels": [
+    {
+      "sampleId": "ce-lbl-synthetic",
+      "expectedVerdict": "correct",
+      "expectedIssueCodes": [],
+      "level": "geometry",
+      "reviewedBy": "annotator:ce-fixture",
+      "reviewedAt": "2026-09-25T00:00:00Z",
+      "independent": true,
+      "labelVersion": "counterexample-labels-1",
+      "truthOrigin": "human-annotation",
+      "humanReviewed": true
+    },
+    {
+      "sampleId": "ce-lbl-render",
+      "expectedVerdict": "correct",
+      "expectedIssueCodes": [],
+      "level": "geometry",
+      "reviewedBy": "annotator:ce-fixture",
+      "reviewedAt": "2026-09-25T00:00:00Z",
+      "independent": true,
+      "labelVersion": "counterexample-labels-1",
+      "truthOrigin": "human-annotation",
+      "humanReviewed": true
+    },
+    {
+      "sampleId": "ce-lbl-video",
+      "expectedVerdict": "correct",
+      "expectedIssueCodes": [],
+      "level": "geometry",
+      "reviewedBy": "annotator:ce-fixture",
+      "reviewedAt": "2026-09-25T00:00:00Z",
+      "independent": true,
+      "labelVersion": "counterexample-labels-1",
+      "truthOrigin": "human-annotation",
+      "humanReviewed": true
+    }
+  ]
+}

@@ -1,0 +1,99 @@
+{
+  "labelVersion": "counterexample-labels-1",
+  "truthOrigin": "synthetic-construction",
+  "humanReviewed": false,
+  "note": "只锁指标分母口径。样本被刻意钉在特定 (真值, 预测) 格子上，不是真实准确率。",
+  "labels": [
+    {
+      "sampleId": "ce-err-falseaccept",
+      "expectedVerdict": "incorrect",
+      "expectedIssueCodes": [],
+      "level": "geometry",
+      "reviewedBy": "annotator:ce-fixture",
+      "reviewedAt": "2026-09-25T00:00:00Z",
+      "independent": true,
+      "labelVersion": "counterexample-labels-1",
+      "truthOrigin": "synthetic-construction",
+      "humanReviewed": false,
+      "note": "误放行格子"
+    },
+    {
+      "sampleId": "ce-err-blocked",
+      "expectedVerdict": "incorrect",
+      "expectedIssueCodes": [],
+      "level": "geometry",
+      "reviewedBy": "annotator:ce-fixture",
+      "reviewedAt": "2026-09-25T00:00:00Z",
+      "independent": true,
+      "labelVersion": "counterexample-labels-1",
+      "truthOrigin": "synthetic-construction",
+      "humanReviewed": false,
+      "note": "错误组里的不可判定"
+    },
+    {
+      "sampleId": "ce-ok-scored",
+      "expectedVerdict": "correct",
+      "expectedIssueCodes": [],
+      "level": "geometry",
+      "reviewedBy": "annotator:ce-fixture",
+      "reviewedAt": "2026-09-25T00:00:00Z",
+      "independent": true,
+      "labelVersion": "counterexample-labels-1",
+      "truthOrigin": "synthetic-construction",
+      "humanReviewed": false,
+      "note": "真阳格子"
+    },
+    {
+      "sampleId": "ce-ok-explicitfail",
+      "expectedVerdict": "correct",
+      "expectedIssueCodes": [],
+      "level": "geometry",
+      "reviewedBy": "annotator:ce-fixture",
+      "reviewedAt": "2026-09-25T00:00:00Z",
+      "independent": true,
+      "labelVersion": "counterexample-labels-1",
+      "truthOrigin": "synthetic-construction",
+      "humanReviewed": false,
+      "note": "明确失败格子"
+    },
+    {
+      "sampleId": "ce-ok-blocked",
+      "expectedVerdict": "correct",
+      "expectedIssueCodes": [],
+      "level": "geometry",
+      "reviewedBy": "annotator:ce-fixture",
+      "reviewedAt": "2026-09-25T00:00:00Z",
+      "independent": true,
+      "labelVersion": "counterexample-labels-1",
+      "truthOrigin": "synthetic-construction",
+      "humanReviewed": false,
+      "note": "正确组里的不可判定"
+    },
+    {
+      "sampleId": "ce-ok-invalid",
+      "expectedVerdict": "correct",
+      "expectedIssueCodes": [],
+      "level": "geometry",
+      "reviewedBy": "annotator:ce-fixture",
+      "reviewedAt": "2026-09-25T00:00:00Z",
+      "independent": true,
+      "labelVersion": "counterexample-labels-1",
+      "truthOrigin": "synthetic-construction",
+      "humanReviewed": false,
+      "note": "正确组里的 invalid"
+    },
+    {
+      "sampleId": "ce-ok-unknown",
+      "expectedVerdict": "correct",
+      "expectedIssueCodes": [],
+      "level": "geometry",
+      "reviewedBy": "annotator:ce-fixture",
+      "reviewedAt": "2026-09-25T00:00:00Z",
+      "independent": true,
+      "labelVersion": "counterexample-labels-1",
+      "truthOrigin": "synthetic-construction",
+      "humanReviewed": false,
+      "note": "正确组里的 unknown"
+    }
+  ]
+}

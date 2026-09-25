@@ -48,6 +48,9 @@ function handednessOf(raw) {
 }
 
 export function createSnapshot(input = {}) {
+  for (const key of Object.keys(input)) {
+    if (FORBIDDEN.has(key)) return { ok: false, reason: "forbidden_field", snapshot: null };
+  }
   const width = input.imageWidth ?? input.width;
   const height = input.imageHeight ?? input.height;
   if (!isFiniteNum(width) || !isFiniteNum(height) || width <= 0 || height <= 0) {
@@ -84,7 +87,8 @@ export function createSnapshot(input = {}) {
       ...(p.z != null ? { z: p.z } : {}),
     })),
   };
-  return { ok: true, reason: "ok", snapshot };
+  // 冻结防后写：调用方拿到对象后不得追加 verdict 类字段再序列化。
+  return { ok: true, reason: "ok", snapshot: Object.freeze(snapshot) };
 }
 
 export function serializeSnapshot(snapshot) {

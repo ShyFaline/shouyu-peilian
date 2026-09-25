@@ -1,0 +1,60 @@
+{
+  "labelVersion": "counterexample-labels-1",
+  "truthOrigin": "human-annotation",
+  "humanReviewed": true,
+  "note": "四组来源共用同一批人工标注。标签来源相同，样本来源不同——这正是 bug 1 的暴露点。",
+  "labels": [
+    {
+      "sampleId": "ce-src-synthetic",
+      "expectedVerdict": "correct",
+      "expectedIssueCodes": [],
+      "level": "geometry",
+      "reviewedBy": "annotator:ce-fixture",
+      "reviewedAt": "2026-09-25T00:00:00Z",
+      "independent": true,
+      "labelVersion": "counterexample-labels-1",
+      "truthOrigin": "human-annotation",
+      "humanReviewed": true,
+      "note": "合成手型，人工标注后仍不是现场真人"
+    },
+    {
+      "sampleId": "ce-src-render",
+      "expectedVerdict": "correct",
+      "expectedIssueCodes": [],
+      "level": "geometry",
+      "reviewedBy": "annotator:ce-fixture",
+      "reviewedAt": "2026-09-25T00:00:00Z",
+      "independent": true,
+      "labelVersion": "counterexample-labels-1",
+      "truthOrigin": "human-annotation",
+      "humanReviewed": true,
+      "note": "Blender 渲染图，人工标注后不是现场真人"
+    },
+    {
+      "sampleId": "ce-src-video",
+      "expectedVerdict": "correct",
+      "expectedIssueCodes": [],
+      "level": "geometry",
+      "reviewedBy": "annotator:ce-fixture",
+      "reviewedAt": "2026-09-25T00:00:00Z",
+      "independent": true,
+      "labelVersion": "counterexample-labels-1",
+      "truthOrigin": "human-annotation",
+      "humanReviewed": true,
+      "note": "第三方视频抽帧，必须单独统计"
+    },
+    {
+      "sampleId": "ce-src-camera",
+      "expectedVerdict": "correct",
+      "expectedIssueCodes": [],
+      "level": "geometry",
+      "reviewedBy": "annotator:ce-fixture",
+      "reviewedAt": "2026-09-25T00:00:00Z",
+      "independent": true,
+      "labelVersion": "counterexample-labels-1",
+      "truthOrigin": "human-annotation",
+      "humanReviewed": true,
+      "note": "现场自愿参与者摄像头采集，唯一可声称真人评估的来源"
+    }
+  ]
+}

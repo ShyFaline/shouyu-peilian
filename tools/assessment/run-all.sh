@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
-# 一键复现本轮全部证据。只读核心，只写 tools/assessment/out/。
+# ⚠ 第一轮历史脚本，已被 run-all-r2.sh 取代。
+# 保留原因：它产出第一轮证据 tools/assessment/out/，该目录是历史证据，不得覆盖。
+# 指标字段口径已在第二轮修正（falseAcceptRate -> falseAcceptAll 等），本脚本的输出
+# 不能与第二轮报告混引。要复现当前行为请用 bash tools/assessment/run-all-r2.sh。
+#
+# 原说明：一键复现第一轮全部证据。只读核心，只写 tools/assessment/out/。
 # 用法: bash tools/assessment/run-all.sh
 set -u
 

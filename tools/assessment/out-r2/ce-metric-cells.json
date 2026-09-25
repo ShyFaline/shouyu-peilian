@@ -1,0 +1,701 @@
+{
+  "generatedAt": "2026-09-25T17:17:13.906Z",
+  "metricDefinitions": {
+    "falseAcceptAll": "全体口径：误放行 / 全部有独立标签的错误样本（含被阻断的）。",
+    "falseRejectAll": "全体口径：明确失败 / 全部有独立标签的正确样本（含被阻断的）。",
+    "decidableCoverage": "可判定覆盖率：真值分组里判得出来的比例，正确组与错误组各算各的。",
+    "conditionalOnDecidable": "条件口径：仅在可判定样本中计算。与全体口径不是同一个数，禁止互换引用。",
+    "undetermined": "judge 无法判定（含质量门失败、异常），与 blocked（规则/状态拒绝）不同。",
+    "failureClass": "失败分类：action_error（动作错）/ hold_incomplete（保持未完成）/ invalid_timeline（时间轴无效）等，互不混同。"
+  },
+  "level": "auto",
+  "coreFingerprint": {
+    "files": {
+      "practice/src/coords.js": "7a607fa98b4e85bb",
+      "practice/src/evaluate.js": "3e8034a89051d512",
+      "practice/src/inputQuality.js": "f51d4e865a33f5d3",
+      "practice/src/passState.js": "c51af97a7002ecf9",
+      "practice/src/judge.js": "2b4d64b26f60f529",
+      "practice/src/snapshot.js": "5e65eedff22d7514",
+      "practice/src/types.js": "1b4c2f966dbe2a2d",
+      "practice/content/letters.json": "e9caa89406134442"
+    },
+    "digest": "0028db7556de2303"
+  },
+  "labelInfo": {
+    "provided": true,
+    "path": "C:\\Users\\15424\\Desktop\\2026.9.15\\tools\\assessment\\samples\\counterexamples\\metric-cells\\labels.json",
+    "truthOrigin": "synthetic-construction",
+    "humanReviewed": false,
+    "accepted": 7,
+    "rejected": 0,
+    "rejectedReasons": {},
+    "aligned": 7,
+    "orphaned": 0,
+    "rejectedDetail": [],
+    "orphanedDetail": [],
+    "wholeSetRejected": false
+  },
+  "holdThresholds": {
+    "passFrames": 6,
+    "maxGapMs": 400,
+    "unverified": true,
+    "source": "practice/src/passState.js"
+  },
+  "totals": {
+    "key": "ALL",
+    "samples": 7,
+    "labeled": 7,
+    "scored": 3,
+    "predicted": 3,
+    "blocked": 2,
+    "undetermined": 0,
+    "unknown": 1,
+    "invalid": 1,
+    "statusCounts": {
+      "scored": 3,
+      "blocked": 2,
+      "undetermined": 0,
+      "unknown": 1,
+      "invalid": 1
+    },
+    "decisionCounts": {
+      "pass": 0,
+      "fail": 3,
+      "blocked": 0,
+      "undetermined": 0
+    },
+    "failureClassCounts": {
+      "blocked_input": 2,
+      "none": 2,
+      "action_error": 1,
+      "invalid_metadata": 1,
+      "unknown_target": 1
+    },
+    "truthCorrect": 5,
+    "truthIncorrect": 2,
+    "truthCorrectDecidable": 2,
+    "truthIncorrectDecidable": 1,
+    "truePositive": 1,
+    "falseAccept": 1,
+    "falseReject": 1,
+    "trueNegative": 0,
+    "issueAgreementNum": 0,
+    "issueAgreementDen": 0,
+    "replayCoverage": {
+      "num": 3,
+      "den": 7,
+      "value": 0.42857142857142855
+    },
+    "scoredCoverage": {
+      "num": 3,
+      "den": 7,
+      "value": 0.42857142857142855
+    },
+    "falseAcceptAll": {
+      "num": 1,
+      "den": 2,
+      "value": 0.5
+    },
+    "falseRejectAll": {
+      "num": 1,
+      "den": 5,
+      "value": 0.2
+    },
+    "decidableCoverage": {
+      "incorrect": {
+        "num": 1,
+        "den": 2,
+        "value": 0.5
+      },
+      "correct": {
+        "num": 2,
+        "den": 5,
+        "value": 0.4
+      }
+    },
+    "conditionalOnDecidable": {
+      "falseAccept": {
+        "num": 1,
+        "den": 1,
+        "value": 1
+      },
+      "falseReject": {
+        "num": 1,
+        "den": 2,
+        "value": 0.5
+      },
+      "agreement": {
+        "num": 1,
+        "den": 3,
+        "value": 0.3333333333333333
+      },
+      "issueAgreement": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      }
+    }
+  },
+  "byLevel": [
+    {
+      "key": "geometry",
+      "samples": 7,
+      "labeled": 7,
+      "scored": 3,
+      "predicted": 3,
+      "blocked": 2,
+      "undetermined": 0,
+      "unknown": 1,
+      "invalid": 1,
+      "statusCounts": {
+        "scored": 3,
+        "blocked": 2,
+        "undetermined": 0,
+        "unknown": 1,
+        "invalid": 1
+      },
+      "decisionCounts": {
+        "pass": 0,
+        "fail": 3,
+        "blocked": 0,
+        "undetermined": 0
+      },
+      "failureClassCounts": {
+        "blocked_input": 2,
+        "none": 2,
+        "action_error": 1,
+        "invalid_metadata": 1,
+        "unknown_target": 1
+      },
+      "truthCorrect": 5,
+      "truthIncorrect": 2,
+      "truthCorrectDecidable": 2,
+      "truthIncorrectDecidable": 1,
+      "truePositive": 1,
+      "falseAccept": 1,
+      "falseReject": 1,
+      "trueNegative": 0,
+      "issueAgreementNum": 0,
+      "issueAgreementDen": 0,
+      "replayCoverage": {
+        "num": 3,
+        "den": 7,
+        "value": 0.42857142857142855
+      },
+      "scoredCoverage": {
+        "num": 3,
+        "den": 7,
+        "value": 0.42857142857142855
+      },
+      "falseAcceptAll": {
+        "num": 1,
+        "den": 2,
+        "value": 0.5
+      },
+      "falseRejectAll": {
+        "num": 1,
+        "den": 5,
+        "value": 0.2
+      },
+      "decidableCoverage": {
+        "incorrect": {
+          "num": 1,
+          "den": 2,
+          "value": 0.5
+        },
+        "correct": {
+          "num": 2,
+          "den": 5,
+          "value": 0.4
+        }
+      },
+      "conditionalOnDecidable": {
+        "falseAccept": {
+          "num": 1,
+          "den": 1,
+          "value": 1
+        },
+        "falseReject": {
+          "num": 1,
+          "den": 2,
+          "value": 0.5
+        },
+        "agreement": {
+          "num": 1,
+          "den": 3,
+          "value": 0.3333333333333333
+        },
+        "issueAgreement": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        }
+      }
+    }
+  ],
+  "byTruthOrigin": [
+    {
+      "key": "synthetic-construction",
+      "samples": 7,
+      "labeled": 7,
+      "scored": 3,
+      "predicted": 3,
+      "blocked": 2,
+      "undetermined": 0,
+      "unknown": 1,
+      "invalid": 1,
+      "statusCounts": {
+        "scored": 3,
+        "blocked": 2,
+        "undetermined": 0,
+        "unknown": 1,
+        "invalid": 1
+      },
+      "decisionCounts": {
+        "pass": 0,
+        "fail": 3,
+        "blocked": 0,
+        "undetermined": 0
+      },
+      "failureClassCounts": {
+        "blocked_input": 2,
+        "none": 2,
+        "action_error": 1,
+        "invalid_metadata": 1,
+        "unknown_target": 1
+      },
+      "truthCorrect": 5,
+      "truthIncorrect": 2,
+      "truthCorrectDecidable": 2,
+      "truthIncorrectDecidable": 1,
+      "truePositive": 1,
+      "falseAccept": 1,
+      "falseReject": 1,
+      "trueNegative": 0,
+      "issueAgreementNum": 0,
+      "issueAgreementDen": 0,
+      "replayCoverage": {
+        "num": 3,
+        "den": 7,
+        "value": 0.42857142857142855
+      },
+      "scoredCoverage": {
+        "num": 3,
+        "den": 7,
+        "value": 0.42857142857142855
+      },
+      "falseAcceptAll": {
+        "num": 1,
+        "den": 2,
+        "value": 0.5
+      },
+      "falseRejectAll": {
+        "num": 1,
+        "den": 5,
+        "value": 0.2
+      },
+      "decidableCoverage": {
+        "incorrect": {
+          "num": 1,
+          "den": 2,
+          "value": 0.5
+        },
+        "correct": {
+          "num": 2,
+          "den": 5,
+          "value": 0.4
+        }
+      },
+      "conditionalOnDecidable": {
+        "falseAccept": {
+          "num": 1,
+          "den": 1,
+          "value": 1
+        },
+        "falseReject": {
+          "num": 1,
+          "den": 2,
+          "value": 0.5
+        },
+        "agreement": {
+          "num": 1,
+          "den": 3,
+          "value": 0.3333333333333333
+        },
+        "issueAgreement": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        }
+      }
+    }
+  ],
+  "bySourceType": [
+    {
+      "key": "synthetic",
+      "samples": 7,
+      "labeled": 7,
+      "scored": 3,
+      "predicted": 3,
+      "blocked": 2,
+      "undetermined": 0,
+      "unknown": 1,
+      "invalid": 1,
+      "statusCounts": {
+        "scored": 3,
+        "blocked": 2,
+        "undetermined": 0,
+        "unknown": 1,
+        "invalid": 1
+      },
+      "decisionCounts": {
+        "pass": 0,
+        "fail": 3,
+        "blocked": 0,
+        "undetermined": 0
+      },
+      "failureClassCounts": {
+        "blocked_input": 2,
+        "none": 2,
+        "action_error": 1,
+        "invalid_metadata": 1,
+        "unknown_target": 1
+      },
+      "truthCorrect": 5,
+      "truthIncorrect": 2,
+      "truthCorrectDecidable": 2,
+      "truthIncorrectDecidable": 1,
+      "truePositive": 1,
+      "falseAccept": 1,
+      "falseReject": 1,
+      "trueNegative": 0,
+      "issueAgreementNum": 0,
+      "issueAgreementDen": 0,
+      "replayCoverage": {
+        "num": 3,
+        "den": 7,
+        "value": 0.42857142857142855
+      },
+      "scoredCoverage": {
+        "num": 3,
+        "den": 7,
+        "value": 0.42857142857142855
+      },
+      "falseAcceptAll": {
+        "num": 1,
+        "den": 2,
+        "value": 0.5
+      },
+      "falseRejectAll": {
+        "num": 1,
+        "den": 5,
+        "value": 0.2
+      },
+      "decidableCoverage": {
+        "incorrect": {
+          "num": 1,
+          "den": 2,
+          "value": 0.5
+        },
+        "correct": {
+          "num": 2,
+          "den": 5,
+          "value": 0.4
+        }
+      },
+      "conditionalOnDecidable": {
+        "falseAccept": {
+          "num": 1,
+          "den": 1,
+          "value": 1
+        },
+        "falseReject": {
+          "num": 1,
+          "den": 2,
+          "value": 0.5
+        },
+        "agreement": {
+          "num": 1,
+          "den": 3,
+          "value": 0.3333333333333333
+        },
+        "issueAgreement": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        }
+      }
+    }
+  ],
+  "bySourceAxis": [
+    {
+      "key": "constructed",
+      "samples": 7,
+      "labeled": 7,
+      "scored": 3,
+      "predicted": 3,
+      "blocked": 2,
+      "undetermined": 0,
+      "unknown": 1,
+      "invalid": 1,
+      "statusCounts": {
+        "scored": 3,
+        "blocked": 2,
+        "undetermined": 0,
+        "unknown": 1,
+        "invalid": 1
+      },
+      "decisionCounts": {
+        "pass": 0,
+        "fail": 3,
+        "blocked": 0,
+        "undetermined": 0
+      },
+      "failureClassCounts": {
+        "blocked_input": 2,
+        "none": 2,
+        "action_error": 1,
+        "invalid_metadata": 1,
+        "unknown_target": 1
+      },
+      "truthCorrect": 5,
+      "truthIncorrect": 2,
+      "truthCorrectDecidable": 2,
+      "truthIncorrectDecidable": 1,
+      "truePositive": 1,
+      "falseAccept": 1,
+      "falseReject": 1,
+      "trueNegative": 0,
+      "issueAgreementNum": 0,
+      "issueAgreementDen": 0,
+      "replayCoverage": {
+        "num": 3,
+        "den": 7,
+        "value": 0.42857142857142855
+      },
+      "scoredCoverage": {
+        "num": 3,
+        "den": 7,
+        "value": 0.42857142857142855
+      },
+      "falseAcceptAll": {
+        "num": 1,
+        "den": 2,
+        "value": 0.5
+      },
+      "falseRejectAll": {
+        "num": 1,
+        "den": 5,
+        "value": 0.2
+      },
+      "decidableCoverage": {
+        "incorrect": {
+          "num": 1,
+          "den": 2,
+          "value": 0.5
+        },
+        "correct": {
+          "num": 2,
+          "den": 5,
+          "value": 0.4
+        }
+      },
+      "conditionalOnDecidable": {
+        "falseAccept": {
+          "num": 1,
+          "den": 1,
+          "value": 1
+        },
+        "falseReject": {
+          "num": 1,
+          "den": 2,
+          "value": 0.5
+        },
+        "agreement": {
+          "num": 1,
+          "den": 3,
+          "value": 0.3333333333333333
+        },
+        "issueAgreement": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        }
+      }
+    }
+  ],
+  "blockReasons": {
+    "fingertip_oob": 2,
+    "missing_size": 1,
+    "unknown_target": 1
+  },
+  "humanEvaluation": {
+    "executed": false,
+    "onSiteHuman": {
+      "collected": 0,
+      "independentlyLabeled": 0,
+      "attempted": false,
+      "attemptedSamples": [],
+      "decidable": 0,
+      "allAttemptsBlocked": false,
+      "decidableCoverage": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "protocolDeclared": false,
+      "blockedBreakdown": {}
+    },
+    "thirdPartyVideo": {
+      "collected": 0,
+      "independentlyLabeled": 0,
+      "decidable": 0,
+      "separateFromHuman": true,
+      "note": "第三方实拍单独统计，不与现场自愿参与者合并成一个真人成绩。"
+    },
+    "note": "未执行真人评估：缺少现场采集样本 / 独立标签 / 可判定结果 / 采集协议声明之一。"
+  },
+  "syntheticNote": "含构造来源样本（synthetic/render）。这些只验证回放接线，不是准确率，不得与真人/实拍混算。",
+  "samples": [
+    {
+      "sampleId": "ce-err-blocked",
+      "file": "ce-err-blocked.json",
+      "level": "geometry",
+      "status": "blocked",
+      "reason": "fingertip_oob",
+      "predicted": null,
+      "targetLetterId": "GF0021.V",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [],
+      "decision": null,
+      "failureClass": "blocked_input",
+      "issueCodes": [],
+      "productDecision": null,
+      "hold": null,
+      "thresholds": null
+    },
+    {
+      "sampleId": "ce-err-falseaccept",
+      "file": "ce-err-falseaccept.json",
+      "level": "geometry",
+      "status": "scored",
+      "reason": "geometry_evaluated",
+      "predicted": "correct",
+      "targetLetterId": "GF0021.V",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [],
+      "decision": "fail",
+      "failureClass": "none",
+      "issueCodes": [],
+      "productDecision": "fail",
+      "hold": null,
+      "thresholds": null
+    },
+    {
+      "sampleId": "ce-ok-blocked",
+      "file": "ce-ok-blocked.json",
+      "level": "geometry",
+      "status": "blocked",
+      "reason": "fingertip_oob",
+      "predicted": null,
+      "targetLetterId": "GF0021.V",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [],
+      "decision": null,
+      "failureClass": "blocked_input",
+      "issueCodes": [],
+      "productDecision": null,
+      "hold": null,
+      "thresholds": null
+    },
+    {
+      "sampleId": "ce-ok-explicitfail",
+      "file": "ce-ok-explicitfail.json",
+      "level": "geometry",
+      "status": "scored",
+      "reason": "geometry_evaluated",
+      "predicted": "incorrect",
+      "targetLetterId": "GF0021.V",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [],
+      "decision": "fail",
+      "failureClass": "action_error",
+      "issueCodes": [
+        "index_middle.not_apart"
+      ],
+      "productDecision": "fail",
+      "hold": null,
+      "thresholds": null
+    },
+    {
+      "sampleId": "ce-ok-invalid",
+      "file": "ce-ok-invalid.json",
+      "level": "geometry",
+      "status": "invalid",
+      "reason": "missing_size",
+      "predicted": null,
+      "targetLetterId": "GF0021.V",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [
+        "missing_size"
+      ],
+      "warnings": [],
+      "decision": null,
+      "failureClass": "invalid_metadata",
+      "issueCodes": [],
+      "productDecision": null,
+      "hold": null,
+      "thresholds": null
+    },
+    {
+      "sampleId": "ce-ok-scored",
+      "file": "ce-ok-scored.json",
+      "level": "geometry",
+      "status": "scored",
+      "reason": "geometry_evaluated",
+      "predicted": "correct",
+      "targetLetterId": "GF0021.V",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [],
+      "decision": "fail",
+      "failureClass": "none",
+      "issueCodes": [],
+      "productDecision": "fail",
+      "hold": null,
+      "thresholds": null
+    },
+    {
+      "sampleId": "ce-ok-unknown",
+      "file": "ce-ok-unknown.json",
+      "level": "geometry",
+      "status": "unknown",
+      "reason": "unknown_target",
+      "predicted": null,
+      "targetLetterId": "GF0021.NOT_A_LETTER",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [
+        "unknown_target"
+      ],
+      "warnings": [],
+      "decision": null,
+      "failureClass": "unknown_target",
+      "issueCodes": [],
+      "productDecision": null,
+      "hold": null,
+      "thresholds": null
+    }
+  ]
+}

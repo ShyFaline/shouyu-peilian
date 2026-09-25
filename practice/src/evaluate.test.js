@@ -541,6 +541,38 @@ test("A07 无手不可导出；切目标序列化仍为 U；缺 imageWidth 拒�
   assert.equal(keys.includes("practiceStatus"), false);
 });
 
+test("DS-R3 createSnapshot 拒绝 verdict 类伪标签字段（不是静默忽略）", () => {
+  const lm = uTogetherHand();
+  const base = {
+    imageWidth: 640,
+    imageHeight: 480,
+    targetLetterId: "GF0021.U",
+    landmarks: lm,
+    coordSpace: "image_normalized",
+  };
+  for (const bad of ["expectedVerdict", "pass", "decision", "practiceStatus", "conf", "t"]) {
+    const built = createSnapshot({ ...base, [bad]: true });
+    assert.equal(built.ok, false, `createSnapshot must reject ${bad}`);
+    assert.equal(built.reason, "forbidden_field");
+    assert.equal(built.snapshot, null);
+  }
+  const clean = createSnapshot(base);
+  assert.equal(clean.ok, true);
+});
+
+test("DS-R4 holdView 透出保持门阈值；judge 出口携带 passFrames/maxGapMs", () => {
+  const hold = makeHold();
+  const view = observePass(hold, { ok: true, videoTime: 0, nowMs: 0 });
+  assert.equal(view.passFrames, 6);
+  assert.equal(view.maxGapMs, 400);
+  const judged = judge(
+    { letter: letterV, hands: [vApartHand()], geom: UNIT, videoTime: 0, nowMs: 0 },
+    makeHold(),
+  );
+  assert.equal(judged.hold.passFrames, 6);
+  assert.equal(judged.hold.maxGapMs, 400);
+});
+
 test("A09 stopCamera / track.stop 可调用", () => {
   let stopped = 0;
   const video = {

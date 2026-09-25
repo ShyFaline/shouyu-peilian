@@ -1,0 +1,40 @@
+{
+  "baseline": "5b56abd",
+  "group": "metric-cells",
+  "humanEvaluation": {
+    "executed": false,
+    "note": "没有真人来源标签。未执行真人评估，本报告不含任何真人准确率。"
+  },
+  "totals": {
+    "samples": 7,
+    "labeled": 7,
+    "scored": 3,
+    "falseAcceptRate": {
+      "num": 1,
+      "den": 1,
+      "value": 1
+    },
+    "falseRejectRate": {
+      "num": 1,
+      "den": 2,
+      "value": 0.5
+    },
+    "agreement": {
+      "num": 1,
+      "den": 3,
+      "value": 0.3333333333333333
+    }
+  },
+  "byTruthOrigin": [
+    {
+      "key": "synthetic-construction",
+      "samples": 7
+    }
+  ],
+  "bySourceType": [
+    {
+      "key": "synthetic",
+      "samples": 7
+    }
+  ]
+}

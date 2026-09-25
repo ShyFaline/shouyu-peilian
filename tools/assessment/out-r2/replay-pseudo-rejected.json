@@ -1,0 +1,1203 @@
+{
+  "generatedAt": "2026-09-25T17:17:14.074Z",
+  "metricDefinitions": {
+    "falseAcceptAll": "全体口径：误放行 / 全部有独立标签的错误样本（含被阻断的）。",
+    "falseRejectAll": "全体口径：明确失败 / 全部有独立标签的正确样本（含被阻断的）。",
+    "decidableCoverage": "可判定覆盖率：真值分组里判得出来的比例，正确组与错误组各算各的。",
+    "conditionalOnDecidable": "条件口径：仅在可判定样本中计算。与全体口径不是同一个数，禁止互换引用。",
+    "undetermined": "judge 无法判定（含质量门失败、异常），与 blocked（规则/状态拒绝）不同。",
+    "failureClass": "失败分类：action_error（动作错）/ hold_incomplete（保持未完成）/ invalid_timeline（时间轴无效）等，互不混同。"
+  },
+  "level": "auto",
+  "coreFingerprint": {
+    "files": {
+      "practice/src/coords.js": "7a607fa98b4e85bb",
+      "practice/src/evaluate.js": "3e8034a89051d512",
+      "practice/src/inputQuality.js": "f51d4e865a33f5d3",
+      "practice/src/passState.js": "c51af97a7002ecf9",
+      "practice/src/judge.js": "2b4d64b26f60f529",
+      "practice/src/snapshot.js": "5e65eedff22d7514",
+      "practice/src/types.js": "1b4c2f966dbe2a2d",
+      "practice/content/letters.json": "e9caa89406134442"
+    },
+    "digest": "0028db7556de2303"
+  },
+  "labelInfo": {
+    "provided": true,
+    "path": "C:\\Users\\15424\\Desktop\\2026.9.15\\tools\\assessment\\samples\\synthetic\\labels.pseudo.json",
+    "truthOrigin": "unspecified",
+    "humanReviewed": false,
+    "accepted": 0,
+    "rejected": 3,
+    "rejectedReasons": {
+      "label_not_independent": 1,
+      "label_derived_from_prediction": 1,
+      "label_bad_level": 1
+    },
+    "aligned": 0,
+    "orphaned": 0,
+    "rejectedDetail": [
+      {
+        "sampleId": "syn-v-pos",
+        "at": "labels[0]",
+        "code": "label_not_independent",
+        "detail": "independent 不是 true"
+      },
+      {
+        "sampleId": "syn-v-neg-spread",
+        "at": "labels[1]",
+        "code": "label_derived_from_prediction",
+        "detail": "reviewedBy=model:judge"
+      },
+      {
+        "sampleId": "syn-l-pos",
+        "at": "labels[2]",
+        "code": "label_bad_level",
+        "detail": "level=\"not_a_level\""
+      }
+    ],
+    "orphanedDetail": [],
+    "wholeSetRejected": true
+  },
+  "holdThresholds": {
+    "passFrames": 6,
+    "maxGapMs": 400,
+    "unverified": true,
+    "source": "practice/src/passState.js"
+  },
+  "totals": {
+    "key": "ALL",
+    "samples": 24,
+    "labeled": 0,
+    "scored": 0,
+    "predicted": 19,
+    "blocked": 0,
+    "undetermined": 0,
+    "unknown": 0,
+    "invalid": 5,
+    "statusCounts": {
+      "scored": 19,
+      "blocked": 0,
+      "undetermined": 0,
+      "unknown": 0,
+      "invalid": 5
+    },
+    "decisionCounts": {
+      "pass": 2,
+      "fail": 16,
+      "blocked": 1,
+      "undetermined": 0
+    },
+    "failureClassCounts": {
+      "none": 13,
+      "invalid_metadata": 5,
+      "action_error": 2,
+      "hold_incomplete": 4
+    },
+    "truthCorrect": 0,
+    "truthIncorrect": 0,
+    "truthCorrectDecidable": 0,
+    "truthIncorrectDecidable": 0,
+    "truePositive": 0,
+    "falseAccept": 0,
+    "falseReject": 0,
+    "trueNegative": 0,
+    "issueAgreementNum": 0,
+    "issueAgreementDen": 0,
+    "replayCoverage": {
+      "num": 19,
+      "den": 24,
+      "value": 0.7916666666666666
+    },
+    "scoredCoverage": {
+      "num": 0,
+      "den": 0,
+      "value": null
+    },
+    "falseAcceptAll": {
+      "num": 0,
+      "den": 0,
+      "value": null
+    },
+    "falseRejectAll": {
+      "num": 0,
+      "den": 0,
+      "value": null
+    },
+    "decidableCoverage": {
+      "incorrect": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "correct": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      }
+    },
+    "conditionalOnDecidable": {
+      "falseAccept": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "falseReject": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "agreement": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "issueAgreement": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      }
+    }
+  },
+  "byLevel": [
+    {
+      "key": "geometry",
+      "samples": 18,
+      "labeled": 0,
+      "scored": 0,
+      "predicted": 13,
+      "blocked": 0,
+      "undetermined": 0,
+      "unknown": 0,
+      "invalid": 5,
+      "statusCounts": {
+        "scored": 13,
+        "blocked": 0,
+        "undetermined": 0,
+        "unknown": 0,
+        "invalid": 5
+      },
+      "decisionCounts": {
+        "pass": 0,
+        "fail": 12,
+        "blocked": 1,
+        "undetermined": 0
+      },
+      "failureClassCounts": {
+        "none": 11,
+        "invalid_metadata": 5,
+        "action_error": 2
+      },
+      "truthCorrect": 0,
+      "truthIncorrect": 0,
+      "truthCorrectDecidable": 0,
+      "truthIncorrectDecidable": 0,
+      "truePositive": 0,
+      "falseAccept": 0,
+      "falseReject": 0,
+      "trueNegative": 0,
+      "issueAgreementNum": 0,
+      "issueAgreementDen": 0,
+      "replayCoverage": {
+        "num": 13,
+        "den": 18,
+        "value": 0.7222222222222222
+      },
+      "scoredCoverage": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "falseAcceptAll": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "falseRejectAll": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "decidableCoverage": {
+        "incorrect": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        },
+        "correct": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        }
+      },
+      "conditionalOnDecidable": {
+        "falseAccept": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        },
+        "falseReject": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        },
+        "agreement": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        },
+        "issueAgreement": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        }
+      }
+    },
+    {
+      "key": "sequence",
+      "samples": 6,
+      "labeled": 0,
+      "scored": 0,
+      "predicted": 6,
+      "blocked": 0,
+      "undetermined": 0,
+      "unknown": 0,
+      "invalid": 0,
+      "statusCounts": {
+        "scored": 6,
+        "blocked": 0,
+        "undetermined": 0,
+        "unknown": 0,
+        "invalid": 0
+      },
+      "decisionCounts": {
+        "pass": 2,
+        "fail": 4,
+        "blocked": 0,
+        "undetermined": 0
+      },
+      "failureClassCounts": {
+        "hold_incomplete": 4,
+        "none": 2
+      },
+      "truthCorrect": 0,
+      "truthIncorrect": 0,
+      "truthCorrectDecidable": 0,
+      "truthIncorrectDecidable": 0,
+      "truePositive": 0,
+      "falseAccept": 0,
+      "falseReject": 0,
+      "trueNegative": 0,
+      "issueAgreementNum": 0,
+      "issueAgreementDen": 0,
+      "replayCoverage": {
+        "num": 6,
+        "den": 6,
+        "value": 1
+      },
+      "scoredCoverage": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "falseAcceptAll": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "falseRejectAll": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "decidableCoverage": {
+        "incorrect": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        },
+        "correct": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        }
+      },
+      "conditionalOnDecidable": {
+        "falseAccept": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        },
+        "falseReject": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        },
+        "agreement": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        },
+        "issueAgreement": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        }
+      }
+    }
+  ],
+  "byTruthOrigin": [
+    {
+      "key": "unlabeled",
+      "samples": 24,
+      "labeled": 0,
+      "scored": 0,
+      "predicted": 19,
+      "blocked": 0,
+      "undetermined": 0,
+      "unknown": 0,
+      "invalid": 5,
+      "statusCounts": {
+        "scored": 19,
+        "blocked": 0,
+        "undetermined": 0,
+        "unknown": 0,
+        "invalid": 5
+      },
+      "decisionCounts": {
+        "pass": 2,
+        "fail": 16,
+        "blocked": 1,
+        "undetermined": 0
+      },
+      "failureClassCounts": {
+        "none": 13,
+        "invalid_metadata": 5,
+        "action_error": 2,
+        "hold_incomplete": 4
+      },
+      "truthCorrect": 0,
+      "truthIncorrect": 0,
+      "truthCorrectDecidable": 0,
+      "truthIncorrectDecidable": 0,
+      "truePositive": 0,
+      "falseAccept": 0,
+      "falseReject": 0,
+      "trueNegative": 0,
+      "issueAgreementNum": 0,
+      "issueAgreementDen": 0,
+      "replayCoverage": {
+        "num": 19,
+        "den": 24,
+        "value": 0.7916666666666666
+      },
+      "scoredCoverage": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "falseAcceptAll": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "falseRejectAll": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "decidableCoverage": {
+        "incorrect": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        },
+        "correct": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        }
+      },
+      "conditionalOnDecidable": {
+        "falseAccept": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        },
+        "falseReject": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        },
+        "agreement": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        },
+        "issueAgreement": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        }
+      }
+    }
+  ],
+  "bySourceType": [
+    {
+      "key": "synthetic",
+      "samples": 24,
+      "labeled": 0,
+      "scored": 0,
+      "predicted": 19,
+      "blocked": 0,
+      "undetermined": 0,
+      "unknown": 0,
+      "invalid": 5,
+      "statusCounts": {
+        "scored": 19,
+        "blocked": 0,
+        "undetermined": 0,
+        "unknown": 0,
+        "invalid": 5
+      },
+      "decisionCounts": {
+        "pass": 2,
+        "fail": 16,
+        "blocked": 1,
+        "undetermined": 0
+      },
+      "failureClassCounts": {
+        "none": 13,
+        "invalid_metadata": 5,
+        "action_error": 2,
+        "hold_incomplete": 4
+      },
+      "truthCorrect": 0,
+      "truthIncorrect": 0,
+      "truthCorrectDecidable": 0,
+      "truthIncorrectDecidable": 0,
+      "truePositive": 0,
+      "falseAccept": 0,
+      "falseReject": 0,
+      "trueNegative": 0,
+      "issueAgreementNum": 0,
+      "issueAgreementDen": 0,
+      "replayCoverage": {
+        "num": 19,
+        "den": 24,
+        "value": 0.7916666666666666
+      },
+      "scoredCoverage": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "falseAcceptAll": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "falseRejectAll": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "decidableCoverage": {
+        "incorrect": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        },
+        "correct": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        }
+      },
+      "conditionalOnDecidable": {
+        "falseAccept": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        },
+        "falseReject": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        },
+        "agreement": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        },
+        "issueAgreement": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        }
+      }
+    }
+  ],
+  "bySourceAxis": [
+    {
+      "key": "constructed",
+      "samples": 24,
+      "labeled": 0,
+      "scored": 0,
+      "predicted": 19,
+      "blocked": 0,
+      "undetermined": 0,
+      "unknown": 0,
+      "invalid": 5,
+      "statusCounts": {
+        "scored": 19,
+        "blocked": 0,
+        "undetermined": 0,
+        "unknown": 0,
+        "invalid": 5
+      },
+      "decisionCounts": {
+        "pass": 2,
+        "fail": 16,
+        "blocked": 1,
+        "undetermined": 0
+      },
+      "failureClassCounts": {
+        "none": 13,
+        "invalid_metadata": 5,
+        "action_error": 2,
+        "hold_incomplete": 4
+      },
+      "truthCorrect": 0,
+      "truthIncorrect": 0,
+      "truthCorrectDecidable": 0,
+      "truthIncorrectDecidable": 0,
+      "truePositive": 0,
+      "falseAccept": 0,
+      "falseReject": 0,
+      "trueNegative": 0,
+      "issueAgreementNum": 0,
+      "issueAgreementDen": 0,
+      "replayCoverage": {
+        "num": 19,
+        "den": 24,
+        "value": 0.7916666666666666
+      },
+      "scoredCoverage": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "falseAcceptAll": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "falseRejectAll": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "decidableCoverage": {
+        "incorrect": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        },
+        "correct": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        }
+      },
+      "conditionalOnDecidable": {
+        "falseAccept": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        },
+        "falseReject": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        },
+        "agreement": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        },
+        "issueAgreement": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        }
+      }
+    }
+  ],
+  "blockReasons": {
+    "missing_xy": 2,
+    "landmark_count": 1,
+    "missing_size": 1,
+    "unsupported_coord_space": 1
+  },
+  "humanEvaluation": {
+    "executed": false,
+    "onSiteHuman": {
+      "collected": 0,
+      "independentlyLabeled": 0,
+      "attempted": false,
+      "attemptedSamples": [],
+      "decidable": 0,
+      "allAttemptsBlocked": false,
+      "decidableCoverage": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "protocolDeclared": false,
+      "blockedBreakdown": {}
+    },
+    "thirdPartyVideo": {
+      "collected": 0,
+      "independentlyLabeled": 0,
+      "decidable": 0,
+      "separateFromHuman": true,
+      "note": "第三方实拍单独统计，不与现场自愿参与者合并成一个真人成绩。"
+    },
+    "note": "未执行真人评估：缺少现场采集样本 / 独立标签 / 可判定结果 / 采集协议声明之一。"
+  },
+  "syntheticNote": "含构造来源样本（synthetic/render）。这些只验证回放接线，不是准确率，不得与真人/实拍混算。",
+  "samples": [
+    {
+      "sampleId": "syn-a-pos",
+      "file": "syn-a-pos.json",
+      "level": "geometry",
+      "status": "scored",
+      "reason": "geometry_evaluated",
+      "predicted": "correct",
+      "targetLetterId": "GF0021.A",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [],
+      "decision": "fail",
+      "failureClass": "none",
+      "issueCodes": [],
+      "productDecision": "fail",
+      "hold": null,
+      "thresholds": null
+    },
+    {
+      "sampleId": "syn-b-pos",
+      "file": "syn-b-pos.json",
+      "level": "geometry",
+      "status": "scored",
+      "reason": "geometry_evaluated",
+      "predicted": "correct",
+      "targetLetterId": "GF0021.B",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [],
+      "decision": "fail",
+      "failureClass": "none",
+      "issueCodes": [],
+      "productDecision": "fail",
+      "hold": null,
+      "thresholds": null
+    },
+    {
+      "sampleId": "syn-bad-number-nan",
+      "file": "syn-bad-number-nan.json",
+      "level": "geometry",
+      "status": "invalid",
+      "reason": "missing_xy",
+      "predicted": null,
+      "targetLetterId": "GF0021.V",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [
+        "missing_xy"
+      ],
+      "warnings": [],
+      "decision": null,
+      "failureClass": "invalid_metadata",
+      "issueCodes": [],
+      "productDecision": null,
+      "hold": null,
+      "thresholds": null
+    },
+    {
+      "sampleId": "syn-bad-number-null",
+      "file": "syn-bad-number-null.json",
+      "level": "geometry",
+      "status": "invalid",
+      "reason": "missing_xy",
+      "predicted": null,
+      "targetLetterId": "GF0021.V",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [
+        "missing_xy"
+      ],
+      "warnings": [],
+      "decision": null,
+      "failureClass": "invalid_metadata",
+      "issueCodes": [],
+      "productDecision": null,
+      "hold": null,
+      "thresholds": null
+    },
+    {
+      "sampleId": "syn-bad-number-short",
+      "file": "syn-bad-number-short.json",
+      "level": "geometry",
+      "status": "invalid",
+      "reason": "landmark_count",
+      "predicted": null,
+      "targetLetterId": "GF0021.V",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [
+        "landmark_count"
+      ],
+      "warnings": [],
+      "decision": null,
+      "failureClass": "invalid_metadata",
+      "issueCodes": [],
+      "productDecision": null,
+      "hold": null,
+      "thresholds": null
+    },
+    {
+      "sampleId": "syn-equal-scale-unit",
+      "file": "syn-equal-scale-unit.json",
+      "level": "geometry",
+      "status": "scored",
+      "reason": "geometry_evaluated",
+      "predicted": "correct",
+      "targetLetterId": "GF0021.V",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [],
+      "decision": "fail",
+      "failureClass": "none",
+      "issueCodes": [],
+      "productDecision": "fail",
+      "hold": null,
+      "thresholds": null
+    },
+    {
+      "sampleId": "syn-i-pos",
+      "file": "syn-i-pos.json",
+      "level": "geometry",
+      "status": "scored",
+      "reason": "geometry_evaluated",
+      "predicted": "correct",
+      "targetLetterId": "GF0021.I",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [],
+      "decision": "fail",
+      "failureClass": "none",
+      "issueCodes": [],
+      "productDecision": "fail",
+      "hold": null,
+      "thresholds": null
+    },
+    {
+      "sampleId": "syn-l-neg-angle",
+      "file": "syn-l-neg-angle.json",
+      "level": "geometry",
+      "status": "scored",
+      "reason": "geometry_evaluated",
+      "predicted": "incorrect",
+      "targetLetterId": "GF0021.L",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [],
+      "decision": "fail",
+      "failureClass": "action_error",
+      "issueCodes": [
+        "thumb_index.angle"
+      ],
+      "productDecision": "fail",
+      "hold": null,
+      "thresholds": null
+    },
+    {
+      "sampleId": "syn-l-pos",
+      "file": "syn-l-pos.json",
+      "level": "geometry",
+      "status": "scored",
+      "reason": "geometry_evaluated",
+      "predicted": "correct",
+      "targetLetterId": "GF0021.L",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [],
+      "decision": "fail",
+      "failureClass": "none",
+      "issueCodes": [],
+      "productDecision": "fail",
+      "hold": null,
+      "thresholds": null
+    },
+    {
+      "sampleId": "syn-missing-size",
+      "file": "syn-missing-size.json",
+      "level": "geometry",
+      "status": "invalid",
+      "reason": "missing_size",
+      "predicted": null,
+      "targetLetterId": "GF0021.V",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [
+        "missing_size"
+      ],
+      "warnings": [],
+      "decision": null,
+      "failureClass": "invalid_metadata",
+      "issueCodes": [],
+      "productDecision": null,
+      "hold": null,
+      "thresholds": null
+    },
+    {
+      "sampleId": "syn-pseudo-label",
+      "file": "syn-pseudo-label.json",
+      "level": "geometry",
+      "status": "scored",
+      "reason": "geometry_evaluated",
+      "predicted": "correct",
+      "targetLetterId": "GF0021.V",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [
+        "pseudo_label_field"
+      ],
+      "decision": "fail",
+      "failureClass": "none",
+      "issueCodes": [],
+      "productDecision": "fail",
+      "hold": null,
+      "thresholds": null
+    },
+    {
+      "sampleId": "syn-seq-v-backwards",
+      "file": "syn-seq-v-backwards.json",
+      "level": "sequence",
+      "status": "scored",
+      "reason": "hold_not_ready",
+      "predicted": "incorrect",
+      "targetLetterId": "GF0021.V",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [],
+      "decision": "fail",
+      "failureClass": "hold_incomplete",
+      "issueCodes": [
+        "hold.pending"
+      ],
+      "productDecision": null,
+      "hold": {
+        "frames": 1,
+        "elapsedMs": 0
+      },
+      "thresholds": {
+        "passFrames": 6,
+        "maxGapMs": 400,
+        "unverified": true,
+        "source": "practice/src/passState.js"
+      }
+    },
+    {
+      "sampleId": "syn-seq-v-dup",
+      "file": "syn-seq-v-dup.json",
+      "level": "sequence",
+      "status": "scored",
+      "reason": "hold_not_ready",
+      "predicted": "incorrect",
+      "targetLetterId": "GF0021.V",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [],
+      "decision": "fail",
+      "failureClass": "hold_incomplete",
+      "issueCodes": [
+        "hold.pending"
+      ],
+      "productDecision": null,
+      "hold": {
+        "frames": 4,
+        "elapsedMs": 600
+      },
+      "thresholds": {
+        "passFrames": 6,
+        "maxGapMs": 400,
+        "unverified": true,
+        "source": "practice/src/passState.js"
+      }
+    },
+    {
+      "sampleId": "syn-seq-v-expired",
+      "file": "syn-seq-v-expired.json",
+      "level": "sequence",
+      "status": "scored",
+      "reason": "hold_not_ready",
+      "predicted": "incorrect",
+      "targetLetterId": "GF0021.V",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [],
+      "decision": "fail",
+      "failureClass": "hold_incomplete",
+      "issueCodes": [
+        "hold.pending"
+      ],
+      "productDecision": null,
+      "hold": {
+        "frames": 1,
+        "elapsedMs": 0
+      },
+      "thresholds": {
+        "passFrames": 6,
+        "maxGapMs": 400,
+        "unverified": true,
+        "source": "practice/src/passState.js"
+      }
+    },
+    {
+      "sampleId": "syn-seq-v-nohand-then-pass",
+      "file": "syn-seq-v-nohand-then-pass.json",
+      "level": "sequence",
+      "status": "scored",
+      "reason": "hold_ready",
+      "predicted": "correct",
+      "targetLetterId": "GF0021.V",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [
+        "frames_without_hand"
+      ],
+      "decision": "pass",
+      "failureClass": "none",
+      "issueCodes": [],
+      "productDecision": null,
+      "hold": {
+        "frames": 6,
+        "elapsedMs": 500
+      },
+      "thresholds": {
+        "passFrames": 6,
+        "maxGapMs": 400,
+        "unverified": true,
+        "source": "practice/src/passState.js"
+      }
+    },
+    {
+      "sampleId": "syn-seq-v-pass",
+      "file": "syn-seq-v-pass.json",
+      "level": "sequence",
+      "status": "scored",
+      "reason": "hold_ready",
+      "predicted": "correct",
+      "targetLetterId": "GF0021.V",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [],
+      "decision": "pass",
+      "failureClass": "none",
+      "issueCodes": [],
+      "productDecision": null,
+      "hold": {
+        "frames": 6,
+        "elapsedMs": 500
+      },
+      "thresholds": {
+        "passFrames": 6,
+        "maxGapMs": 400,
+        "unverified": true,
+        "source": "practice/src/passState.js"
+      }
+    },
+    {
+      "sampleId": "syn-seq-v-short",
+      "file": "syn-seq-v-short.json",
+      "level": "sequence",
+      "status": "scored",
+      "reason": "hold_not_ready",
+      "predicted": "incorrect",
+      "targetLetterId": "GF0021.V",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [],
+      "decision": "fail",
+      "failureClass": "hold_incomplete",
+      "issueCodes": [
+        "hold.pending"
+      ],
+      "productDecision": null,
+      "hold": {
+        "frames": 5,
+        "elapsedMs": 400
+      },
+      "thresholds": {
+        "passFrames": 6,
+        "maxGapMs": 400,
+        "unverified": true,
+        "source": "practice/src/passState.js"
+      }
+    },
+    {
+      "sampleId": "syn-u-geom-pass-judge-blocked",
+      "file": "syn-u-geom-pass-judge-blocked.json",
+      "level": "geometry",
+      "status": "scored",
+      "reason": "geometry_evaluated",
+      "predicted": "correct",
+      "targetLetterId": "GF0021.U",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [],
+      "decision": "blocked",
+      "failureClass": "none",
+      "issueCodes": [],
+      "productDecision": "blocked",
+      "hold": null,
+      "thresholds": null
+    },
+    {
+      "sampleId": "syn-unlabeled",
+      "file": "syn-unlabeled.json",
+      "level": "geometry",
+      "status": "scored",
+      "reason": "geometry_evaluated",
+      "predicted": "correct",
+      "targetLetterId": "GF0021.Y",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [],
+      "decision": "fail",
+      "failureClass": "none",
+      "issueCodes": [],
+      "productDecision": "fail",
+      "hold": null,
+      "thresholds": null
+    },
+    {
+      "sampleId": "syn-unsupported-space",
+      "file": "syn-unsupported-space.json",
+      "level": "geometry",
+      "status": "invalid",
+      "reason": "unsupported_coord_space",
+      "predicted": null,
+      "targetLetterId": "GF0021.V",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [
+        "unsupported_coord_space",
+        "unsupported_coord_space"
+      ],
+      "warnings": [],
+      "decision": null,
+      "failureClass": "invalid_metadata",
+      "issueCodes": [],
+      "productDecision": null,
+      "hold": null,
+      "thresholds": null
+    },
+    {
+      "sampleId": "syn-v-neg-spread",
+      "file": "syn-v-neg-spread.json",
+      "level": "geometry",
+      "status": "scored",
+      "reason": "geometry_evaluated",
+      "predicted": "incorrect",
+      "targetLetterId": "GF0021.V",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [],
+      "decision": "fail",
+      "failureClass": "action_error",
+      "issueCodes": [
+        "index_middle.not_apart"
+      ],
+      "productDecision": "fail",
+      "hold": null,
+      "thresholds": null
+    },
+    {
+      "sampleId": "syn-v-pos",
+      "file": "syn-v-pos.json",
+      "level": "geometry",
+      "status": "scored",
+      "reason": "geometry_evaluated",
+      "predicted": "correct",
+      "targetLetterId": "GF0021.V",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [],
+      "decision": "fail",
+      "failureClass": "none",
+      "issueCodes": [],
+      "productDecision": "fail",
+      "hold": null,
+      "thresholds": null
+    },
+    {
+      "sampleId": "syn-w-pos",
+      "file": "syn-w-pos.json",
+      "level": "geometry",
+      "status": "scored",
+      "reason": "geometry_evaluated",
+      "predicted": "correct",
+      "targetLetterId": "GF0021.W",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [],
+      "decision": "fail",
+      "failureClass": "none",
+      "issueCodes": [],
+      "productDecision": "fail",
+      "hold": null,
+      "thresholds": null
+    },
+    {
+      "sampleId": "syn-y-pos",
+      "file": "syn-y-pos.json",
+      "level": "geometry",
+      "status": "scored",
+      "reason": "geometry_evaluated",
+      "predicted": "correct",
+      "targetLetterId": "GF0021.Y",
+      "sourceType": "synthetic",
+      "synthetic": true,
+      "blockers": [],
+      "warnings": [],
+      "decision": "fail",
+      "failureClass": "none",
+      "issueCodes": [],
+      "productDecision": "fail",
+      "hold": null,
+      "thresholds": null
+    }
+  ]
+}

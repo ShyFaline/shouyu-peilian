@@ -94,6 +94,8 @@ report.samples = replays.map((r) => ({
   synthetic: r.synthetic,
   blockers: r.blockers.map((b) => b.code),
   warnings: r.warnings.map((w) => w.code),
+  decision: r.decision ?? null,
+  failureClass: r.failureClass ?? null,
   issueCodes: r.evidence?.issueCodes ?? [],
   productDecision: r.evidence?.productDecision ?? null,
   hold: r.evidence?.hold ?? null,
@@ -107,8 +109,21 @@ if (!quiet) {
     `样本 ${t.samples} | 有标签 ${t.labeled} | 已评分 ${t.scored} | blocked ${t.blocked} | unknown ${t.unknown} | invalid ${t.invalid}`,
   );
   console.log(
-    `回放覆盖率 ${fmtRate(t.replayCoverage)} | 评分覆盖率 ${fmtRate(t.scoredCoverage)} | 误接收 ${fmtRate(t.falseAcceptRate)} | 误拒绝 ${fmtRate(t.falseRejectRate)} | 一致率 ${fmtRate(t.agreement)}`,
+    `回放覆盖率 ${fmtRate(t.replayCoverage)} | 评分覆盖率 ${fmtRate(t.scoredCoverage)}`,
   );
+  console.log(
+    `[全体口径] 误放行 ${fmtRate(t.falseAcceptAll)} | 明确失败 ${fmtRate(t.falseRejectAll)}` +
+      ` | 可判定覆盖 错误组 ${fmtRate(t.decidableCoverage.incorrect)} 正确组 ${fmtRate(t.decidableCoverage.correct)}`,
+  );
+  console.log(
+    `[conditional 仅可判定] 误放行 ${fmtRate(t.conditionalOnDecidable.falseAccept)}` +
+      ` | 明确失败 ${fmtRate(t.conditionalOnDecidable.falseReject)}` +
+      ` | 一致率 ${fmtRate(t.conditionalOnDecidable.agreement)}`,
+  );
+  console.log(
+    `结果分布: blocked ${t.blocked} | undetermined ${t.undetermined} | unknown ${t.unknown} | invalid ${t.invalid}`,
+  );
+  console.log(`失败分类: ${JSON.stringify(t.failureClassCounts)}`);
   console.log(`阻断原因: ${JSON.stringify(report.blockReasons)}`);
   console.log(
     `保持门阈值: passFrames=${report.holdThresholds.passFrames} maxGapMs=${report.holdThresholds.maxGapMs}` +
@@ -123,12 +138,22 @@ if (!quiet) {
   } else {
     console.log("标签: 未提供，只回放不评分。");
   }
-  console.log(`真人评估: ${report.humanEvaluation.note}`);
+  const he = report.humanEvaluation;
+  console.log(
+    `真人评估 executed=${he.executed} | 现场采集 ${he.onSiteHuman.collected} | 独立标签 ${he.onSiteHuman.independentlyLabeled}` +
+      ` | 已尝试 ${he.onSiteHuman.attempted} | 可判定 ${he.onSiteHuman.decidable} | 协议声明 ${he.onSiteHuman.protocolDeclared}` +
+      `${he.onSiteHuman.allAttemptsBlocked ? " ⚠ 尝试全被阻断，不算有效结果" : ""}`,
+  );
+  console.log(
+    `第三方实拍(单独统计): 采集 ${he.thirdPartyVideo.collected} | 独立标签 ${he.thirdPartyVideo.independentlyLabeled} | 可判定 ${he.thirdPartyVideo.decidable}`,
+  );
+  console.log(`说明: ${he.note}`);
   if (report.syntheticNote) console.log(`合成提示: ${report.syntheticNote}`);
   console.log("");
   for (const s of report.samples) {
     console.log(
-      `  ${s.status.padEnd(8)} ${s.sampleId.padEnd(30)} lvl=${s.level.padEnd(8)} pred=${String(s.predicted).padEnd(9)} reason=${String(s.reason).padEnd(22)} issues=${s.issueCodes.join(",")}`,
+      `  ${s.status.padEnd(8)} ${s.sampleId.padEnd(30)} lvl=${s.level.padEnd(8)} pred=${String(s.predicted).padEnd(9)}` +
+        ` fail=${String(s.failureClass).padEnd(16)} reason=${String(s.reason).padEnd(20)} issues=${s.issueCodes.join(",")}`,
     );
   }
 }

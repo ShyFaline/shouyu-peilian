@@ -1,0 +1,52 @@
+{
+  "baseline": "5b56abd",
+  "group": "source-orthogonality",
+  "humanEvaluation": {
+    "executed": true,
+    "note": "存在真人来源标签桶，见 byTruthOrigin。"
+  },
+  "totals": {
+    "samples": 4,
+    "labeled": 4,
+    "scored": 4,
+    "falseAcceptRate": {
+      "num": 0,
+      "den": 0,
+      "value": null
+    },
+    "falseRejectRate": {
+      "num": 0,
+      "den": 4,
+      "value": 0
+    },
+    "agreement": {
+      "num": 4,
+      "den": 4,
+      "value": 1
+    }
+  },
+  "byTruthOrigin": [
+    {
+      "key": "human-annotation",
+      "samples": 4
+    }
+  ],
+  "bySourceType": [
+    {
+      "key": "camera",
+      "samples": 1
+    },
+    {
+      "key": "render",
+      "samples": 1
+    },
+    {
+      "key": "synthetic",
+      "samples": 1
+    },
+    {
+      "key": "video",
+      "samples": 1
+    }
+  ]
+}

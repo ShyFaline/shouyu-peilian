@@ -1,0 +1,58 @@
+{
+  "baseline": "5b56abd",
+  "note": "旧口径下的输出，用于对比修后行为。",
+  "groups": {
+    "label-only-human": {
+      "executed": true,
+      "falseAcceptRate": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "falseRejectRate": {
+        "num": 0,
+        "den": 3,
+        "value": 0
+      }
+    },
+    "source-orthogonality": {
+      "executed": true,
+      "falseAcceptRate": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "falseRejectRate": {
+        "num": 0,
+        "den": 4,
+        "value": 0
+      }
+    },
+    "metric-cells": {
+      "executed": false,
+      "falseAcceptRate": {
+        "num": 1,
+        "den": 1,
+        "value": 1
+      },
+      "falseRejectRate": {
+        "num": 1,
+        "den": 2,
+        "value": 0.5
+      }
+    },
+    "sequence-levels": {
+      "executed": false,
+      "falseAcceptRate": {
+        "num": 0,
+        "den": 2,
+        "value": 0
+      },
+      "falseRejectRate": {
+        "num": 0,
+        "den": 1,
+        "value": 0
+      }
+    }
+  }
+}

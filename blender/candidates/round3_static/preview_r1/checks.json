@@ -1,0 +1,291 @@
+{
+  "blender_version": "4.5.10 LTS",
+  "source": "C:\\Users\\15424\\Desktop\\2026.9.15\\工作副本\\手模补救\\blender\\candidates\\round2\\hand_gf0021.candidate_r2.blend",
+  "source_sha256": "8d3be3fc3ee0955c851c533a9507f379ee4d267cb3042b6641e364f652a93ee5",
+  "script_sha256": "d5ddd8fc67bff6069ab079b52861f29d7ef303985a3bc16889e53ae0d1b1b3c3",
+  "parameters": {
+    "letters": [
+      "A",
+      "L",
+      "B"
+    ],
+    "round": 1,
+    "resolution": 512,
+    "voxel": 0.0005,
+    "thumb_inflate": 0.0025
+  },
+  "limitations": [
+    "No visual acceptance or content approval",
+    "Vertex proximity does not prove absence of intersection",
+    "Global union may erase inter-finger clefts; inspect oblique views",
+    "Local thumb inflation may not correct malformed thumb anatomy"
+  ],
+  "poses": [
+    {
+      "letter": "A",
+      "frame": 10,
+      "thumb_displaced_vertices": 8343,
+      "topology": {
+        "vertices": 198566,
+        "faces": 198538,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "component_vertex_counts": [
+          117260,
+          31176,
+          27870,
+          22120,
+          16,
+          12,
+          12,
+          12,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8
+        ]
+      },
+      "finger_clearance_before_global_union": [
+        {
+          "pair": [
+            "index",
+            "middle"
+          ],
+          "min_vertex_surface_distance_m": 0.004157643299549818,
+          "near_vertices_under_3_voxels": 0,
+          "possible_unwanted_union": false
+        },
+        {
+          "pair": [
+            "index",
+            "ring"
+          ],
+          "min_vertex_surface_distance_m": 0.02774370089173317,
+          "near_vertices_under_3_voxels": 0,
+          "possible_unwanted_union": false
+        },
+        {
+          "pair": [
+            "index",
+            "pinky"
+          ],
+          "min_vertex_surface_distance_m": 0.05226607620716095,
+          "near_vertices_under_3_voxels": 0,
+          "possible_unwanted_union": false
+        },
+        {
+          "pair": [
+            "middle",
+            "ring"
+          ],
+          "min_vertex_surface_distance_m": 0.004280560649931431,
+          "near_vertices_under_3_voxels": 0,
+          "possible_unwanted_union": false
+        },
+        {
+          "pair": [
+            "middle",
+            "pinky"
+          ],
+          "min_vertex_surface_distance_m": 0.03022160194814205,
+          "near_vertices_under_3_voxels": 0,
+          "possible_unwanted_union": false
+        },
+        {
+          "pair": [
+            "ring",
+            "pinky"
+          ],
+          "min_vertex_surface_distance_m": 0.007195962592959404,
+          "near_vertices_under_3_voxels": 0,
+          "possible_unwanted_union": false
+        }
+      ],
+      "visual_status": "NOT_REVIEWED",
+      "content_status": "DRAFT_NOT_APPROVED",
+      "images": [
+        "C:\\Users\\15424\\Desktop\\2026.9.15\\工作副本\\手模补救\\blender\\candidates\\round3_static\\preview_r1\\GF0021.A_front.png",
+        "C:\\Users\\15424\\Desktop\\2026.9.15\\工作副本\\手模补救\\blender\\candidates\\round3_static\\preview_r1\\GF0021.A_oblique_m30.png",
+        "C:\\Users\\15424\\Desktop\\2026.9.15\\工作副本\\手模补救\\blender\\candidates\\round3_static\\preview_r1\\GF0021.A_oblique_p30.png"
+      ]
+    },
+    {
+      "letter": "L",
+      "frame": 50,
+      "thumb_displaced_vertices": 8343,
+      "topology": {
+        "vertices": 201208,
+        "faces": 201200,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "component_vertex_counts": [
+          161046,
+          26646,
+          13508,
+          8
+        ]
+      },
+      "finger_clearance_before_global_union": [
+        {
+          "pair": [
+            "index",
+            "middle"
+          ],
+          "min_vertex_surface_distance_m": 0.004692199174314737,
+          "near_vertices_under_3_voxels": 0,
+          "possible_unwanted_union": false
+        },
+        {
+          "pair": [
+            "index",
+            "ring"
+          ],
+          "min_vertex_surface_distance_m": 0.028736241161823273,
+          "near_vertices_under_3_voxels": 0,
+          "possible_unwanted_union": false
+        },
+        {
+          "pair": [
+            "index",
+            "pinky"
+          ],
+          "min_vertex_surface_distance_m": 0.05156468227505684,
+          "near_vertices_under_3_voxels": 0,
+          "possible_unwanted_union": false
+        },
+        {
+          "pair": [
+            "middle",
+            "ring"
+          ],
+          "min_vertex_surface_distance_m": 0.004280560649931431,
+          "near_vertices_under_3_voxels": 0,
+          "possible_unwanted_union": false
+        },
+        {
+          "pair": [
+            "middle",
+            "pinky"
+          ],
+          "min_vertex_surface_distance_m": 0.03022160194814205,
+          "near_vertices_under_3_voxels": 0,
+          "possible_unwanted_union": false
+        },
+        {
+          "pair": [
+            "ring",
+            "pinky"
+          ],
+          "min_vertex_surface_distance_m": 0.007195962592959404,
+          "near_vertices_under_3_voxels": 0,
+          "possible_unwanted_union": false
+        }
+      ],
+      "visual_status": "NOT_REVIEWED",
+      "content_status": "DRAFT_NOT_APPROVED",
+      "images": [
+        "C:\\Users\\15424\\Desktop\\2026.9.15\\工作副本\\手模补救\\blender\\candidates\\round3_static\\preview_r1\\GF0021.L_front.png",
+        "C:\\Users\\15424\\Desktop\\2026.9.15\\工作副本\\手模补救\\blender\\candidates\\round3_static\\preview_r1\\GF0021.L_oblique_m30.png",
+        "C:\\Users\\15424\\Desktop\\2026.9.15\\工作副本\\手模补救\\blender\\candidates\\round3_static\\preview_r1\\GF0021.L_oblique_p30.png"
+      ]
+    },
+    {
+      "letter": "B",
+      "frame": 20,
+      "thumb_displaced_vertices": 8343,
+      "topology": {
+        "vertices": 183258,
+        "faces": 183228,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "component_vertex_counts": [
+          71520,
+          29548,
+          26842,
+          25730,
+          17876,
+          11670,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8
+        ]
+      },
+      "finger_clearance_before_global_union": [
+        {
+          "pair": [
+            "index",
+            "middle"
+          ],
+          "min_vertex_surface_distance_m": 0.0036828401498496532,
+          "near_vertices_under_3_voxels": 0,
+          "possible_unwanted_union": false
+        },
+        {
+          "pair": [
+            "index",
+            "ring"
+          ],
+          "min_vertex_surface_distance_m": 0.021006545051932335,
+          "near_vertices_under_3_voxels": 0,
+          "possible_unwanted_union": false
+        },
+        {
+          "pair": [
+            "index",
+            "pinky"
+          ],
+          "min_vertex_surface_distance_m": 0.048524871468544006,
+          "near_vertices_under_3_voxels": 0,
+          "possible_unwanted_union": false
+        },
+        {
+          "pair": [
+            "middle",
+            "ring"
+          ],
+          "min_vertex_surface_distance_m": 0.004535110201686621,
+          "near_vertices_under_3_voxels": 0,
+          "possible_unwanted_union": false
+        },
+        {
+          "pair": [
+            "middle",
+            "pinky"
+          ],
+          "min_vertex_surface_distance_m": 0.028857076540589333,
+          "near_vertices_under_3_voxels": 0,
+          "possible_unwanted_union": false
+        },
+        {
+          "pair": [
+            "ring",
+            "pinky"
+          ],
+          "min_vertex_surface_distance_m": 0.005050628911703825,
+          "near_vertices_under_3_voxels": 0,
+          "possible_unwanted_union": false
+        }
+      ],
+      "visual_status": "NOT_REVIEWED",
+      "content_status": "DRAFT_NOT_APPROVED",
+      "images": [
+        "C:\\Users\\15424\\Desktop\\2026.9.15\\工作副本\\手模补救\\blender\\candidates\\round3_static\\preview_r1\\GF0021.B_front.png",
+        "C:\\Users\\15424\\Desktop\\2026.9.15\\工作副本\\手模补救\\blender\\candidates\\round3_static\\preview_r1\\GF0021.B_oblique_m30.png",
+        "C:\\Users\\15424\\Desktop\\2026.9.15\\工作副本\\手模补救\\blender\\candidates\\round3_static\\preview_r1\\GF0021.B_oblique_p30.png"
+      ]
+    }
+  ]
+}

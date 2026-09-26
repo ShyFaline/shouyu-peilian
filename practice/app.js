@@ -128,7 +128,7 @@ function showDemo(letter) {
   probe.onload = () => {
     if (current?.id !== letter.id) return;
     els.demoImage.src = src;
-    els.demoImage.alt = `${letter.title}标准手示范（渲染图，不是识别模型）`;
+    els.demoImage.alt = `${letter.title}示范草稿（渲染图，未经标准核定，不参与识别）`;
     els.demoStage.dataset.mode = "image";
   };
   probe.onerror = () => {

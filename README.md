@@ -6,6 +6,16 @@
 
 规划总稿：`总体目标与并行拆分.md`。
 
+## 在线试用
+
+https://shyfaline.github.io/shouyu-peilian/
+
+手机或电脑浏览器直接打开，不用装东西。首次加载要下约 17 MB 的识别资源（wasm + 模型），慢一点是正常的，之后就进缓存。
+
+站点只发布 `practice/` 这一个目录，仓库里其它资料不上网。改动 `practice/**` 并推到 `main` 后，`.github/workflows/pages.yml` 会自动重新发布，大约一到两分钟生效。
+
+浏览器只允许在**安全上下文**里开摄像头：`127.0.0.1`、`localhost` 或 `https://`。线上是 https，可以直接用；局域网内用 `http://192.168.x.x` 打开则读不到摄像头。
+
 ## 状态机
 
 `practiceStatus` 只来自 `practice/content/letters.json`，运行时不准升格。本轮没有任何字母是 `accepted_practice`。

@@ -1,0 +1,20 @@
+{
+  "labelVersion": "counterexample-labels-2",
+  "truthOrigin": "human-annotation",
+  "humanReviewed": true,
+  "note": "阳性对照。它仍是构造样本（sourceType 只为验证逻辑），不是真实采集。",
+  "labels": [
+    {
+      "sampleId": "ce-stitch-f-qualified",
+      "expectedVerdict": "correct",
+      "expectedIssueCodes": [],
+      "level": "geometry",
+      "reviewedBy": "annotator:ce-fixture",
+      "reviewedAt": "2026-09-25T00:00:00Z",
+      "independent": true,
+      "labelVersion": "counterexample-labels-1",
+      "truthOrigin": "human-annotation",
+      "humanReviewed": true
+    }
+  ]
+}

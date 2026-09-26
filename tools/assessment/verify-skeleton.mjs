@@ -1,5 +1,6 @@
 /**
  * 回放骨架自检。覆盖：缺尺寸、坏数值、伪标签、无标签、零样本、合成正负例，
+ * 证据链逐样本合取（不得跨样本拼接）、全体 vs conditional 两口径并列，
  * 以及第二轮新增的：来源/标签正交、全体 vs conditional 口径、序列判定层级。
  *
  * 只验证「骨架接线是否正确」，不产生准确率。全部样本为合成。
@@ -383,6 +384,127 @@ function runGroup(group) {
     "反例4 序列通过 => none + decision=pass",
     g.byId.get("ce-seq-pass")?.failureClass === "none" && g.byId.get("ce-seq-pass")?.decision === "pass",
   );
+}
+
+// ---------------------------------------------------------------- 反例 5/6/7：证据链不得跨样本拼接（第三轮）
+// 总控要求：来源、合格独立人工标签、协议关联、实际评估结果必须落在**同一个**合格样本上。
+{
+  // 5. 纯拼接陷阱：四条分散，没有任何样本四条齐全 => executed 必须 false
+  const g = runGroup("evidence-stitching");
+  const he = g.rep.humanEvaluation;
+  const o = he.onSiteHuman;
+
+  check(
+    "反例5 纯拼接陷阱 => executed=false（四条不能跨样本拼）",
+    he.executed === false,
+    `executed=${he.executed} qualified=${o.qualified}`,
+  );
+  check(
+    "反例5 旧口径会误报（naiveWouldMisreport=true，证明反例确实钉住了 bug）",
+    he.stitchingCheck.naiveAndOfCounts === true && he.stitchingCheck.naiveWouldMisreport === true,
+    `naive=${he.stitchingCheck.naiveAndOfCounts} misreport=${he.stitchingCheck.naiveWouldMisreport}`,
+  );
+  check(
+    "反例5 逐样本矩阵存在，且每条都标出缺哪一条",
+    o.perSample.length === 3 && o.perSample.every((s) => Array.isArray(s.missing) && s.missing.length === 1),
+    JSON.stringify(o.perSample.map((s) => [s.sampleId, s.missing])),
+  );
+  check(
+    "反例5 三个样本各缺一条不同条件（协议/结果/人工标签）",
+    new Set(o.perSample.flatMap((s) => s.missing)).size === 3,
+    JSON.stringify(o.perSample.flatMap((s) => s.missing)),
+  );
+  check(
+    "反例5 camera 来源 + 构造标签 => 不算合格独立人工标签",
+    o.perSample.find((s) => s.sampleId === "ce-stitch-c-camera-synthetic-label")?.independentHumanLabel === false,
+  );
+  check(
+    "反例5 漏斗逐级收窄到 qualified=0",
+    o.funnel.collected === 3 && o.funnel.qualified === 0,
+    JSON.stringify(o.funnel),
+  );
+  check(
+    "反例5 已尝试但无合格样本被显式标出",
+    o.attempted === true && o.attemptedButNoQualified === true,
+  );
+  check(
+    "反例5 无法判断的样本被列出，不隐藏",
+    o.undecidableButOtherwiseQualifiedCount === 1 &&
+      o.undecidableButOtherwiseQualified[0].reason === "fingertip_oob",
+    JSON.stringify(o.undecidableButOtherwiseQualified),
+  );
+  check(
+    "反例5 protocolDeclared 明确标注为「声明不是真实性证明」",
+    o.protocolDeclared === true && /声明/.test(o.protocolDeclaredNote),
+  );
+
+  // 6. 阳性对照：四条齐全 => executed 必须 true（证明不是一律 false）
+  const p = runGroup("evidence-stitching-positive");
+  check(
+    "反例6 阳性对照 四条落在同一样本 => executed=true",
+    p.rep.humanEvaluation.executed === true && p.rep.humanEvaluation.onSiteHuman.qualified === 1,
+    `executed=${p.rep.humanEvaluation.executed} qualified=${p.rep.humanEvaluation.onSiteHuman.qualified}`,
+  );
+  check(
+    "反例6 阳性对照 旧口径与新口径一致（无误报）",
+    p.rep.humanEvaluation.stitchingCheck.naiveWouldMisreport === false,
+  );
+  check(
+    "反例6 阳性对照 该样本 missing 为空",
+    p.rep.humanEvaluation.onSiteHuman.perSample[0].missing.length === 0,
+  );
+
+  // 7. 全部阻断：已尝试但零可判定结果
+  const b = runGroup("evidence-all-blocked");
+  const bo = b.rep.humanEvaluation.onSiteHuman;
+  check(
+    "反例7 全部阻断 => executed=false，且标为「尝试过但全被阻断」",
+    b.rep.humanEvaluation.executed === false && bo.allAttemptsBlocked === true && bo.attempted === true && bo.decidable === 0,
+    `executed=${b.rep.humanEvaluation.executed} attempted=${bo.attempted} decidable=${bo.decidable}`,
+  );
+  check(
+    "反例7 已尝试与「有可判定结果」分开报",
+    bo.attempted === true && bo.decidable === 0 && bo.attemptedButNoQualified === true,
+  );
+  check(
+    "反例7 全部阻断的样本仍被列出原因，不隐藏",
+    bo.undecidableButOtherwiseQualifiedCount === 2 && bo.blockedBreakdown.fingertip_oob === 2,
+    JSON.stringify(bo.blockedBreakdown),
+  );
+}
+
+// ---------------------------------------------------------------- 反例 8：两种统计口径并列，不隐藏无法判断
+{
+  const g = runGroup("metric-cells");
+  const t = g.rep.totals;
+  const o = g.rep.humanEvaluation.onSiteHuman;
+
+  check(
+    "反例8 全体口径与条件口径同时存在（同一份报告里并列）",
+    t.falseAcceptAll && t.falseRejectAll && t.conditionalOnDecidable.falseAccept && t.conditionalOnDecidable.falseReject,
+  );
+  check(
+    "反例8 全体口径分母含不可判定样本（错误组 1/2、正确组 1/5）",
+    t.falseAcceptAll.den === 2 && t.falseRejectAll.den === 5,
+    `FA=${t.falseAcceptAll.num}/${t.falseAcceptAll.den} FR=${t.falseRejectAll.num}/${t.falseRejectAll.den}`,
+  );
+  check(
+    "反例8 条件口径分母只含可判定样本（1/1、1/2），且名字带 conditional",
+    t.conditionalOnDecidable.falseAccept.den === 1 && t.conditionalOnDecidable.falseReject.den === 2,
+    `cFA=${t.conditionalOnDecidable.falseAccept.num}/${t.conditionalOnDecidable.falseAccept.den} cFR=${t.conditionalOnDecidable.falseReject.num}/${t.conditionalOnDecidable.falseReject.den}`,
+  );
+  check(
+    "反例8 不可判定样本数显式可见（blocked+invalid+unknown > 0）",
+    t.blocked + t.invalid + t.unknown > 0,
+    `blocked=${t.blocked} invalid=${t.invalid} unknown=${t.unknown}`,
+  );
+  check(
+    "反例8 两种口径的差值即「被隐藏掉的不可判定样本」",
+    t.falseAcceptAll.den - t.conditionalOnDecidable.falseAccept.den === 1 &&
+      t.falseRejectAll.den - t.conditionalOnDecidable.falseReject.den === 3,
+    `err 差 ${t.falseAcceptAll.den - t.conditionalOnDecidable.falseAccept.den}，ok 差 ${t.falseRejectAll.den - t.conditionalOnDecidable.falseReject.den}`,
+  );
+  check("反例8 metric-cells 无现场采集样本（该组不是真人数据）", o.collected === 0);
 }
 
 // ---------------------------------------------------------------- 汇总输出

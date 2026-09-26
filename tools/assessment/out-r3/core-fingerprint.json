@@ -1,0 +1,13 @@
+{
+  "files": {
+    "practice/src/coords.js": "7a607fa98b4e85bb",
+    "practice/src/evaluate.js": "3e8034a89051d512",
+    "practice/src/inputQuality.js": "f51d4e865a33f5d3",
+    "practice/src/passState.js": "c51af97a7002ecf9",
+    "practice/src/judge.js": "2b4d64b26f60f529",
+    "practice/src/snapshot.js": "5e65eedff22d7514",
+    "practice/src/types.js": "1b4c2f966dbe2a2d",
+    "practice/content/letters.json": "e9caa89406134442"
+  },
+  "digest": "0028db7556de2303"
+}

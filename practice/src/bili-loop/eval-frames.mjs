@@ -17,9 +17,9 @@
  *        [--out <path>] [--json]
  *
  * 退出码:
- *   0 已评估（u_pass/v_pass 有真实含义）
+ *   0 已评估（referenceTargets 有真实含义）
  *   2 不可评估（缺尺寸，或没有任何可判定帧）
- *   3 用法错误 / JSON 解析失败
+ *   3 用法错误 / JSON 解析失败 / 旧调用入口（明确拒绝，不静默产出错误结果）
  */
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
@@ -87,6 +87,31 @@ function main() {
   if (!packArg) {
     console.error(
       "用法: bun practice/src/bili-loop/eval-frames.mjs <pack.json> [--video <path> | --width N --height N] [--out <path>] [--json]",
+    );
+    return EXIT_USAGE;
+  }
+
+  // 旧调用入口（bili-loop/run.py 曾用 `eval-frames.mjs <json> <json>` 原地改写）已不兼容：
+  // 本版不再原地写回、不再产出 u_pass/v_pass，也要求显式尺寸。
+  // 明确拒绝，不静默忽略第二个参数后生成一份看着正常、实际无意义的结果。
+  if (positional.length > 1) {
+    console.error(
+      [
+        "拒绝执行：检测到旧调用入口（多个位置参数）。",
+        `  收到: ${positional.map((p) => JSON.stringify(p)).join(" ")}`,
+        "",
+        "本版 eval-frames.mjs 与旧接口不兼容，原因有三：",
+        "  1. 不再原地改写输入文件（旧版把结果写回同一个 JSON）；",
+        "  2. 不再产出 u_pass / v_pass 字段（旧版把 missing_size 的拒绝评估写成动作负例）；",
+        "  3. 必须显式提供尺寸（--width/--height 或 --video），否则整份不可评估。",
+        "",
+        "调用方需要改：practice/src/bili-loop/run.py 的 eval_video_json()。",
+        "  旧: [bun, EVAL_JS, json_path, json_path]",
+        "  新: [bun, EVAL_JS, json_path, '--width', str(w), '--height', str(h), '--out', str(out_path)]",
+        "  并把 summarize() 里读 u_pass/v_pass 改为读 frames[].referenceTargets。",
+        "",
+        "详见 tools/assessment/ROUND3.md 第 3 节。",
+      ].join("\n"),
     );
     return EXIT_USAGE;
   }

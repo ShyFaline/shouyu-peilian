@@ -1,6 +1,6 @@
-# 给 K3 的事实摘要（第二轮）
+# 给 K3 的事实摘要（第二轮 + 第三轮）
 
-日期：2026-09-25。来源：离线评测与工程工具席（ds4.1flash）。
+日期：2026-09-26（第三轮更新）。来源：离线评测与工程工具席（ds4.1flash）。
 用途：供 K3 在 `docs/` 文书中引用。**只列事实，不含结论性评价。**
 
 ---
@@ -20,7 +20,8 @@
 | `tools/assessment/out/*.json` | 第一轮（2026-09-24） | ⚠ **仅作历史证据** | 字段 `falseAcceptRate`/`falseRejectRate` 是**条件口径**（分母只含可判定样本），名字未标明；`humanEvaluation.executed` 由标签来源触发，**会误报** |
 | `tools/assessment/out-r2/*.json` | 第二轮（2026-09-25） | ✅ 当前 | 字段已改为 `falseAcceptAll`/`falseRejectAll`（全体）+ `conditionalOnDecidable.*`（条件） |
 | `tools/assessment/VERIFICATION.md`、`ACCEPTANCE.md` | 第一轮 | ⚠ **历史** | 指标口径已被取代 |
-| `tools/assessment/ROUND2-VERIFICATION.md`、`ROUND2-ACCEPTANCE.md` | 第二轮 | ✅ 当前 | — |
+| `tools/assessment/ROUND2-VERIFICATION.md`、`ROUND2-ACCEPTANCE.md` | 第二轮 | ⚠ 部分过时 | 其中「真人评估认定」的判定口径已被第三轮取代 |
+| `tools/assessment/out-r3/*.json`、`ROUND3.md` | 第三轮（2026-09-26） | ✅ **当前** | 真人评估认定改为逐样本合取；历史文件保护改为真实前后比较 |
 | `tools/assessment/CONTRACT-DIFF.md` | 第一轮 | ✅ 仍有效 | 契约差异与可回放性矩阵未被第二轮推翻 |
 
 **核心版本**：本轮所有报告对应 `out-r2/core-fingerprint.json` 的 `digest`。
@@ -116,3 +117,78 @@
 3. `practiceStatus` 分布：`pose_practice` 9 个、`pending_review` 18 个、`demo_only` 5 个。
    主路径 8 个字母里 `GF0021.U` 是 `pending_review`，产品对它恒 `blocked`——**U 不能出成绩**。
 4. `types.js` 的 `ruleStatus` 注释与代码不符（注释写了三个代码里不存在的取值），**以代码为准**，已请 Grok 修。
+
+
+---
+
+# 第三轮补充（2026-09-26）
+
+## 8. 第三轮修了什么（K3 文书必须更新的两处表述）
+
+### 8.1 「已执行真人评估」的认定：四条必须落在同一个样本上
+
+**第二轮的口径仍有漏洞**：它用四个独立计数再 AND，所以四条条件可以来自**不同样本**。
+
+举例（第三轮反例 `evidence-stitching`，三个样本）：
+
+| 样本 | camera 来源 | 独立人工标签 | 协议声明 | 可判定结果 |
+|---|---|---|---|---|
+| A | ✅ | ✅ | ✅ | ❌ 被阻断 |
+| B | ✅ | ✅ | ❌ 无协议 | ✅ |
+| C | ✅ | ❌ 标签是构造的 | ✅ | ✅ |
+
+**没有任何一个样本四条齐全**，但第二轮口径报 `executed=true`——因为 A 提供了协议、B 提供了结果，
+条件被拼成了一个不存在的"合格样本"。
+
+**第三轮口径**：`executed` 只在**存在单个样本同时满足四条**时为真。
+实测同一反例组：`executed=false`（修正后），旧口径 `naiveWouldMisreport=true`（证明漏洞真实存在）。
+
+> **文书表述**：说「已执行真人评估」时，必须能指认出**具体哪个样本**同时具备
+> 现场采集来源、独立人工标签、协议关联、实际可判定结果。四条分散在不同样本上不算。
+
+**「协议声明」不等于协议真实性。** 工具只检查 `collection.protocol` 字段是否按样本关联到位，
+不验证协议内容。协议是否真实、同意是否有效，需要伦理文书侧的独立证据。
+
+### 8.2 两种统计口径并列，且不隐藏"无法判断"
+
+| 口径 | 分母 | 用途 |
+|---|---|---|
+| **全体** `falseAcceptAll` / `falseRejectAll` | 全部有独立标签的样本（**含被阻断、不可判定的**） | 诚实反映整体表现 |
+| **条件** `conditionalOnDecidable.*` | 仅在**可判定**样本里 | 反映"判得出来时"的表现 |
+
+两者通常不同，差值就是被排除的不可判定样本数。引用时必须写明是哪一层。
+
+报告里另有显式字段避免"隐藏无法判断"：
+
+- `undecidableButOtherwiseQualified`：**除「有结果」外都满足**的现场样本，逐条列出 id 与原因
+- `allAttemptsBlocked`：尝试过但零可判定结果
+- `attempted` 与 `decidable` 分开报：「已尝试」不等于「有结果」
+- `blocked` / `undetermined` / `unknown` / `invalid` 分开计数，各有原因
+
+### 8.3 历史文件保护测试已改为真实比较
+
+旧测试只检查"算出了一个哈希"（`typeof x === "string"`，恒真），**不比较任何东西**。
+现已改为两层真实比较：运行内 操作前 vs 操作后；以及与该轮记录基线比对（发现跨运行漂移）。
+比较器自身有自检：单字节改动、新增、删除都能被发现。
+
+**对 K3 的意义**：`practice/src/render-loop/out`、`bili-loop/out`、`fixtures`
+以及第一/二轮证据目录现在有**可核查的保护**。若这些文件被改动，验证会失败并指名道姓。
+
+### 8.4 旧调用入口不兼容时明确拒绝
+
+`practice/src/bili-loop/run.py` 仍按旧形式调用 `eval-frames.mjs`。新 CLI 与旧接口不兼容，
+现在会**明确拒绝**（退出码 3）并打印改法，**不再静默生成一份看着正常、实际无意义的结果**。
+
+> 这条对文书的直接意义：**bili 离线路径当前处于停用状态**，不是"跑通了"。
+> 在 `run.py` 适配之前，不要引用任何 bili 路径的新结果。
+
+## 9. 第三轮仍未解决（文书不要写成已完成）
+
+| 项 | 状态 |
+|---|---|
+| `bili-loop/run.py` 适配新 CLI | **未解决**，不在本席写锁，已提交请求给 Grok |
+| `bili-loop/run.py` 仍读 `u_pass`/`v_pass` | **未解决**，新 CLI 不再产出这些字段 |
+| 协议真实性验证 | **不在工具职责内**，需伦理文书侧独立证据 |
+| 真人评估 | **仍未执行**，`fixtures/` 为空 |
+| 反例中的 `camera` 样本 | **是构造的**，只用于验证逻辑，不是真实采集 |
+| 保持门阈值 | 仍 UNVERIFIED（`PASS_FRAMES=6` / `MAX_GAP_MS=400`） |

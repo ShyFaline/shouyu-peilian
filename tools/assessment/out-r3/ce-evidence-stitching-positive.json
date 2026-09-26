@@ -1,0 +1,598 @@
+{
+  "generatedAt": "2026-09-26T08:24:00.151Z",
+  "metricDefinitions": {
+    "falseAcceptAll": "全体口径：误放行 / 全部有独立标签的错误样本（含被阻断的）。",
+    "falseRejectAll": "全体口径：明确失败 / 全部有独立标签的正确样本（含被阻断的）。",
+    "decidableCoverage": "可判定覆盖率：真值分组里判得出来的比例，正确组与错误组各算各的。",
+    "conditionalOnDecidable": "条件口径：仅在可判定样本中计算。与全体口径不是同一个数，禁止互换引用。",
+    "undetermined": "judge 无法判定（含质量门失败、异常），与 blocked（规则/状态拒绝）不同。",
+    "failureClass": "失败分类：action_error（动作错）/ hold_incomplete（保持未完成）/ invalid_timeline（时间轴无效）等，互不混同。"
+  },
+  "level": "auto",
+  "coreFingerprint": {
+    "files": {
+      "practice/src/coords.js": "7a607fa98b4e85bb",
+      "practice/src/evaluate.js": "3e8034a89051d512",
+      "practice/src/inputQuality.js": "f51d4e865a33f5d3",
+      "practice/src/passState.js": "c51af97a7002ecf9",
+      "practice/src/judge.js": "2b4d64b26f60f529",
+      "practice/src/snapshot.js": "5e65eedff22d7514",
+      "practice/src/types.js": "1b4c2f966dbe2a2d",
+      "practice/content/letters.json": "e9caa89406134442"
+    },
+    "digest": "0028db7556de2303"
+  },
+  "labelInfo": {
+    "provided": true,
+    "path": "C:\\Users\\15424\\Desktop\\2026.9.15\\tools\\assessment\\samples\\counterexamples\\evidence-stitching-positive\\labels.json",
+    "truthOrigin": "human-annotation",
+    "humanReviewed": true,
+    "accepted": 1,
+    "rejected": 0,
+    "rejectedReasons": {},
+    "aligned": 1,
+    "orphaned": 0,
+    "rejectedDetail": [],
+    "orphanedDetail": [],
+    "wholeSetRejected": false
+  },
+  "holdThresholds": {
+    "passFrames": 6,
+    "maxGapMs": 400,
+    "unverified": true,
+    "source": "practice/src/passState.js"
+  },
+  "totals": {
+    "key": "ALL",
+    "samples": 1,
+    "labeled": 1,
+    "scored": 1,
+    "predicted": 1,
+    "blocked": 0,
+    "undetermined": 0,
+    "unknown": 0,
+    "invalid": 0,
+    "statusCounts": {
+      "scored": 1,
+      "blocked": 0,
+      "undetermined": 0,
+      "unknown": 0,
+      "invalid": 0
+    },
+    "decisionCounts": {
+      "pass": 0,
+      "fail": 1,
+      "blocked": 0,
+      "undetermined": 0
+    },
+    "failureClassCounts": {
+      "none": 1
+    },
+    "truthCorrect": 1,
+    "truthIncorrect": 0,
+    "truthCorrectDecidable": 1,
+    "truthIncorrectDecidable": 0,
+    "truePositive": 1,
+    "falseAccept": 0,
+    "falseReject": 0,
+    "trueNegative": 0,
+    "issueAgreementNum": 0,
+    "issueAgreementDen": 0,
+    "replayCoverage": {
+      "num": 1,
+      "den": 1,
+      "value": 1
+    },
+    "scoredCoverage": {
+      "num": 1,
+      "den": 1,
+      "value": 1
+    },
+    "falseAcceptAll": {
+      "num": 0,
+      "den": 0,
+      "value": null
+    },
+    "falseRejectAll": {
+      "num": 0,
+      "den": 1,
+      "value": 0
+    },
+    "decidableCoverage": {
+      "incorrect": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "correct": {
+        "num": 1,
+        "den": 1,
+        "value": 1
+      }
+    },
+    "conditionalOnDecidable": {
+      "falseAccept": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "falseReject": {
+        "num": 0,
+        "den": 1,
+        "value": 0
+      },
+      "agreement": {
+        "num": 1,
+        "den": 1,
+        "value": 1
+      },
+      "issueAgreement": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      }
+    }
+  },
+  "byLevel": [
+    {
+      "key": "geometry",
+      "samples": 1,
+      "labeled": 1,
+      "scored": 1,
+      "predicted": 1,
+      "blocked": 0,
+      "undetermined": 0,
+      "unknown": 0,
+      "invalid": 0,
+      "statusCounts": {
+        "scored": 1,
+        "blocked": 0,
+        "undetermined": 0,
+        "unknown": 0,
+        "invalid": 0
+      },
+      "decisionCounts": {
+        "pass": 0,
+        "fail": 1,
+        "blocked": 0,
+        "undetermined": 0
+      },
+      "failureClassCounts": {
+        "none": 1
+      },
+      "truthCorrect": 1,
+      "truthIncorrect": 0,
+      "truthCorrectDecidable": 1,
+      "truthIncorrectDecidable": 0,
+      "truePositive": 1,
+      "falseAccept": 0,
+      "falseReject": 0,
+      "trueNegative": 0,
+      "issueAgreementNum": 0,
+      "issueAgreementDen": 0,
+      "replayCoverage": {
+        "num": 1,
+        "den": 1,
+        "value": 1
+      },
+      "scoredCoverage": {
+        "num": 1,
+        "den": 1,
+        "value": 1
+      },
+      "falseAcceptAll": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "falseRejectAll": {
+        "num": 0,
+        "den": 1,
+        "value": 0
+      },
+      "decidableCoverage": {
+        "incorrect": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        },
+        "correct": {
+          "num": 1,
+          "den": 1,
+          "value": 1
+        }
+      },
+      "conditionalOnDecidable": {
+        "falseAccept": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        },
+        "falseReject": {
+          "num": 0,
+          "den": 1,
+          "value": 0
+        },
+        "agreement": {
+          "num": 1,
+          "den": 1,
+          "value": 1
+        },
+        "issueAgreement": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        }
+      }
+    }
+  ],
+  "byTruthOrigin": [
+    {
+      "key": "human-annotation",
+      "samples": 1,
+      "labeled": 1,
+      "scored": 1,
+      "predicted": 1,
+      "blocked": 0,
+      "undetermined": 0,
+      "unknown": 0,
+      "invalid": 0,
+      "statusCounts": {
+        "scored": 1,
+        "blocked": 0,
+        "undetermined": 0,
+        "unknown": 0,
+        "invalid": 0
+      },
+      "decisionCounts": {
+        "pass": 0,
+        "fail": 1,
+        "blocked": 0,
+        "undetermined": 0
+      },
+      "failureClassCounts": {
+        "none": 1
+      },
+      "truthCorrect": 1,
+      "truthIncorrect": 0,
+      "truthCorrectDecidable": 1,
+      "truthIncorrectDecidable": 0,
+      "truePositive": 1,
+      "falseAccept": 0,
+      "falseReject": 0,
+      "trueNegative": 0,
+      "issueAgreementNum": 0,
+      "issueAgreementDen": 0,
+      "replayCoverage": {
+        "num": 1,
+        "den": 1,
+        "value": 1
+      },
+      "scoredCoverage": {
+        "num": 1,
+        "den": 1,
+        "value": 1
+      },
+      "falseAcceptAll": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "falseRejectAll": {
+        "num": 0,
+        "den": 1,
+        "value": 0
+      },
+      "decidableCoverage": {
+        "incorrect": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        },
+        "correct": {
+          "num": 1,
+          "den": 1,
+          "value": 1
+        }
+      },
+      "conditionalOnDecidable": {
+        "falseAccept": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        },
+        "falseReject": {
+          "num": 0,
+          "den": 1,
+          "value": 0
+        },
+        "agreement": {
+          "num": 1,
+          "den": 1,
+          "value": 1
+        },
+        "issueAgreement": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        }
+      }
+    }
+  ],
+  "bySourceType": [
+    {
+      "key": "camera",
+      "samples": 1,
+      "labeled": 1,
+      "scored": 1,
+      "predicted": 1,
+      "blocked": 0,
+      "undetermined": 0,
+      "unknown": 0,
+      "invalid": 0,
+      "statusCounts": {
+        "scored": 1,
+        "blocked": 0,
+        "undetermined": 0,
+        "unknown": 0,
+        "invalid": 0
+      },
+      "decisionCounts": {
+        "pass": 0,
+        "fail": 1,
+        "blocked": 0,
+        "undetermined": 0
+      },
+      "failureClassCounts": {
+        "none": 1
+      },
+      "truthCorrect": 1,
+      "truthIncorrect": 0,
+      "truthCorrectDecidable": 1,
+      "truthIncorrectDecidable": 0,
+      "truePositive": 1,
+      "falseAccept": 0,
+      "falseReject": 0,
+      "trueNegative": 0,
+      "issueAgreementNum": 0,
+      "issueAgreementDen": 0,
+      "replayCoverage": {
+        "num": 1,
+        "den": 1,
+        "value": 1
+      },
+      "scoredCoverage": {
+        "num": 1,
+        "den": 1,
+        "value": 1
+      },
+      "falseAcceptAll": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "falseRejectAll": {
+        "num": 0,
+        "den": 1,
+        "value": 0
+      },
+      "decidableCoverage": {
+        "incorrect": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        },
+        "correct": {
+          "num": 1,
+          "den": 1,
+          "value": 1
+        }
+      },
+      "conditionalOnDecidable": {
+        "falseAccept": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        },
+        "falseReject": {
+          "num": 0,
+          "den": 1,
+          "value": 0
+        },
+        "agreement": {
+          "num": 1,
+          "den": 1,
+          "value": 1
+        },
+        "issueAgreement": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        }
+      }
+    }
+  ],
+  "bySourceAxis": [
+    {
+      "key": "on_site_human",
+      "samples": 1,
+      "labeled": 1,
+      "scored": 1,
+      "predicted": 1,
+      "blocked": 0,
+      "undetermined": 0,
+      "unknown": 0,
+      "invalid": 0,
+      "statusCounts": {
+        "scored": 1,
+        "blocked": 0,
+        "undetermined": 0,
+        "unknown": 0,
+        "invalid": 0
+      },
+      "decisionCounts": {
+        "pass": 0,
+        "fail": 1,
+        "blocked": 0,
+        "undetermined": 0
+      },
+      "failureClassCounts": {
+        "none": 1
+      },
+      "truthCorrect": 1,
+      "truthIncorrect": 0,
+      "truthCorrectDecidable": 1,
+      "truthIncorrectDecidable": 0,
+      "truePositive": 1,
+      "falseAccept": 0,
+      "falseReject": 0,
+      "trueNegative": 0,
+      "issueAgreementNum": 0,
+      "issueAgreementDen": 0,
+      "replayCoverage": {
+        "num": 1,
+        "den": 1,
+        "value": 1
+      },
+      "scoredCoverage": {
+        "num": 1,
+        "den": 1,
+        "value": 1
+      },
+      "falseAcceptAll": {
+        "num": 0,
+        "den": 0,
+        "value": null
+      },
+      "falseRejectAll": {
+        "num": 0,
+        "den": 1,
+        "value": 0
+      },
+      "decidableCoverage": {
+        "incorrect": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        },
+        "correct": {
+          "num": 1,
+          "den": 1,
+          "value": 1
+        }
+      },
+      "conditionalOnDecidable": {
+        "falseAccept": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        },
+        "falseReject": {
+          "num": 0,
+          "den": 1,
+          "value": 0
+        },
+        "agreement": {
+          "num": 1,
+          "den": 1,
+          "value": 1
+        },
+        "issueAgreement": {
+          "num": 0,
+          "den": 0,
+          "value": null
+        }
+      }
+    }
+  ],
+  "blockReasons": {},
+  "humanEvaluation": {
+    "executed": true,
+    "criterion": "来源 ∧ 合格独立人工标签 ∧ 协议关联 ∧ 实际可判定结果，四条必须落在同一个样本上（逐样本合取）。",
+    "onSiteHuman": {
+      "collected": 1,
+      "independentlyLabeled": 1,
+      "attempted": true,
+      "attemptedSamples": [
+        "ce-stitch-f-qualified"
+      ],
+      "decidable": 1,
+      "qualified": 1,
+      "qualifiedSamples": [
+        "ce-stitch-f-qualified"
+      ],
+      "allAttemptsBlocked": false,
+      "attemptedButNoQualified": false,
+      "undecidableButOtherwiseQualified": [],
+      "undecidableButOtherwiseQualifiedCount": 0,
+      "decidableCoverage": {
+        "num": 1,
+        "den": 1,
+        "value": 1
+      },
+      "protocolDeclared": true,
+      "protocolDeclaredNote": "protocolDeclared 表示 collection.protocol 字段按样本关联到位，是声明，不是协议真实性的验证。",
+      "funnel": {
+        "collected": 1,
+        "withIndependentHumanLabel": 1,
+        "withProtocol": 1,
+        "withProtocolAndIndependentHumanLabel": 1,
+        "decidableWithIndependentHumanLabel": 1,
+        "qualified": 1
+      },
+      "perSample": [
+        {
+          "sampleId": "ce-stitch-f-qualified",
+          "sourceType": "camera",
+          "status": "scored",
+          "reason": "geometry_evaluated",
+          "truthOrigin": "human-annotation",
+          "onSite": true,
+          "independentHumanLabel": true,
+          "protocol": true,
+          "decidable": true,
+          "qualified": true,
+          "missing": []
+        }
+      ],
+      "blockedBreakdown": {}
+    },
+    "stitchingCheck": {
+      "perSampleConjunction": true,
+      "naiveAndOfCounts": true,
+      "naiveWouldMisreport": false,
+      "naiveFormula": "旧口径 = collected>0 ∧ 有标签>0 ∧ 可判定>0 ∧ 有人声明协议（四个独立计数，可来自不同样本）",
+      "fixedFormula": "修正口径 = 存在单个样本同时满足 来源 ∧ 合格独立人工标签 ∧ 协议 ∧ 可判定结果"
+    },
+    "thirdPartyVideo": {
+      "collected": 0,
+      "independentlyLabeled": 0,
+      "decidable": 0,
+      "separateFromHuman": true,
+      "note": "第三方实拍单独统计，不与现场自愿参与者合并成一个真人成绩。"
+    },
+    "note": "有 1 个样本同时满足四条条件（来源/独立人工标签/协议/可判定结果），才置 executed=true。"
+  },
+  "syntheticNote": null,
+  "samples": [
+    {
+      "sampleId": "ce-stitch-f-qualified",
+      "file": "ce-stitch-f-qualified.json",
+      "level": "geometry",
+      "status": "scored",
+      "reason": "geometry_evaluated",
+      "predicted": "correct",
+      "targetLetterId": "GF0021.V",
+      "sourceType": "camera",
+      "synthetic": false,
+      "blockers": [],
+      "warnings": [],
+      "decision": "fail",
+      "failureClass": "none",
+      "issueCodes": [],
+      "productDecision": "fail",
+      "hold": null,
+      "thresholds": null
+    }
+  ]
+}

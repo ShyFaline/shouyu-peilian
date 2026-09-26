@@ -1,10 +1,13 @@
 /**
- * 第二轮反例夹具生成器。三组，各自独立成目录，便于分开统计分母。
+ * 第二轮+第三轮反例夹具生成器。各组独立成目录，便于分开统计分母。
  *
  * 1. source-orthogonality/  样本来源 × 标签来源正交：人工标注的合成/渲染/第三方视频
  *                           都不是「已执行现场真人评估」。
  * 2. metric-cells/          把样本钉在特定 (真值, 预测) 格子上，用来锁死指标分母口径。
  * 3. sequence-levels/       序列任务的判定层级：动作错误 / 保持未完成 / 无效时间轴必须分开。
+ * 4. evidence-stitching/          第三轮：纯拼接陷阱，四条分散 => executed 必须 false。
+ * 5. evidence-stitching-positive/ 第三轮：阳性对照，四条同一样本 => executed 必须 true。
+ * 6. evidence-all-blocked/        第三轮：已尝试但零可判定结果，不算有效评估。
  *
  * 全部 sourceType 明确、全部标签 humanReviewed=false（除 source-orthogonality 组，
  * 该组**故意**声明 human-annotation 以暴露 bug 1；它仍是合成样本，不是真人数据）。
@@ -275,6 +278,114 @@ writeIn("sequence-levels", "labels.json", {
     L("ce-seq-invalid-timeline", "incorrect", { level: "sequence", expectedIssueCodes: ["missing_timestamps"], note: "无效时间轴（校验层）" }),
     L("ce-seq-pass", "correct", { level: "sequence", note: "序列通过" }),
   ],
+});
+
+// ============================================================ 5. 证据链不得跨样本拼接（第三轮）
+/**
+ * 总控要求：来源、合格独立人工标签、协议关联、实际评估结果
+ * **必须落在同一个合格样本上**，不能从不同样本各取一条拼出通过条件。
+ *
+ * 三组，各自只证明一件事：
+ *   evidence-stitching/          纯拼接陷阱：四条分散，**没有任何样本四条齐全** => executed 必须 false
+ *   evidence-stitching-positive/ 阳性对照：四条落在同一个样本上 => executed 必须 true
+ *   evidence-all-blocked/        已尝试但零可判定结果 => executed 必须 false
+ */
+const CAMERA_PROTO = { protocol: "voluntary-participant-onsite-v1", consent: true, sessionId: "ce-stitch" };
+const CE_NOTE = { group: "evidence-stitching" };
+
+// --- 5a. 纯拼接陷阱 ---
+// A：有协议、有标签，但被阻断 => 没有实际评估结果
+writeIn(
+  "evidence-stitching",
+  "ce-stitch-a-protocol-blocked.json",
+  frame({
+    sampleId: "ce-stitch-a-protocol-blocked",
+    sourceType: "camera",
+    landmarks: shiftOutOfFrame(vHand(18)),
+    patch: { collection: CAMERA_PROTO, _counterexample: { ...CE_NOTE, note: "有协议有标签但被阻断：无实际结果" } },
+  }),
+);
+// B：可判定、有标签，但没有协议关联
+writeIn(
+  "evidence-stitching",
+  "ce-stitch-b-decidable-noproto.json",
+  frame({
+    sampleId: "ce-stitch-b-decidable-noproto",
+    sourceType: "camera",
+    landmarks: vHand(18),
+    patch: { _counterexample: { ...CE_NOTE, note: "可判定有标签但没有协议关联" } },
+  }),
+);
+// C：来源是 camera、有协议、可判定，但标签是构造的 => 不算合格独立人工标签
+writeIn(
+  "evidence-stitching",
+  "ce-stitch-c-camera-synthetic-label.json",
+  frame({
+    sampleId: "ce-stitch-c-camera-synthetic-label",
+    sourceType: "camera",
+    landmarks: vHand(18),
+    patch: { collection: CAMERA_PROTO, _counterexample: { ...CE_NOTE, note: "camera+协议+可判定，但标签是构造的" } },
+  }),
+);
+
+writeIn("evidence-stitching", "labels.json", {
+  labelVersion: "counterexample-labels-2",
+  truthOrigin: "human-annotation",
+  humanReviewed: true,
+  note: "纯拼接陷阱：四条条件分散在三个样本上，没有任何单个样本四条齐全。",
+  labels: [
+    L("ce-stitch-a-protocol-blocked", "correct", { ...SRC_HUMAN_LABEL }),
+    L("ce-stitch-b-decidable-noproto", "correct", { ...SRC_HUMAN_LABEL }),
+    L("ce-stitch-c-camera-synthetic-label", "correct", {
+      truthOrigin: "synthetic-construction",
+      humanReviewed: false,
+      reviewedBy: "fixture-author:synthetic",
+    }),
+  ],
+});
+
+// --- 5b. 阳性对照：四条齐全 ---
+// 没有它，「一律返回 false」也能骗过测试。
+writeIn(
+  "evidence-stitching-positive",
+  "ce-stitch-f-qualified.json",
+  frame({
+    sampleId: "ce-stitch-f-qualified",
+    sourceType: "camera",
+    landmarks: vHand(18),
+    patch: {
+      collection: CAMERA_PROTO,
+      _counterexample: { group: "evidence-stitching-positive", note: "阳性对照：四条条件落在同一个样本上" },
+    },
+  }),
+);
+writeIn("evidence-stitching-positive", "labels.json", {
+  labelVersion: "counterexample-labels-2",
+  truthOrigin: "human-annotation",
+  humanReviewed: true,
+  note: "阳性对照。它仍是构造样本（sourceType 只为验证逻辑），不是真实采集。",
+  labels: [L("ce-stitch-f-qualified", "correct", { ...SRC_HUMAN_LABEL })],
+});
+
+// --- 5c. 全部阻断：已尝试但零可判定结果 ---
+for (const n of [1, 2]) {
+  writeIn(
+    "evidence-all-blocked",
+    `ce-ab-${n}.json`,
+    frame({
+      sampleId: `ce-ab-${n}`,
+      sourceType: "camera",
+      landmarks: shiftOutOfFrame(vHand(18)),
+      patch: { collection: CAMERA_PROTO, _counterexample: { group: "evidence-all-blocked", note: `全部阻断之${n}` } },
+    }),
+  );
+}
+writeIn("evidence-all-blocked", "labels.json", {
+  labelVersion: "counterexample-labels-2",
+  truthOrigin: "human-annotation",
+  humanReviewed: true,
+  note: "现场采集 + 人工标签 + 协议，但全部被阻断 => 不算有效结果。",
+  labels: [L("ce-ab-1", "correct", { ...SRC_HUMAN_LABEL }), L("ce-ab-2", "correct", { ...SRC_HUMAN_LABEL })],
 });
 
 console.log(`wrote counterexample fixtures to ${HERE}`);

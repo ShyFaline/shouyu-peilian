@@ -1,0 +1,44 @@
+{
+  "labelVersion": "counterexample-labels-2",
+  "truthOrigin": "human-annotation",
+  "humanReviewed": true,
+  "note": "纯拼接陷阱：四条条件分散在三个样本上，没有任何单个样本四条齐全。",
+  "labels": [
+    {
+      "sampleId": "ce-stitch-a-protocol-blocked",
+      "expectedVerdict": "correct",
+      "expectedIssueCodes": [],
+      "level": "geometry",
+      "reviewedBy": "annotator:ce-fixture",
+      "reviewedAt": "2026-09-25T00:00:00Z",
+      "independent": true,
+      "labelVersion": "counterexample-labels-1",
+      "truthOrigin": "human-annotation",
+      "humanReviewed": true
+    },
+    {
+      "sampleId": "ce-stitch-b-decidable-noproto",
+      "expectedVerdict": "correct",
+      "expectedIssueCodes": [],
+      "level": "geometry",
+      "reviewedBy": "annotator:ce-fixture",
+      "reviewedAt": "2026-09-25T00:00:00Z",
+      "independent": true,
+      "labelVersion": "counterexample-labels-1",
+      "truthOrigin": "human-annotation",
+      "humanReviewed": true
+    },
+    {
+      "sampleId": "ce-stitch-c-camera-synthetic-label",
+      "expectedVerdict": "correct",
+      "expectedIssueCodes": [],
+      "level": "geometry",
+      "reviewedBy": "fixture-author:synthetic",
+      "reviewedAt": "2026-09-25T00:00:00Z",
+      "independent": true,
+      "labelVersion": "counterexample-labels-1",
+      "truthOrigin": "synthetic-construction",
+      "humanReviewed": false
+    }
+  ]
+}

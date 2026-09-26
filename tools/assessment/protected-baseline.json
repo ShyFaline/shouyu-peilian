@@ -1,0 +1,58 @@
+{
+  "_format": "protected-baseline/1",
+  "_eolNormalization": "CRLF->LF；含 NUL 的二进制原样哈希。哈希与检出方式无关。",
+  "_protectedLabels": [
+    "render-loop/out",
+    "bili-loop/out",
+    "fixtures",
+    "assessment/out (第一轮证据)",
+    "assessment/out-r2 (第二轮证据)"
+  ],
+  "trees": {
+    "render-loop/out": {
+      "GF0021.A.json": "44c65c70b3da06636cb7772a62f00d9e3a2c4966e31b4866a5fef5e032444950",
+      "GF0021.I.json": "1d6a27b805cf01a26765fa26e65363e1547229c8de19bd07ba377f9644128913"
+    },
+    "bili-loop/out": {
+      "BV1B64y1M7az.json": "345525fdb5c301a9ffb4c977ad31fa3ffa39c97c048569564cfb4e667a63932b",
+      "BV1Khd6YgEDd.json": "df35deeb099732e752fced570ca504348c2d2a94f288aa3ed13cfa5ee4a5b367",
+      "BV1Xe4y1G794.json": "4df9d6b710fe8be3c2eec393676aab5ca4459c0775f44f2d09d93869f4b975a0",
+      "BV1psRUYpEs7.json": "8a6839e20c3517c8b30b7999f263ff85026ca6564c264de073097f847800d3e7"
+    },
+    "fixtures": {
+      "README.md": "c25ee866a94f9e4aca3321a636395dfaf56f97a8b932778e0677059290e1ad7b"
+    },
+    "assessment/out (第一轮证据)": {
+      "core-fingerprint.json": "cca75b65650320427929e4827b75e091bbe72ebcda0040020c6c97f037e7959b",
+      "replay-empty.json": "c53d533127751641fe1b3aaef339fcc79f509ef7e22acb60f82182edd9c4ef15",
+      "replay-pseudo-rejected.json": "c02b6aa1f7a2c8d55aefd1e8d8d8e0b3a428272743611edc58b0d44221eec493",
+      "replay-synthetic.json": "6258ac1c63b3ec4ac2b5f70210649019627dc0f82f3d18e1b3bea902198e9b0c",
+      "validate-bili-loop.json": "cbfcfe320a82cca659b7b47fe2bc3ffa4d993b962d3724eb99472bb26d1bb2ce",
+      "validate-fixtures.json": "2a384101a73ca59b8d496f73ddd6d82f31c3d470c288bdfccb46eb01a635f714",
+      "validate-render-loop.json": "6c31c1c5fb16e543e06a9968738024e480b0ab9471b0918193394c81ed612a10",
+      "validate-synthetic.json": "9181a298c871fa394bda9661cd46be7ac06dacbf1ef26ca56f77fb7d673f25f4"
+    },
+    "assessment/out-r2 (第二轮证据)": {
+      "ce-label-only-human.json": "a0a322608cf086cb8bba3b80f5068bb4f6f39a660459630af567ba57a669ca5f",
+      "ce-metric-cells.json": "23970d198c44cb46693ecd70a34bd099d46f5abeaa161c504e1a14fbb9dc5c6c",
+      "ce-sequence-levels.json": "3d247cccd2b7a3bc3fe2167fc75bb1dbbc79c9fff4db789ff7f1b6aebc76ea39",
+      "ce-source-orthogonality.json": "fa7f9ecf9201ed461c52999b922a9c0b8e0998622af02c1c45a842f024da8557",
+      "core-fingerprint.json": "1404d35872644cb31ca4873c5203922a0a18de5ad261f5fcc33a81fdfd5e4470",
+      "post-fix/label-only-human.json": "d1452ddc41edca5a5866e702c91d1a3317dccad981ec89c33bdedf598e858dce",
+      "post-fix/metric-cells.json": "f1d5d7b92ec4fa76d04cc0e7ff3fe6680f327515b43906cc918a9736e714fd6b",
+      "post-fix/sequence-levels.json": "c12880192bef15ec8120b7dd26221e06766bd0ea71f0c84886d62907b159f38c",
+      "post-fix/source-orthogonality.json": "8973ecf669e40859b3c1014adec102c4b9d13af5aa977b14ef978d4c72ebcc37",
+      "pre-fix/SUMMARY.json": "a966637c3f0be05337c3b71047de373752b1d79d161e56837ef26b9d84e5d06b",
+      "pre-fix/label-only-human.json": "eb0f0c7f44cad0c5a49043740be110bd7833fbebe8b3f93f936db78d77d8885d",
+      "pre-fix/metric-cells.json": "0a8066524088edbdd30a07e1d50b8b76910da996483948e461303b6487036abb",
+      "pre-fix/sequence-levels.json": "a2e935e81d532c6341a9b12cb9fae7fb2bb789c86fed21e04679bf2ee7fec2fc",
+      "pre-fix/source-orthogonality.json": "017ff64fcf5e5f7344c161fbed2715ff7535369aab03600dceac5373b1f4025f",
+      "replay-empty.json": "fcddd08c1cecf4465157ac5f29f8cedec0c053aab257046f4674bbb3f9cda323",
+      "replay-pseudo-rejected.json": "c8db1e245d652c641b939e4f95a18a2c885de72ba5205bb843263e70ac089581",
+      "replay-synthetic.json": "27a02a117029c70221a4ef9eafaa2bbb21e27aa7d57a09012fbbf363f6c0a55b",
+      "validate-bili-loop.json": "d028ae8fae1c16964bebe553cc9acdceb4b1ab48953c3c603206f22cc78e048a",
+      "validate-fixtures.json": "1a057c07ca99ee2188a10afa39867cf2a4897c757fb0357ecf21e7056bb16f4e",
+      "validate-render-loop.json": "ffc9f4f92b28f376ac9454ed896287a7b646bb69c812e93b81e3d356e901c4c2"
+    }
+  }
+}

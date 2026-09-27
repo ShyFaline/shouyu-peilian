@@ -32,7 +32,7 @@ class Target {
 function deferred(){let resolve,reject;const promise=new Promise((a,b)=>{resolve=a;reject=b;});return {promise,resolve,reject};}
 async function harness(){
   const h={now:1000,epoch:1700000000000,raf:new Map(),seq:0,downloads:[],detects:0,painted:false,hands:[hand()],logs:[],streams:[],images:[]};
-  const ids=['video','overlay','status','verdict','hint','how','demo-stage','demo-image','demo-glyph','demo-badge','demo-label','letter-btns','atlas-btns','start-btn','stop-btn','mirror-toggle','export-toggle','export-btn','stage'];
+  const ids=['video','overlay','status','verdict','hint','how','demo-stage','demo-image','demo-glyph','demo-badge','demo-note','demo-label','letter-btns','atlas-btns','start-btn','stop-btn','mirror-toggle','export-toggle','export-btn','stage'];
   h.els=Object.fromEntries(ids.map(id=>[id,new Target()]));
   const canvas=h.els.overlay;
   canvas.getContext=()=>({clearRect(){h.painted=false;},beginPath(){},moveTo(){},lineTo(){},stroke(){h.painted=true;},arc(){},fill(){h.painted=true;}});
@@ -158,6 +158,8 @@ test('demo image: load failure falls back to glyph, never leaves broken image',a
  await new Promise(r=>setTimeout(r,5));
  assert.notEqual(h.els['demo-stage'].dataset.hasImage,'true','failed demo must not be shown');
  assert.equal(h.els['demo-glyph'].textContent.length>0,true,'glyph fallback must be visible');
+ assert.equal(h.els['demo-note'].textContent.includes('待完善'),true,'missing demo must say 该项参考图待完善');
+ assert.equal(h.els['demo-note'].hidden,false,'note must be visible');
 });
 test('demo image: rapid target switch, slow old callback must not overwrite new target',async()=>{
  const h=await harness();h.imageAutoLoad=false;await h.boot();

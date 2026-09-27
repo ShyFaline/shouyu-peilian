@@ -37,6 +37,7 @@ const els = {
   demoImage: document.getElementById("demo-image"),
   demoGlyph: document.getElementById("demo-glyph"),
   demoBadge: document.getElementById("demo-badge"),
+  demoNote: document.getElementById("demo-note"),
   demoLabel: document.getElementById("demo-label"),
   letterBtns: document.getElementById("letter-btns"),
   atlasBtns: document.getElementById("atlas-btns"),
@@ -122,13 +123,15 @@ function showDemo(letter) {
   els.demoStage.dataset.mode = "font";
   els.demoImage.removeAttribute("src");
   els.demoImage.alt = "";
+  els.demoNote.hidden = true;
+  els.demoNote.textContent = "";
 
   const src = demoSrc(letter);
   const probe = new Image();
   probe.onload = () => {
     if (current?.id !== letter.id) return;
     els.demoImage.src = src;
-    els.demoImage.alt = `${letter.title}示范草稿（渲染图，未经标准核定，不参与识别）`;
+    els.demoImage.alt = `${letter.title}临时字形参考（尚未逐项核定，不参与识别）`;
     els.demoStage.dataset.mode = "image";
   };
   probe.onerror = () => {
@@ -136,6 +139,9 @@ function showDemo(letter) {
     els.demoImage.removeAttribute("src");
     els.demoImage.alt = "";
     els.demoStage.dataset.mode = "font";
+    // 被否定的三维渲染图已撤下默认示范位；缺图时明示，不静默用旧图。
+    els.demoNote.textContent = "该项参考图待完善，当前显示字形示意";
+    els.demoNote.hidden = false;
   };
   probe.src = src;
 }

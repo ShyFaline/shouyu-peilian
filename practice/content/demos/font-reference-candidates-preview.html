@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SignPinyin 临时字形参考候选预览</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", sans-serif;
+      background: #f4f6f8;
+      color: #333;
+      margin: 0;
+      padding: 24px;
+    }
+    header {
+      max-width: 1200px;
+      margin: 0 auto 24px;
+      background: #fff;
+      padding: 20px 24px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    h1 { margin: 0 0 8px; font-size: 22px; }
+    p { margin: 6px 0; font-size: 14px; line-height: 1.6; }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    .badge-primary { background: #e6f7ff; color: #1890ff; border: 1px solid #91d5ff; }
+    .badge-warn { background: #fffbe6; color: #d48806; border: 1px solid #ffe58f; }
+    .badge-sec { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .card {
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      display: flex;
+      flex-direction: column;
+      border: 1px solid #e8e8e8;
+    }
+    .card-img {
+      width: 100%;
+      aspect-ratio: 1;
+      background: #fafafa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .card-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .card-body {
+      padding: 12px 16px;
+      flex: 1;
+    }
+    .card-title {
+      margin: 0 0 6px;
+      font-size: 16px;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .card-meta {
+      font-size: 12px;
+      color: #666;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>SignPinyin 临时字形参考候选预览 (GF 0021-2019 对照)</h1>
+    <p><strong>说明：</strong>本批图片复用 <code>SignPinyin-Regular-0.6.ttf</code> 字体导出，仅作为初稿的临时静态参考，<strong>不作为识别模型、不作为训练数据、不等于已核定手型</strong>。所有手型均为第三人称右手视角（平视观看角度）。字母名称由网页显示，图片内不加修饰文字与徽章。</p>
+  </header>
+  <div class="grid" id="grid"></div>
+  <script>
+    const items = [
+      { id: 'GF0021.A', char: 'a', type: '主路径候选', status: '一致', desc: '右手伸拇指，手背向右，四指握拳' },
+      { id: 'GF0021.B', char: 'b', type: '主路径候选 (首张核对)', status: '一致', desc: '四指并拢直立，拇指向掌心弯曲，掌心向前偏左' },
+      { id: 'GF0021.V', char: 'v', type: '主路径候选', status: '一致', desc: '食中二指分开直立成V，掌心向前偏左' },
+      { id: 'GF0021.L', char: 'l', type: '主路径候选', status: '一致', desc: '拇食二指张开成角，掌心向前偏左' },
+      { id: 'GF0021.Y', char: 'y', type: '主路径候选', status: '一致', desc: '伸拇指与小指，其余收起，掌心向前偏左' },
+      { id: 'GF0021.I', char: 'i', type: '主路径候选', status: '文字OCR疑待核', desc: '小指直立其余握拳，规范文字OCR疑排查中' },
+      { id: 'GF0021.W', char: 'w', type: '主路径候选', status: '一致', desc: '食中无名三指分开直立，掌心向前偏左' },
+      { id: 'GF0021.U', char: 'u', type: '主路径候选 (争议单列)', status: '二指/四指争议', desc: '字形为二指直立，规范原文文字为四指，争议单列' },
+      { id: 'GF0021.C', char: 'c', type: '次级候选', status: '一致', desc: '五指弯曲成C形开口' },
+      { id: 'GF0021.D', char: 'd', type: '次级候选', status: '一致', desc: '食指直立，拇指与中指相抵' },
+      { id: 'GF0021.F', char: 'f', type: '次级候选', status: '一致', desc: '拇食指捏合成圆，其余伸直' },
+      { id: 'GF0021.K', char: 'k', type: '次级候选', status: '一致', desc: '食中分开直立，拇指贴中指' },
+      { id: 'GF0021.O', char: 'o', type: '次级候选', status: '一致', desc: '五指弯曲捏合成O形' },
+      { id: 'GF0021.CH', char: 'ĉ (U+0109)', type: '次级候选 (特殊)', status: '动态手型', desc: '扁O新手型；规范为上下晃动动作' },
+      { id: 'GF0021.SH', char: 'ŝ (U+015D)', type: '次级候选 (特殊)', status: '待图示核实', desc: '手指微曲手型' },
+      { id: 'GF0021.NG', char: 'ŋ (U+014B)', type: '次级候选 (特殊)', status: '待图示核实', desc: '小指横伸字形' }
+    ];
+
+    const container = document.getElementById('grid');
+    items.forEach(it => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      const badgeCls = it.status === '一致' ? 'badge-primary' : 'badge-warn';
+      card.innerHTML = `
+        <div class="card-img">
+          <img src="./font-reference-candidates/${it.id}_256.png" alt="${it.id}" loading="lazy">
+        </div>
+        <div class="card-body">
+          <div class="card-title">
+            <span>${it.id}</span>
+            <span class="badge ${badgeCls}">${it.status}</span>
+          </div>
+          <div class="card-meta">
+            <div><strong>输入字符:</strong> <code>${it.char}</code></div>
+            <div><strong>分类:</strong> ${it.type}</div>
+            <div><strong>说明:</strong> ${it.desc}</div>
+            <div style="margin-top: 6px;"><a href="./font-reference-candidates/${it.id}_512.png" target="_blank">查看 512px 原图</a></div>
+          </div>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  </script>
+</body>
+</html>

@@ -112,7 +112,9 @@ function setVerdict(decision, issues, extra) {
 }
 
 function demoSrc(letter) {
-  return `./content/demos/${letter.id}_front.png`;
+  // 正式槽位只放获批参考图；当前为空，缺图时明示“待完善”。
+  // 被否定的三维渲染图留在 demos/ 根目录作存档，页面不再读取。
+  return `./content/demos/approved/${letter.id}_front.png`;
 }
 
 function showDemo(letter) {

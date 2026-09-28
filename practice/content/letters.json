@@ -202,7 +202,7 @@
           "ring"
         ]
       },
-      "practiceStatus": "pose_practice"
+      "practiceStatus": "pending_review"
     },
     {
       "id": "GF0021.J",
@@ -222,7 +222,7 @@
           "ring"
         ]
       },
-      "practiceStatus": "pose_practice"
+      "practiceStatus": "pending_review"
     },
     {
       "id": "GF0021.K",
@@ -547,7 +547,7 @@
           "pinky"
         ]
       },
-      "practiceStatus": "pose_practice"
+      "practiceStatus": "pending_review"
     },
     {
       "id": "GF0021.ZH",

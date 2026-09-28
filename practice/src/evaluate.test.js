@@ -257,8 +257,11 @@ test("practiceStatus 四值且本轮无 accepted_practice", () => {
     assert.notEqual(letter.practiceStatus, "accepted_practice");
   }
   assert.equal(letterU.practiceStatus, "pending_review");
-  for (const letter of [letterV, letterA, letterB, letterL, letterY, letterI, letterW, letterJ, letterZ]) {
+  for (const letter of [letterV, letterA, letterB, letterL, letterY, letterW]) {
     assert.equal(letter.practiceStatus, "pose_practice", letter.id);
+  }
+  for (const letter of [letterI, letterJ, letterZ]) {
+    assert.equal(letter.practiceStatus, "pending_review", letter.id);
   }
   for (const letter of [letterM, letterN, letterS, letterE, letterEH]) {
     assert.equal(letter.practiceStatus, "demo_only", letter.id);

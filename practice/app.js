@@ -112,9 +112,13 @@ function setVerdict(decision, issues, extra) {
 }
 
 function demoSrc(letter) {
-  // 正式槽位只放获批参考图；当前为空，缺图时明示“待完善”。
-  // 被否定的三维渲染图留在 demos/ 根目录作存档，页面不再读取。
-  return `./content/demos/approved/${letter.id}_front.png`;
+  // 两级槽位：approved/ 为获批正式参考（当前为空）；
+  // font-reference/ 为 Gemini 按交接清单接入的 SignPinyin 临时字形图（非获批证明）。
+  // 被否定的三维渲染图留在 demos/ 根目录作存档，页面永不读取。
+  return {
+    approved: `./content/demos/approved/${letter.id}_front.png`,
+    fontRef: `./content/demos/font-reference/${letter.id}_front.png`,
+  };
 }
 
 function showDemo(letter) {
@@ -128,24 +132,44 @@ function showDemo(letter) {
   els.demoNote.hidden = true;
   els.demoNote.textContent = "";
 
-  const src = demoSrc(letter);
-  const probe = new Image();
-  probe.onload = () => {
-    if (current?.id !== letter.id) return;
+  const { approved, fontRef } = demoSrc(letter);
+  const showImage = (src, altText) => {
     els.demoImage.src = src;
-    els.demoImage.alt = `${letter.title}临时字形参考（尚未逐项核定，不参与识别）`;
+    els.demoImage.alt = altText;
     els.demoStage.dataset.mode = "image";
   };
-  probe.onerror = () => {
-    if (current?.id !== letter.id) return;
+  const showMissing = () => {
+    // 缺图时明示，不静默回退被否定的三维图或二维自绘图。
     els.demoImage.removeAttribute("src");
     els.demoImage.alt = "";
     els.demoStage.dataset.mode = "font";
-    // 被否定的三维渲染图已撤下默认示范位；缺图时明示，不静默用旧图。
     els.demoNote.textContent = "该项参考图待完善，当前显示字形示意";
     els.demoNote.hidden = false;
   };
-  probe.src = src;
+  const tryFontRef = () => {
+    const probe = new Image();
+    probe.onload = () => {
+      if (current?.id !== letter.id) return;
+      showImage(fontRef, `${letter.title}临时字形参考（尚未逐项核定，不参与识别）`);
+      els.demoNote.textContent = "临时字形参考，尚未逐项核定";
+      els.demoNote.hidden = false;
+    };
+    probe.onerror = () => {
+      if (current?.id !== letter.id) return;
+      showMissing();
+    };
+    probe.src = fontRef;
+  };
+  const probe = new Image();
+  probe.onload = () => {
+    if (current?.id !== letter.id) return;
+    showImage(approved, `${letter.title}正式参考图（不参与识别）`);
+  };
+  probe.onerror = () => {
+    if (current?.id !== letter.id) return;
+    tryFontRef();
+  };
+  probe.src = approved;
 }
 
 function presentLetterIdle(letter) {

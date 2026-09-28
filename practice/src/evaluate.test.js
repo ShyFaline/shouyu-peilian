@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { angleDeg, APART_DEG, evaluate, isReadyToScore, spreadBetween, vecAngle } from "./evaluate.js";
@@ -224,6 +224,31 @@ function test(name, fn) {
     console.error(err);
   }
 }
+
+test("A–Z 26 字母入口齐全、唯一、必备字段与能力状态合法", () => {
+  const az = pack.letters.filter((l) => /^GF0021\.[A-Z]$/.test(l.id));
+  assert.equal(az.length, 26, "A-Z 必须恰好 26 项");
+  assert.equal(new Set(az.map((l) => l.id)).size, 26, "不得重复");
+  for (const ch of "ABCDEFGHIJKLMNOPQRSTUVWXYZ") {
+    const l = az.find((x) => x.id === `GF0021.${ch}`);
+    assert.ok(l, `缺字母 ${ch}`);
+    assert.ok(typeof l.title === "string" && l.title.length > 0, `${l.id} 缺名称`);
+    assert.ok(typeof l.how === "string" && l.how.length > 0, `${l.id} 缺手型说明`);
+    assert.ok(["pose_practice", "pending_review", "demo_only"].includes(l.practiceStatus), `${l.id} 能力状态非法`);
+    assert.notEqual(l.practiceStatus, "accepted_practice", `${l.id} 不得升格`);
+  }
+  // 字体参考图与 letters 的映射一致性：存在的图必须对应 A-Z 字母且文件可读
+  const fontDir = join(root, "../content/demos/font-reference");
+  if (existsSync(fontDir)) {
+    const files = readdirSync(fontDir).filter((f) => f.endsWith("_front.png"));
+    for (const f of files) {
+      const id = f.replace("_front.png", "");
+      assert.ok(az.some((l) => l.id === id), `font-reference 图 ${f} 无对应 A-Z 字母`);
+      assert.ok(readFileSync(join(fontDir, f)).length > 100, `${f} 为空文件`);
+    }
+    console.log(`font-reference 图 ${files.length} 张：${files.map((f) => f.replace(/GF0021\.|_front.png/g, "")).join(" ")}`);
+  }
+});
 
 test("practiceStatus 四值且本轮无 accepted_practice", () => {
   const allowed = new Set(["pending_review", "demo_only", "pose_practice", "accepted_practice"]);

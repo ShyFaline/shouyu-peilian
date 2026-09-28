@@ -153,13 +153,29 @@ test('runtime versions hash actual sources/letters; export retains raw unmirrore
 test('demo image: load failure falls back to glyph, never leaves broken image',async()=>{
  const h=await harness();h.imageAutoLoad=false;await h.boot();
  await h.select('GF0021.V');
- const probe=h.images[h.images.length-1];assert.ok(String(probe.src).includes('GF0021.V_front.png'));
+ const probe=h.images[h.images.length-1];assert.ok(String(probe.src).includes('approved/GF0021.V_front.png'),'first probe must be the approved slot');
  probe.fail();
+ await new Promise(r=>setTimeout(r,5));
+ const fontProbe=h.images[h.images.length-1];assert.ok(String(fontProbe.src).includes('font-reference/GF0021.V_front.png'),'second probe must be the font-reference slot');
+ fontProbe.fail();
  await new Promise(r=>setTimeout(r,5));
  assert.notEqual(h.els['demo-stage'].dataset.hasImage,'true','failed demo must not be shown');
  assert.equal(h.els['demo-glyph'].textContent.length>0,true,'glyph fallback must be visible');
  assert.equal(h.els['demo-note'].textContent.includes('待完善'),true,'missing demo must say 该项参考图待完善');
  assert.equal(h.els['demo-note'].hidden,false,'note must be visible');
+});
+test('demo image: approved missing but font-reference present shows it with draft note',async()=>{
+ const h=await harness();h.imageAutoLoad=false;await h.boot();
+ await h.select('GF0021.V');
+ const approvedProbe=h.images[h.images.length-1];assert.ok(String(approvedProbe.src).includes('approved/'));
+ approvedProbe.fail();
+ await new Promise(r=>setTimeout(r,5));
+ const fontProbe=h.images[h.images.length-1];assert.ok(String(fontProbe.src).includes('font-reference/'));
+ fontProbe.load();
+ await new Promise(r=>setTimeout(r,5));
+ assert.ok(String(h.els['demo-image'].src||'').includes('font-reference/GF0021.V_front.png'),'font reference image must be shown');
+ assert.equal(h.els['demo-note'].textContent.includes('尚未逐项核定'),true,'draft note must be visible');
+ assert.equal(h.els['demo-note'].hidden,false);
 });
 test('demo image: rapid target switch, slow old callback must not overwrite new target',async()=>{
  const h=await harness();h.imageAutoLoad=false;await h.boot();
@@ -168,6 +184,7 @@ test('demo image: rapid target switch, slow old callback must not overwrite new 
  newer.load();await new Promise(r=>setTimeout(r,5));
  const shownAfterNew=String(h.els['demo-image'].src||'');
  slow.load();await new Promise(r=>setTimeout(r,5));
+ const staleFont=h.images[h.images.length-1];staleFont.load();await new Promise(r=>setTimeout(r,5));
  assert.equal(String(h.els['demo-image'].src||''),shownAfterNew,'stale V image callback must not overwrite U');
  assert.ok(shownAfterNew.includes('GF0021.U')||shownAfterNew==='','shown demo must belong to U or be empty');
 });

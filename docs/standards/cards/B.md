@@ -23,7 +23,7 @@
 | letters.json `how` | 「四指并拢伸直，拇指弯曲贴掌心。」 | 文字层面一致（E1） |
 | letters.json `rules` | extended: index, middle, ring, pinky；curled: thumb；spread 三对 together | 与条文一致；**未表达掌向「掌心向前偏左」**（能力限制，非错误） |
 | 页面/图鉴文案 | 与 how 同源 | 同上 |
-| 示范 PNG | 现用图为第 3 小时草稿手（`practice/content/demos/GF0021.B_front.png`）；Gemini Round2 候选在 `blender/render/hour5/connect/r2/`（草稿，`GF0021.B_front.png` SHA-256 `cf8a1261…） | 草稿未对照规范原图；**不称标准示范** |
+| 示范 PNG | 页面正式槽 `practice/content/demos/approved/` **当前为空**，页面回退字形示意并标注「该项参考图待完善」。存档草稿 `practice/content/demos/GF0021.B_front.png`（存档草稿，页面不加载）。原 Gemini Round2 候选目录 `blender/render/hour5/connect/r2/` 在当前分支已不存在（旧候选已退役/归档），旧 SHA-256 引用随之失效 | 草稿未对照规范原图；**不称标准示范** |
 
 ## AI 预审结论
 

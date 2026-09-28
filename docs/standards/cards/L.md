@@ -22,7 +22,7 @@
 |---|---|---|
 | letters.json `how` | 「拇指、食指伸直成直角，其余收起。」 | **近似**：原文只说「拇、食指张开」，无「直角」字样；「直角」是仓库自加的量化 |
 | letters.json `rules` | extended: thumb, index；curled: middle, ring, pinky；thumb_index=right_angle；pointing=up | 与条文近似；「成直角」规则与原文的对应关系**必须对原图确认**（原图夹角即规范的呈现）；未表达掌向 |
-| 示范 PNG | 现用图为第 3 小时草稿手（`practice/content/demos/GF0021.L_front.png`）；Gemini Round2 候选在 `blender/render/hour5/connect/r2/`（草稿，SHA-256 `c3086a31…`，注：该候选拇指仍成片未达标） | 草稿未对照规范原图 |
+| 示范 PNG | 页面正式槽 `practice/content/demos/approved/` **当前为空**，页面回退字形示意并标注「该项参考图待完善」。存档草稿 `practice/content/demos/GF0021.L_front.png`（存档草稿，页面不加载）。原 Gemini Round2 候选目录 `blender/render/hour5/connect/r2/` 在当前分支已不存在（旧候选已退役/归档），旧 SHA-256 引用随之失效 | 草稿未对照规范原图；**不称标准示范** |
 
 ## AI 预审结论
 

@@ -1,0 +1,381 @@
+import os
+import subprocess
+from PIL import Image
+
+# Revised SVG:
+# 1. Anatomical hand: RIGHT HAND facing forward slightly tilted left.
+#    In front view of right hand palm:
+#    - Left side is THENAR (大鱼际) and THUMB (拇指).
+#    - Right side is HYPOTHENAR (小鱼际) and PINKY (小指).
+#    - Fingers left-to-right: Index (食指), Middle (中指), Ring (无名指), Pinky (小指).
+#    - Slight tilt left: Palm faces front-left (towards viewer's right slightly, so right/lateral edge of hand recedes slightly).
+# 2. Hand-to-finger proportions:
+#    - Hand length: fingers ~ 45-50% of hand, palm ~ 50-55%.
+#    - Fingers have natural arc: Middle is longest, Ring slightly shorter, Index slightly shorter than Ring, Pinky shortest.
+#    - MCP knuckles curve naturally downwards toward pinky.
+# 3. Clean vector Cel-shading (flat clean shadows, NO bitmap/feDropShadow filters).
+# 4. Thumb flexion: originates from left thenar eminence, flexes at MP and IP joints, tip clearly rests against the middle palm surface.
+# 5. Clear 256px readability with clean dark outlines (#2B1810) and warm inviting skin tones.
+
+revised_svg = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="800" height="800">
+  <defs>
+    <!-- Background clean gradient -->
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F8FAFC"/>
+      <stop offset="100%" stop-color="#F1F5F9"/>
+    </linearGradient>
+
+    <!-- Warm Natural Skin Tones -->
+    <linearGradient id="skinBase" x1="0.2" y1="0" x2="0.8" y2="1">
+      <stop offset="0%" stop-color="#FDEFE2"/>
+      <stop offset="60%" stop-color="#F7D3B8"/>
+      <stop offset="100%" stop-color="#EBB38D"/>
+    </linearGradient>
+
+    <linearGradient id="fingerBase" x1="0.3" y1="0" x2="0.7" y2="1">
+      <stop offset="0%" stop-color="#FFF3E8"/>
+      <stop offset="50%" stop-color="#F8D6BC"/>
+      <stop offset="100%" stop-color="#EEBA96"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Card Background Container -->
+  <rect x="24" y="24" width="752" height="752" rx="28" fill="url(#bgGrad)" stroke="#CBD5E1" stroke-width="2"/>
+  <path d="M 60 115 L 740 115" stroke="#E2E8F0" stroke-width="1.5" stroke-dasharray="4 4"/>
+
+  <!-- Card Header & Metadata -->
+  <g id="header-meta">
+    <text x="60" y="85" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="48" font-weight="800" fill="#1E293B">B</text>
+    <text x="110" y="83" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="20" font-weight="600" fill="#475569">/b/ · 汉语手指字母</text>
+    <text x="60" y="106" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="13" fill="#64748B">依据 GF 0021—2019 标准条文原创矢量教学插画 · 候选第二版</text>
+
+    <!-- Clear Right-Hand Badge -->
+    <g transform="translate(485, 52)">
+      <rect x="0" y="0" width="255" height="42" rx="21" fill="#EFF6FF" stroke="#93C5FD" stroke-width="1.5"/>
+      <circle cx="21" cy="21" r="7" fill="#2563EB"/>
+      <text x="36" y="26" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="14" font-weight="700" fill="#1D4ED8">右手 · 掌心向前偏左 (正面观)</text>
+    </g>
+  </g>
+
+  <!-- Illustration Main Group -->
+  <!-- Hand Center: X ~ 400, Y ~ 430 -->
+  <g id="hand-illustration">
+
+    <!-- 1. FOREARM & WRIST BASE -->
+    <path id="wrist-forearm" d="
+      M 315 745
+      C 318 695, 310 655, 292 610
+      C 275 565, 260 520, 255 470
+      L 548 460
+      C 545 520, 532 580, 510 635
+      C 495 675, 490 710, 488 745
+      Z"
+      fill="url(#skinBase)"
+      stroke="#2B1810"
+      stroke-width="7"
+      stroke-linejoin="round"/>
+
+    <!-- Wrist flat shadow & contour lines -->
+    <path d="
+      M 548 460
+      C 545 520, 532 580, 510 635
+      C 495 675, 490 710, 488 745
+      L 468 745
+      C 472 705, 478 665, 492 625
+      C 512 575, 524 515, 526 460
+      Z"
+      fill="#DF9A76"
+      opacity="0.45"/>
+
+    <!-- 2. FOUR EXTENDED FINGERS (Left to Right: Index, Middle, Ring, Pinky) -->
+    
+    <!-- Finger 1: INDEX (食指, 位于手内侧偏左) -->
+    <!-- X range: ~270 to 335, Top y ~ 160 -->
+    <g id="finger-index">
+      <path d="
+        M 275 460
+        C 272 400, 270 300, 274 235
+        C 277 185, 288 160, 305 160
+        C 322 160, 332 185, 336 235
+        C 340 290, 338 380, 338 438
+        Z"
+        fill="url(#fingerBase)"
+        stroke="#2B1810"
+        stroke-width="7"
+        stroke-linejoin="round"/>
+      <!-- Index DIP crease -->
+      <path d="M 280 230 C 294 227, 318 227, 330 230" stroke="#7A361C" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+      <!-- Index PIP crease -->
+      <path d="M 276 305 C 294 302, 320 302, 334 305" stroke="#7A361C" stroke-width="4" stroke-linecap="round" fill="none"/>
+      <!-- Soft inner side light -->
+      <path d="M 278 175 C 275 220, 275 320, 278 400" stroke="#FFF7ED" stroke-width="3" stroke-linecap="round" opacity="0.6" fill="none"/>
+    </g>
+
+    <!-- Finger 2: MIDDLE (中指, 最长, 居中微偏左) -->
+    <!-- X range: ~338 to 410, Top y ~ 130 -->
+    <g id="finger-middle">
+      <path d="
+        M 338 438
+        C 338 360, 339 270, 344 205
+        C 348 155, 360 130, 377 130
+        C 394 130, 404 155, 408 205
+        C 413 270, 412 360, 412 436
+        Z"
+        fill="url(#fingerBase)"
+        stroke="#2B1810"
+        stroke-width="7"
+        stroke-linejoin="round"/>
+      <!-- Flat separation shadow along left side -->
+      <path d="M 338 438 L 341 200 C 342 170, 346 150, 350 150 C 344 175, 343 270, 343 438 Z" fill="#D98E68" opacity="0.4"/>
+      <!-- Middle DIP crease -->
+      <path d="M 350 205 C 365 202, 390 202, 402 205" stroke="#7A361C" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+      <!-- Middle PIP crease -->
+      <path d="M 345 285 C 364 282, 392 282, 406 285" stroke="#7A361C" stroke-width="4" stroke-linecap="round" fill="none"/>
+    </g>
+
+    <!-- Finger 3: RING (无名指, 稍短于中指) -->
+    <!-- X range: ~412 to 478, Top y ~ 155 -->
+    <g id="finger-ring">
+      <path d="
+        M 412 436
+        C 412 370, 413 285, 417 225
+        C 421 178, 432 155, 447 155
+        C 462 155, 471 178, 474 225
+        C 477 285, 476 370, 476 448
+        Z"
+        fill="url(#fingerBase)"
+        stroke="#2B1810"
+        stroke-width="7"
+        stroke-linejoin="round"/>
+      <!-- Flat separation shadow along left side -->
+      <path d="M 412 436 L 414 215 C 415 190, 419 175, 423 175 C 418 195, 417 280, 417 436 Z" fill="#D98E68" opacity="0.4"/>
+      <!-- Ring DIP crease -->
+      <path d="M 423 228 C 436 225, 458 225, 469 228" stroke="#7A361C" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+      <!-- Ring PIP crease -->
+      <path d="M 419 305 C 435 302, 460 302, 472 305" stroke="#7A361C" stroke-width="4" stroke-linecap="round" fill="none"/>
+    </g>
+
+    <!-- Finger 4: PINKY (小指, 外侧最右, 最短) -->
+    <!-- X range: ~476 to 536, Top y ~ 220 -->
+    <g id="finger-pinky">
+      <path d="
+        M 476 448
+        C 476 390, 477 325, 482 280
+        C 485 240, 495 220, 508 220
+        C 521 220, 529 240, 532 280
+        C 536 335, 536 410, 535 465
+        Z"
+        fill="url(#fingerBase)"
+        stroke="#2B1810"
+        stroke-width="7"
+        stroke-linejoin="round"/>
+      <!-- Flat separation shadow along left side -->
+      <path d="M 476 448 L 478 275 C 479 250, 483 238, 487 238 C 482 255, 481 330, 481 448 Z" fill="#D98E68" opacity="0.4"/>
+      <!-- Pinky DIP crease -->
+      <path d="M 488 280 C 498 278, 518 278, 527 280" stroke="#7A361C" stroke-width="3" stroke-linecap="round" fill="none"/>
+      <!-- Pinky PIP crease -->
+      <path d="M 484 345 C 497 342, 520 342, 530 345" stroke="#7A361C" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+    </g>
+
+    <!-- 3. PALM SURFACE & THENAR EMINENCE (大鱼际在左侧，掌心弧度) -->
+    <!-- Base palm skin overlap across MCP joints -->
+    <path id="palm-front" d="
+      M 260 480
+      C 255 440, 275 425, 305 435
+      C 340 435, 410 432, 475 445
+      C 515 452, 545 455, 542 490
+      C 535 550, 510 615, 470 655
+      C 420 675, 340 670, 290 610
+      C 265 570, 260 525, 260 480
+      Z"
+      fill="url(#skinBase)"
+      stroke="#2B1810"
+      stroke-width="7"
+      stroke-linejoin="round"/>
+
+    <!-- Thenar Eminence (左侧大鱼际，饱满圆润) -->
+    <path d="
+      M 260 480
+      C 240 515, 242 560, 265 595
+      C 285 625, 315 645, 345 645
+      C 325 615, 300 565, 300 515
+      C 300 485, 280 470, 260 480
+      Z"
+      fill="#E79F7C"
+      opacity="0.3"/>
+
+    <!-- Hypothenar Eminence (右侧小鱼际，掌侧阴影) -->
+    <path d="
+      M 542 490
+      C 538 545, 515 605, 475 645
+      C 460 635, 485 580, 495 530
+      C 505 480, 528 470, 542 490
+      Z"
+      fill="#DF9570"
+      opacity="0.4"/>
+
+    <!-- Natural Palm Creases (清晰手掌掌纹) -->
+    <!-- Distal crease (天纹 / 远端横纹) -->
+    <path d="M 335 480 C 385 470, 460 478, 515 500" stroke="#7A361C" stroke-width="3" stroke-linecap="round" opacity="0.45" fill="none"/>
+    <!-- Proximal crease (人纹 / 近端横纹) -->
+    <path d="M 285 525 C 330 528, 410 540, 475 565" stroke="#7A361C" stroke-width="3.5" stroke-linecap="round" opacity="0.45" fill="none"/>
+    <!-- Thenar crease (地纹 / 大鱼际生命线) -->
+    <path d="M 285 525 C 315 565, 335 605, 340 645" stroke="#7A361C" stroke-width="3.5" stroke-linecap="round" opacity="0.4" fill="none"/>
+
+    <!-- 4. THUMB (RIGHT HAND: CURLED INWARD ACROSS PALM FROM LEFT THENAR) -->
+    <!-- Planar clear cast shadow behind curled thumb (NO blur filter) -->
+    <path d="
+      M 268 495
+      C 300 495, 350 515, 395 525
+      C 435 535, 455 555, 445 580
+      C 425 600, 380 600, 335 590
+      C 295 580, 270 550, 268 495
+      Z"
+      fill="#85361A"
+      opacity="0.32"/>
+
+    <!-- Thumb Group: clearly showing MP base on left, proximal phalanx, IP flexion, and distal phalanx pointing right-downward onto palm center -->
+    <g id="thumb-curled-right">
+      <!-- Outer contour of curled thumb -->
+      <path d="
+        M 252 485
+        C 245 445, 275 425, 310 435
+        C 345 445, 385 465, 418 488
+        C 438 502, 448 522, 442 542
+        C 435 565, 412 578, 382 575
+        C 345 570, 310 558, 275 538
+        C 258 528, 253 505, 252 485
+        Z"
+        fill="url(#skinBase)"
+        stroke="#2B1810"
+        stroke-width="7"
+        stroke-linejoin="round"/>
+
+      <!-- Planar shading for thumb volume (cel-shaded lower half) -->
+      <path d="
+        M 275 538
+        C 310 558, 345 570, 382 575
+        C 412 578, 435 565, 442 542
+        C 438 535, 420 545, 390 545
+        C 350 545, 315 535, 275 515
+        Z"
+        fill="#D98A62"
+        opacity="0.5"/>
+
+      <!-- Thumb IP Joint Flexion Crease (清晰关节弯曲折痕，交代转折支点) -->
+      <path d="M 370 460 C 378 485, 382 515, 378 545" stroke="#7A361C" stroke-width="4" stroke-linecap="round" fill="none"/>
+      <path d="M 382 468 C 388 490, 390 512, 388 535" stroke="#7A361C" stroke-width="2.5" stroke-linecap="round" opacity="0.6" fill="none"/>
+
+      <!-- Thumb Nail (清晰位于拇指指尖背侧微侧方) -->
+      <path d="
+        M 412 512
+        C 424 515, 432 525, 430 538
+        C 428 548, 418 554, 406 550
+        C 400 542, 402 525, 412 512
+        Z"
+        fill="#FFF1E8"
+        stroke="#7A361C"
+        stroke-width="2.5"/>
+      <!-- Nail highlight -->
+      <path d="M 416 518 C 424 522, 425 530, 423 538" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" fill="none"/>
+
+      <!-- Light dorsal highlight on thumb edge -->
+      <path d="M 285 440 C 320 448, 355 465, 385 485" stroke="#FFF7ED" stroke-width="3" stroke-linecap="round" opacity="0.6" fill="none"/>
+    </g>
+
+    <!-- Natural wrist creases (手腕横纹) -->
+    <path d="M 345 705 C 390 714, 430 712, 465 702" stroke="#7A361C" stroke-width="3.5" stroke-linecap="round" opacity="0.4" fill="none"/>
+    <path d="M 360 725 C 395 732, 425 730, 452 722" stroke="#7A361C" stroke-width="2.5" stroke-linecap="round" opacity="0.3" fill="none"/>
+  </g>
+
+  <!-- Clear Educational Legend Footer -->
+  <g id="footer-notes" transform="translate(60, 725)">
+    <circle cx="6" cy="6" r="4" fill="#059669"/>
+    <text x="18" y="10" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="13" font-weight="600" fill="#334155">规范要点：右手同侧胸前；四指并拢直立；拇指向掌心弯曲扣贴；手心向前微偏左。</text>
+  </g>
+</svg>
+"""
+
+out_dir = r"工作副本/二维示范/practice/content/demos/illustration-candidates/B"
+os.makedirs(out_dir, exist_ok=True)
+
+svg_path = os.path.join(out_dir, "candidate-B.svg")
+with open(svg_path, "w", encoding="utf-8") as f:
+    f.write(revised_svg)
+
+print(f"Updated SVG written to {svg_path}")
+
+# Render 512x512 via headless Chrome
+html_content = f'''<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8'>
+<style>
+  body {{ margin: 0; padding: 0; background: transparent; overflow: hidden; }}
+  img {{ width: 512px; height: 512px; display: block; }}
+</style>
+</head>
+<body>
+  <img src='file:///{svg_path.replace(chr(92), "/")}'>
+</body>
+</html>'''
+
+temp_html = os.path.join(out_dir, 'render_512.html')
+with open(temp_html, 'w', encoding='utf-8') as f:
+    f.write(html_content)
+
+png_512 = os.path.join(out_dir, 'candidate-B-512.png')
+chrome_bin = r'C:\Program Files\Google\Chrome\Application\chrome.exe'
+cmd = [
+    chrome_bin,
+    '--headless',
+    '--disable-gpu',
+    f'--screenshot={png_512}',
+    '--window-size=512,512',
+    '--default-background-color=00000000',
+    f'file:///{temp_html.replace(chr(92), "/")}'
+]
+subprocess.run(cmd, check=True)
+
+# Generate 256x256 preview from 512
+im = Image.open(png_512)
+png_256 = os.path.join(out_dir, 'candidate-B-256.png')
+im.resize((256, 256), Image.Resampling.LANCZOS).save(png_256)
+
+# Generate 1024x1024 high-res
+html_1024 = f'''<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8'>
+<style>
+  body {{ margin: 0; padding: 0; background: transparent; overflow: hidden; }}
+  img {{ width: 1024px; height: 1024px; display: block; }}
+</style>
+</head>
+<body>
+  <img src='file:///{svg_path.replace(chr(92), "/")}'>
+</body>
+</html>'''
+temp_html_1024 = os.path.join(out_dir, 'render_1024.html')
+with open(temp_html_1024, 'w', encoding='utf-8') as f:
+    f.write(html_1024)
+
+png_1024 = os.path.join(out_dir, 'candidate-B-1024.png')
+cmd_1024 = [
+    chrome_bin,
+    '--headless',
+    '--disable-gpu',
+    f'--screenshot={png_1024}',
+    '--window-size=1024,1024',
+    '--default-background-color=00000000',
+    f'file:///{temp_html_1024.replace(chr(92), "/")}'
+]
+subprocess.run(cmd_1024, check=True)
+
+os.remove(temp_html)
+os.remove(temp_html_1024)
+
+print("Revision complete. Rendered:")
+print("512:", os.path.exists(png_512), os.path.getsize(png_512))
+print("256:", os.path.exists(png_256), os.path.getsize(png_256))
+print("1024:", os.path.exists(png_1024), os.path.getsize(png_1024))

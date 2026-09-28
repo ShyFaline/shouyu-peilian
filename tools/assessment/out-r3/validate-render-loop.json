@@ -1,0 +1,66 @@
+{
+  "dir": "C:\\Users\\15424\\Desktop\\2026.9.15\\practice\\src\\render-loop\\out",
+  "generatedAt": "2026-09-26T08:24:00.431Z",
+  "coreFingerprint": {
+    "files": {
+      "practice/src/coords.js": "7a607fa98b4e85bb",
+      "practice/src/evaluate.js": "3e8034a89051d512",
+      "practice/src/inputQuality.js": "f51d4e865a33f5d3",
+      "practice/src/passState.js": "c51af97a7002ecf9",
+      "practice/src/judge.js": "2b4d64b26f60f529",
+      "practice/src/snapshot.js": "5e65eedff22d7514",
+      "practice/src/types.js": "1b4c2f966dbe2a2d",
+      "practice/content/letters.json": "e9caa89406134442"
+    },
+    "digest": "0028db7556de2303"
+  },
+  "totals": {
+    "files": 2,
+    "ok": 0,
+    "blocked": 2,
+    "warnings": 2
+  },
+  "blockerCodes": {
+    "unsupported_schema_version": 2,
+    "missing_size": 2
+  },
+  "warningCodes": {
+    "missing_target": 2
+  },
+  "files": [
+    {
+      "file": "GF0021.A.json",
+      "ok": false,
+      "kind": "single",
+      "target": null,
+      "coordSpace": "image_normalized",
+      "size": null,
+      "sourceType": "unspecified",
+      "blockerCount": 2,
+      "blockers": [
+        "unsupported_schema_version@schemaVersion",
+        "missing_size@imageWidth/imageHeight"
+      ],
+      "warnings": [
+        "missing_target"
+      ]
+    },
+    {
+      "file": "GF0021.I.json",
+      "ok": false,
+      "kind": "single",
+      "target": null,
+      "coordSpace": "image_normalized",
+      "size": null,
+      "sourceType": "unspecified",
+      "blockerCount": 2,
+      "blockers": [
+        "unsupported_schema_version@schemaVersion",
+        "missing_size@imageWidth/imageHeight"
+      ],
+      "warnings": [
+        "missing_target"
+      ]
+    }
+  ]
+}

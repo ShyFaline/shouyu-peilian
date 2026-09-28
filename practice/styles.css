@@ -70,6 +70,21 @@ main {
   text-transform: uppercase;
 }
 
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.panel-head .panel-label { margin: 0; }
+.view-note {
+  font-size: 11px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
 .demo-stage {
   position: relative;
   min-height: 220px;
@@ -78,6 +93,32 @@ main {
   background: #181818;
   border-radius: 12px;
   overflow: hidden;
+}
+
+.demo-tag {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.65);
+  color: var(--muted);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  pointer-events: none;
+  z-index: 2;
+}
+.demo-tag[data-type="official"] {
+  color: var(--ok);
+  border-color: rgba(126, 224, 198, 0.4);
+}
+.demo-tag[data-type="draft"] {
+  color: var(--idle);
+  border-color: rgba(230, 217, 162, 0.4);
+}
+.demo-tag[data-type="aux"] {
+  color: #9cbbf0;
+  border-color: rgba(156, 187, 240, 0.4);
 }
 
 .demo-stage img {

@@ -1,0 +1,14 @@
+拒绝执行：检测到旧调用入口（多个位置参数）。
+  收到: "practice/src/bili-loop/out/BV1B64y1M7az.json" "practice/src/bili-loop/out/BV1B64y1M7az.json"
+
+本版 eval-frames.mjs 与旧接口不兼容，原因有三：
+  1. 不再原地改写输入文件（旧版把结果写回同一个 JSON）；
+  2. 不再产出 u_pass / v_pass 字段（旧版把 missing_size 的拒绝评估写成动作负例）；
+  3. 必须显式提供尺寸（--width/--height 或 --video），否则整份不可评估。
+
+调用方需要改：practice/src/bili-loop/run.py 的 eval_video_json()。
+  旧: [bun, EVAL_JS, json_path, json_path]
+  新: [bun, EVAL_JS, json_path, '--width', str(w), '--height', str(h), '--out', str(out_path)]
+  并把 summarize() 里读 u_pass/v_pass 改为读 frames[].referenceTargets。
+
+详见 tools/assessment/ROUND3.md 第 3 节。

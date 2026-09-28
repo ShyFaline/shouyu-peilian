@@ -133,37 +133,145 @@ function sourceAxis(sourceType) {
  *   decidable           其中真正判得出来的数量
  * executed 需要四项都成立，且采集声明了协议。
  */
+/**
+ * 逐样本判定一个现场样本是否「合格」。
+ *
+ * 总控要求：来源、合格独立人工标签、协议关联、实际评估结果
+ * **必须落在同一个样本上**，不能从不同样本各取一条拼出通过条件。
+ *
+ * 所以这里返回**逐样本的合取**，不是四个独立计数再 AND。
+ */
+const QUALIFY_CONDITIONS = ["onSite", "independentHumanLabel", "protocol", "decidable"];
+
+function assessOnSiteSample(r, label) {
+  const onSite = sourceAxis(r.sourceType) === "on_site_human";
+  // 合格独立人工标签：标签存在、来源是人工轴、且标注者独立（truth.mjs 已挡掉预测派生）。
+  const independentHumanLabel = !!label && HUMAN_LABEL_ORIGINS.includes(label.truthOrigin) && label.independent !== false;
+  const protocol = typeof r.collection?.protocol === "string" && r.collection.protocol.trim() !== "";
+  const decidable = r.status === "scored";
+
+  const flags = { onSite, independentHumanLabel, protocol, decidable };
+  const missing = QUALIFY_CONDITIONS.filter((c) => !flags[c]);
+
+  return {
+    sampleId: r.sampleId,
+    sourceType: r.sourceType,
+    status: r.status,
+    reason: r.reason,
+    truthOrigin: label?.truthOrigin ?? null,
+    ...flags,
+    /** 四条全部成立才算合格 —— executed 的唯一依据。 */
+    qualified: missing.length === 0,
+    missing,
+  };
+}
+
+/**
+ * 真人评估证据。executed 只在**同一个样本**同时满足四条时为真。
+ *
+ * 字段声明（collection.protocol）只是**声明**，不是真实性证明；
+ * 本函数不校验协议内容，只要求它按样本关联到位。
+ */
 function humanEvidence({ replays, byId, protocols }) {
-  const onSite = replays.filter((r) => sourceAxis(r.sourceType) === "on_site_human");
-  const onSiteLabeled = onSite.filter((r) => byId.has(r.sampleId));
-  const onSiteDecidable = onSiteLabeled.filter((r) => r.status === "scored");
-  const protocolDeclared = onSiteLabeled.some((r) => protocols.has(r.sampleId));
+  const onSiteAll = replays.filter((r) => sourceAxis(r.sourceType) === "on_site_human");
+  const perSample = onSiteAll.map((r) => assessOnSiteSample(r, byId.get(r.sampleId) ?? null));
+
+  const withHumanLabel = perSample.filter((s) => s.independentHumanLabel);
+  const withProtocol = perSample.filter((s) => s.protocol);
+  const withProtocolAndHumanLabel = perSample.filter((s) => s.protocol && s.independentHumanLabel);
+  const decidableWithHumanLabel = perSample.filter((s) => s.decidable && s.independentHumanLabel);
+  const qualified = perSample.filter((s) => s.qualified);
+
+  const collected = perSample.length;
+  const independentlyLabeled = withHumanLabel.length;
+  const attempted = independentlyLabeled > 0;
+  const decidable = decidableWithHumanLabel.length;
+  const qualifiedCount = qualified.length;
+  const protocolDeclared = withProtocol.length > 0;
+
+  // 逐样本合取 —— 唯一判定依据。
+  const executed = qualifiedCount > 0;
+
+  // 对照：**旧口径**（第二轮实现）——四个独立计数再 AND，不要求落在同一样本上。
+  // 这里刻意复刻旧语义（标签只问存在、协议只问有人声明），用来证明拼接确实被拦住。
+  const oldCollected = onSiteAll.length;
+  const oldLabeled = onSiteAll.filter((r) => byId.has(r.sampleId)).length;
+  const oldDecidable = onSiteAll.filter((r) => byId.has(r.sampleId) && r.status === "scored").length;
+  const oldProtocolDeclared = onSiteAll.some((r) => protocols.has(r.sampleId));
+  const naiveAndOfCounts =
+    oldCollected > 0 && oldLabeled > 0 && oldDecidable > 0 && oldProtocolDeclared;
+
+  // 「除有结果外都满足」：这些样本**本该可判但没判出来**，不能隐藏。
+  const undecidableButOtherwiseQualified = perSample.filter(
+    (s) => !s.decidable && s.onSite && s.independentHumanLabel && s.protocol,
+  );
 
   const thirdParty = replays.filter((r) => sourceAxis(r.sourceType) === "third_party_real");
   const thirdPartyLabeled = thirdParty.filter((r) => byId.has(r.sampleId));
   const thirdPartyDecidable = thirdPartyLabeled.filter((r) => r.status === "scored");
 
-  const collected = onSite.length;
-  const independentlyLabeled = onSiteLabeled.length;
-  const attempted = independentlyLabeled > 0;
-  const decidable = onSiteDecidable.length;
-  const executed = collected > 0 && independentlyLabeled > 0 && decidable > 0 && protocolDeclared;
-
   return {
     executed,
+    /** 判定口径本身随报告输出，避免口头解释。 */
+    criterion: "来源 ∧ 合格独立人工标签 ∧ 协议关联 ∧ 实际可判定结果，四条必须落在同一个样本上（逐样本合取）。",
     onSiteHuman: {
       collected,
       independentlyLabeled,
       attempted,
-      attemptedSamples: onSiteLabeled.map((r) => r.sampleId),
+      attemptedSamples: withHumanLabel.map((s) => s.sampleId),
       decidable,
+      /** executed 的唯一依据。 */
+      qualified: qualifiedCount,
+      qualifiedSamples: qualified.map((s) => s.sampleId),
       /** 全被阻断的尝试：attempted 为真但 decidable 为 0 —— 不算有效结果。 */
       allAttemptsBlocked: attempted && decidable === 0,
+      /** 尝试过，但没有任何样本四条齐全。 */
+      attemptedButNoQualified: attempted && qualifiedCount === 0,
+      /** 除「有结果」外都满足 —— 必须显式列出，不能隐藏。 */
+      undecidableButOtherwiseQualified: undecidableButOtherwiseQualified.map((s) => ({
+        sampleId: s.sampleId,
+        reason: s.reason,
+      })),
+      undecidableButOtherwiseQualifiedCount: undecidableButOtherwiseQualified.length,
       decidableCoverage: rate(decidable, independentlyLabeled),
+      /** 只是「字段已声明」。字段声明不是真实性证明。 */
       protocolDeclared,
-      blockedBreakdown: onSiteLabeled
-        .filter((r) => r.status !== "scored")
-        .reduce((m, r) => ((m[r.reason] = (m[r.reason] ?? 0) + 1), m), {}),
+      protocolDeclaredNote: "protocolDeclared 表示 collection.protocol 字段按样本关联到位，是声明，不是协议真实性的验证。",
+      /** 漏斗：四条条件逐级收窄，一眼看出样本在哪一步掉出去。 */
+      funnel: {
+        collected,
+        withIndependentHumanLabel: withHumanLabel.length,
+        withProtocol: withProtocol.length,
+        withProtocolAndIndependentHumanLabel: withProtocolAndHumanLabel.length,
+        decidableWithIndependentHumanLabel: decidableWithHumanLabel.length,
+        qualified: qualifiedCount,
+      },
+      /** 逐样本四条件矩阵，便于核查「不能跨样本拼」。 */
+      perSample: perSample.map((s) => ({
+        sampleId: s.sampleId,
+        sourceType: s.sourceType,
+        status: s.status,
+        reason: s.reason,
+        truthOrigin: s.truthOrigin,
+        onSite: s.onSite,
+        independentHumanLabel: s.independentHumanLabel,
+        protocol: s.protocol,
+        decidable: s.decidable,
+        qualified: s.qualified,
+        missing: s.missing,
+      })),
+      blockedBreakdown: perSample
+        .filter((s) => !s.decidable)
+        .reduce((m, s) => ((m[s.reason] = (m[s.reason] ?? 0) + 1), m), {}),
+    },
+    /** 拼接自检：旧口径会不会误判通过。 */
+    stitchingCheck: {
+      perSampleConjunction: executed,
+      naiveAndOfCounts,
+      /** true = 旧口径会误报「已执行真人评估」；修正后 executed 仍为逐样本结果。 */
+      naiveWouldMisreport: naiveAndOfCounts !== executed,
+      naiveFormula: "旧口径 = collected>0 ∧ 有标签>0 ∧ 可判定>0 ∧ 有人声明协议（四个独立计数，可来自不同样本）",
+      fixedFormula: "修正口径 = 存在单个样本同时满足 来源 ∧ 合格独立人工标签 ∧ 协议 ∧ 可判定结果",
     },
     thirdPartyVideo: {
       collected: thirdParty.length,
@@ -173,8 +281,8 @@ function humanEvidence({ replays, byId, protocols }) {
       note: "第三方实拍单独统计，不与现场自愿参与者合并成一个真人成绩。",
     },
     note: executed
-      ? "存在现场真人采集 + 独立标签 + 可判定结果 + 采集协议声明，才置 executed=true。"
-      : "未执行真人评估：缺少现场采集样本 / 独立标签 / 可判定结果 / 采集协议声明之一。",
+      ? `有 ${qualifiedCount} 个样本同时满足四条条件（来源/独立人工标签/协议/可判定结果），才置 executed=true。`
+      : "未执行真人评估：没有任何**单个**样本同时满足来源、合格独立人工标签、协议关联、实际可判定结果四条。",
   };
 }
 

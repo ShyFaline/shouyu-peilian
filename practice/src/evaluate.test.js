@@ -62,6 +62,15 @@ function curlThumb(lm) {
   lm[4] = pt(0.44, 0.76);
 }
 
+/** 拇指竖直伸出（正立 A、Y 用；side 判定已加宽，对角 45° 属斜向不算侧）。 */
+function extendThumbUp(lm) {
+  lm[1] = pt(0.42, 0.80);
+  lm[2] = pt(0.42, 0.70);
+  lm[3] = pt(0.42, 0.46);
+  lm[4] = pt(0.42, 0.34);
+}
+
+/** 拇指横向伸出（L 用）。 */
 function extendThumbSide(lm) {
   lm[1] = pt(0.42, 0.80);
   lm[2] = pt(0.38, 0.70);
@@ -113,10 +122,10 @@ function palm() {
   return lm;
 }
 
-/** A：握拳，拇指伸出。 */
+/** A：握拳，拇指伸出朝上。 */
 function aHand() {
   const lm = palm();
-  extendThumbSide(lm);
+  extendThumbUp(lm);
   setFinger(lm, 5, false, 0.44);
   setFinger(lm, 9, false, 0.50);
   setFinger(lm, 13, false, 0.56);
@@ -146,10 +155,10 @@ function lHand() {
   return lm;
 }
 
-/** Y：拇指、小指伸出，其余收起。 */
+/** Y：拇指、小指伸出，其余收起。pointing 探针是 extended[0]=thumb，须朝上。 */
 function yHand() {
   const lm = palm();
-  extendThumbSide(lm);
+  extendThumbUp(lm);
   setFinger(lm, 5, false, 0.44);
   setFinger(lm, 9, false, 0.50);
   setFinger(lm, 13, false, 0.56);
@@ -321,6 +330,37 @@ test("I 正例通过", () => {
 test("W 正例通过", () => {
   const result = evaluate(letterW, wHand(), UNIT);
   assert.equal(result.pass, true, JSON.stringify(result.audit || result.issues));
+});
+
+/** 画面内上下翻转（y -> 1.5 - y）。角度/夹角不变，只有 pointing 的 up 变 down。 */
+function upsideDown(lm) {
+  return lm.map((p) => pt(p.x, 1.5 - p.y, p.z));
+}
+
+test("主路径可练字母必须有 pointing 规则（朝向缺失回归门）", () => {
+  for (const letter of [letterA, letterB, letterV, letterL, letterY, letterI, letterW, letterJ]) {
+    assert.equal(letter.rules.pointing, "up", `${letter.id} 缺 pointing 规则`);
+  }
+});
+
+test("指尖朝下不得 pass，hint 提示朝上", () => {
+  const cases = [
+    ["GF0021.V", letterV, vApartHand()],
+    ["GF0021.L", letterL, lHand()],
+    ["GF0021.A", letterA, aHand()],
+    ["GF0021.B", letterB, bHand()],
+    ["GF0021.Y", letterY, yHand()],
+    ["GF0021.I", letterI, iHand()],
+    ["GF0021.W", letterW, wHand()],
+    ["GF0021.J", letterJ, iHand()],
+  ];
+  for (const [name, letter, lm] of cases) {
+    const result = evaluate(letter, upsideDown(lm), UNIT);
+    assert.equal(result.pass, false, `${name} 倒置仍 pass`);
+    const blob = (result.audit || result.issues).map((issue) => `${issue.code} ${issue.hint}`).join("；");
+    assert.match(blob, /pointing\.up/, `${name} 缺 pointing.up：${blob}`);
+    assert.match(blob, /指尖朝上/, `${name} 缺中文提示：${blob}`);
+  }
 });
 
 test("空 rules 不得 pass", () => {

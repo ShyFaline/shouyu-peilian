@@ -35,7 +35,8 @@
           "middle",
           "ring",
           "pinky"
-        ]
+        ],
+        "pointing": "up"
       },
       "practiceStatus": "pose_practice"
     },
@@ -60,7 +61,8 @@
           "index_middle": "together",
           "middle_ring": "together",
           "ring_pinky": "together"
-        }
+        },
+        "pointing": "up"
       },
       "practiceStatus": "pose_practice"
     },
@@ -200,7 +202,8 @@
           "index",
           "middle",
           "ring"
-        ]
+        ],
+        "pointing": "up"
       },
       "practiceStatus": "pose_practice"
     },
@@ -220,7 +223,8 @@
           "index",
           "middle",
           "ring"
-        ]
+        ],
+        "pointing": "up"
       },
       "practiceStatus": "pose_practice"
     },
@@ -488,7 +492,8 @@
         "spread": {
           "index_middle": "apart",
           "middle_ring": "apart"
-        }
+        },
+        "pointing": "up"
       },
       "practiceStatus": "pose_practice"
     },
@@ -526,7 +531,8 @@
           "index",
           "middle",
           "ring"
-        ]
+        ],
+        "pointing": "up"
       },
       "practiceStatus": "pose_practice"
     },

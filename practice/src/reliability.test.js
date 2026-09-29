@@ -32,7 +32,7 @@ class Target {
 function deferred(){let resolve,reject;const promise=new Promise((a,b)=>{resolve=a;reject=b;});return {promise,resolve,reject};}
 async function harness(){
   const h={now:1000,epoch:1700000000000,raf:new Map(),seq:0,downloads:[],detects:0,painted:false,hands:[hand()],logs:[],streams:[]};
-  const ids=['video','overlay','status','verdict','hint','how','demo-stage','demo-image','demo-glyph','demo-badge','demo-label','letter-btns','atlas-btns','start-btn','stop-btn','mirror-toggle','export-toggle','export-btn','stage'];
+  const ids=['video','overlay','status','verdict','hint','how','demo-stage','demo-image','demo-glyph','demo-label','letter-btns','atlas-btns','start-btn','stop-btn','mirror-toggle','export-toggle','export-btn','stage'];
   h.els=Object.fromEntries(ids.map(id=>[id,new Target()]));
   const canvas=h.els.overlay;
   canvas.getContext=()=>({clearRect(){h.painted=false;},beginPath(){},moveTo(){},lineTo(){},stroke(){h.painted=true;},arc(){},fill(){h.painted=true;}});

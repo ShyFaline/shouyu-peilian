@@ -101,22 +101,7 @@ main {
   letter-spacing: 0;
 }
 
-.font-badge {
-  position: absolute;
-  right: 10px;
-  bottom: 8px;
-  font-family: "SignPinyin", sans-serif;
-  font-size: 40px;
-  line-height: 1;
-  opacity: 0.9;
-  pointer-events: none;
-}
-.font-badge[data-wide="true"] {
-  font-size: 28px;
-}
-
 .demo-stage[data-mode="font"] img,
-.demo-stage[data-mode="font"] .font-badge,
 .demo-stage[data-mode="image"] .glyph {
   display: none;
 }

@@ -36,7 +36,6 @@ const els = {
   demoStage: document.getElementById("demo-stage"),
   demoImage: document.getElementById("demo-image"),
   demoGlyph: document.getElementById("demo-glyph"),
-  demoBadge: document.getElementById("demo-badge"),
   demoLabel: document.getElementById("demo-label"),
   letterBtns: document.getElementById("letter-btns"),
   atlasBtns: document.getElementById("atlas-btns"),
@@ -117,8 +116,6 @@ function demoSrc(letter) {
 function showDemo(letter) {
   els.demoGlyph.textContent = letter.demo;
   els.demoGlyph.dataset.wide = letter.demo.length > 1 ? "true" : "false";
-  els.demoBadge.textContent = letter.demo;
-  els.demoBadge.dataset.wide = letter.demo.length > 1 ? "true" : "false";
   els.demoStage.dataset.mode = "font";
   els.demoImage.removeAttribute("src");
   els.demoImage.alt = "";

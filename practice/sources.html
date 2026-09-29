@@ -51,7 +51,7 @@
     <article>
       <h2>3. SignPinyin 字体</h2>
       <p>示范区缺渲染图时，用 SignPinyin 字形占位，避免空白。许可：<strong>SIL Open Font License 1.1</strong>。</p>
-      <p><strong>SignPinyin 是字体，不是识别模型。</strong> 它不参与关键点检测，也不进入 <code>evaluate()</code>。有 <code>content/demos/</code> 下的 PNG 时，字体只作为角标。</p>
+      <p><strong>SignPinyin 是字体，不是识别模型。</strong> 它不参与关键点检测，也不进入 <code>evaluate()</code>。有 <code>content/demos/</code> 下的 PNG 时只显示渲染图，不再叠加字体角标——SignPinyin 的部分字形与国标手型不一致（如 U），并放会误导。</p>
       <p>上游：<a href="https://github.com/ErSanSan233/SignPinyin">SignPinyin</a></p>
     </article>
 

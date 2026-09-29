@@ -37,6 +37,11 @@ def import_hand():
             bpy.data.objects.remove(o)
         else:
             mesh = o
+    # Workbench MATERIAL 色：暖肤色，对齐 Hour5 基线采样 (240,205,180)
+    mat = bpy.data.materials.new("Skin")
+    mat.diffuse_color = (1.0, 0.65, 0.48, 1.0)
+    mesh.data.materials.clear()
+    mesh.data.materials.append(mat)
     return arm, mesh
 
 
@@ -109,11 +114,16 @@ def setup_render(size=512):
     sc = bpy.context.scene
     sc.render.engine = "BLENDER_WORKBENCH"
     sc.display.shading.light = "STUDIO"
+    sc.display.shading.studio_light = "paint.sl"   # 亮平的工作室光，有柔和体积感但不过曝
     sc.display.shading.show_cavity = True
+    sc.display.shading.color_type = "MATERIAL"
     sc.display.shading.background_type = "WORLD"
     world = bpy.data.worlds.new("W")
     world.color = (1.0, 1.0, 1.0)
     sc.world = world
+    sc.view_settings.view_transform = "Standard"   # AgX 会把白底压灰，对齐 Hour5 基线用 Standard
+    sc.render.film_transparent = True              # 基线是 RGBA 透明底，练习页白卡片上显示
+    sc.render.image_settings.color_mode = "RGBA"
     sc.render.resolution_x = size
     sc.render.resolution_y = size
     sc.render.image_settings.file_format = "PNG"
@@ -169,21 +179,45 @@ def cmd_inspect(arm, mesh):
         bpy.data.objects.remove(sc.camera)
 
 
+FIST = (30, 95, 100, 60)   # 弯曲抵掌心
+EXT = (5, 0, 0, 0)         # 伸直（rest 微曲）
+
 LETTERS = {
-    # GF0021: 握拳，拇指贴食指侧
-    "A": {f: (20, 85, 95, 55) for f in FINGERS},
-    # GF0021: 四指伸直并拢，拇指弯回贴掌心（四指保持 rest 伸展，仅收拇指+并拢）
-    "B": {f: (5, 2, 0, 0) for f in FINGERS},
-    # GF0021: 食中二指伸直并拢，拇指弯回压无名指、小指
-    "U": {"Index": (8, 5, 0, 0), "Middle": (8, 5, 0, 0),
-          "Ring": (30, 95, 100, 60), "Little": (30, 95, 100, 60)},
+    # 原文页2：伸拇指指尖朝上，四指弯曲抵掌心，手背向右（2019 呈现角度调整名单）
+    "A": {f: FIST for f in FINGERS},
+    # 原文页2：四指并拢直立，拇指向掌心弯曲贴掌，掌心向前偏左
+    "B": {f: EXT for f in FINGERS},
+    # 【冲突记录用草稿】OCR 与仓库规则未裁定；按仓库规则：食中二指伸直并拢
+    "U": {"Index": EXT, "Middle": EXT, "Ring": FIST, "Little": FIST},
+    # 原文页5：食中指直立分开成 V，拇无名小弯曲，拇指搭无名指远节
+    "V": {"Index": EXT, "Middle": EXT, "Ring": FIST, "Little": FIST},
+    # 原文页5：食中无名直立分开成 W，拇小指弯曲，拇指搭小指远节
+    "W": {"Index": EXT, "Middle": EXT, "Ring": EXT, "Little": FIST},
+    # 原文页3：拇食指张开、食指朝上，中无名小弯曲抵掌心；原文无「直角」，张开角待人工对图
+    "L": {"Index": EXT, "Middle": FIST, "Ring": FIST, "Little": FIST},
+    # 原文页5：伸拇、小指，食中无名弯曲
+    "Y": {"Little": EXT, "Index": FIST, "Middle": FIST, "Ring": FIST},
+    # 【待人工对图】OCR「食指直立」与仓库「小指伸直」冲突；按仓库规则渲染
+    "I": {"Little": EXT, "Index": FIST, "Middle": FIST, "Ring": FIST},
 }
-THUMB_CURL = {"A": 45.0, "B": 60.0, "U": 55.0}
-# 拇指掌骨绕 finger_up 的对掌角（负值 = 扫向掌心一侧）
-THUMB_OPPOSE = {"A": -30.0, "B": -45.0, "U": -40.0}
-# 绕掌法线的开合角（度），rest 姿态手指自然张开，需收拢；正角向拇指侧
+# 绕掌法线（+X）的开合角：正角 = 向拇指侧（+Z）
 SPLAY = {"A": {}, "B": {"Index": -4, "Middle": -1.5, "Ring": 1.5, "Little": 4},
-         "U": {"Index": -6, "Middle": 5}}
+         "U": {"Index": -6, "Middle": 5},
+         "V": {"Index": 12, "Middle": -12},
+         "W": {"Index": 12, "Ring": -12},
+         "L": {"Index": -2}, "Y": {"Little": -10}, "I": {"Little": -6}}
+# 拇指 = (绕掌法线摆角, 绕finger_up屈曲 meta, prox, dist)；屈曲负角 = 扫向掌心（-X）
+THUMB = {"A": (-80, -10, -8, -5),     # 竖起，指尖朝上
+         "B": (0, -40, -45, -30),     # 弯回贴掌
+         "U": (0, -35, -40, -30),
+         "V": (0, -40, -38, -25),     # 搭无名指远节
+         "W": (0, -48, -40, -25),     # 搭小指远节
+         "L": (-35, 0, 0, 0),         # 张开
+         "Y": (-55, 0, 0, 0),         # 伸出
+         "I": (0, -35, -40, -30)}
+# 呈现角度：A 手背向右（背面视角）；其余掌心向前偏左（掌心视角 + 绕竖轴偏转）
+VIEW = {"A": "back"}
+PALM_YAW_DEG = 20.0
 
 
 def cmd_letters(arm, mesh):
@@ -199,21 +233,25 @@ def cmd_letters(arm, mesh):
             name = f"{finger}_Metacarpal_R"
             if deg and name in arm.pose.bones:
                 curl(arm, name, deg, palm_normal)
-        if "Thumb_Metacarpal_R" in arm.pose.bones:
-            curl(arm, "Thumb_Metacarpal_R", THUMB_OPPOSE[letter], finger_up)
+        swing, tmeta, tprox, tdist = THUMB[letter]
+        if swing and "Thumb_Metacarpal_R" in arm.pose.bones:
+            curl(arm, "Thumb_Metacarpal_R", swing, palm_normal)
         pose_letter(arm, curls, axis)
-        for seg in ("Metacarpal", "Proximal", "Distal"):
+        for seg, deg in zip(("Metacarpal", "Proximal", "Distal"), (tmeta, tprox, tdist)):
             name = f"Thumb_{seg}_R"
-            if name in arm.pose.bones:
-                curl(arm, name, THUMB_CURL[letter] / 3, axis)
+            if deg and name in arm.pose.bones:
+                curl(arm, name, deg, finger_up)
         lo, hi = world_bbox(mesh)
         c = (lo + hi) / 2
         dist = (hi - lo).length * 1.35
         across = palm_normal.cross(finger_up).normalized()
-        views = [(f"GF0021.{letter}_front.png", -palm_normal)]
-        if letter == "A":
-            views += [(f"GF0021.{letter}_back.png", palm_normal),
-                      (f"GF0021.{letter}_side.png", across)]
+        if VIEW.get(letter) == "back":
+            front_dir = palm_normal.copy()   # 手背向观者
+        else:
+            yaw = Matrix.Rotation(math.radians(PALM_YAW_DEG), 3, finger_up)
+            front_dir = (yaw @ -palm_normal).normalized()   # 掌心向前偏左
+        views = [(f"GF0021.{letter}_front.png", front_dir),
+                 (f"GF0021.{letter}_side.png", across)]   # 侧面验证视角，防支点类回归
         for fname, direction in views:
             add_camera(c + direction * dist, c, finger_up)
             render(sc, os.path.join(POC, fname))

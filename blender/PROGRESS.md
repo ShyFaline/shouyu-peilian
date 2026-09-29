@@ -29,6 +29,17 @@
 - **遗留争议（渲染按仓库规则，未裁定）**：U「食中二指 vs 中无小」、「食指 vs 小指」均按仓库规则；ZH/CH/SH「OCR疑」未做；所有角度为工程近似值，未经人工对照 GF 原图。
 - **已知待调**：A 的拇指在握拳位仍偏显眼；V/W/L/Y 拇指为近似位；各字母姿态未经人工对图验收前不替换 `practice/content/demos/`。
 
+## 0c. 判定交叉验证（2026-09-29 当日续）：示范姿态 ↔ 判定规则一致性
+
+做法：`build_godot_hand_poc.py -- landmarks` 把每个摆好姿的字母的 21 个 MediaPipe 式关键点（骨骼关节映射：Proximal.head=MCP、Intermediate.head=PIP、Distal.head=DIP、Distal.tail=指尖）经渲染相机投影为归一化图像坐标，导出 frame JSON，逐个喂给官方离线判定器 `practice/src/eval-handframe.mjs`（共享 evaluate.js 同一套规则，未复制阈值）。
+
+结果：**8/8 geometry_pass**。首跑仅 A 通过，失败模式与修正：
+1. B/U/V/W/I `thumb.not_curled`：判定器 thumb 卷曲只看 IP 关节（lm 2/3/4）**二维内角 ≤100°**。拇指绕 finger_up(+Y) 的屈曲发生在深度方向，投影上不可见；改为"掌骨横摆（绕掌法线）+ 近/远节在掌面内折叠"，拇指二维投影弯折达标。这是"3D 解剖正确 ≠ 判定器 2D 可见"的典型例。
+2. L `thumb_index.not_90deg`：拇指横摆角 -35° 在 20° 偏航下投影不足 60°；提到 -75°。
+3. W `middle_ring.not_apart`：食/无各 ±12° 开合经投影压缩到 22°（阈值 24°）；提到 ±18°。
+
+结论：示范资产与判定规则无系统性冲突；3D 姿态可作为规则的回归基准（改规则后重跑 landmarks → eval 即可验证）。局限：关键点是关节投影而非 MediaPipe 检测输出，未覆盖检测噪声路径。
+
 ---
 
 ## 1. 资产与页面对应关系核查

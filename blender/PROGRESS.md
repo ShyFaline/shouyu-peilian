@@ -4,6 +4,22 @@
 
 ---
 
+## 0. Godot XR 绑定手 PoC（2026-09-29 追加，本机 Kimi 执行）
+
+背景：Round1/Round2 两轮的 HBM 静态网格 + 自制权重路线失败（"幽灵手指"，Round2 渲染图全部带残影，与 DELIVERY_ROUND2.md 的"已修复"结论不符）。2026-09-29 核查确认 HBM bundle = Blender Studio 官方 CC0 demo 资产（证据已记入 `docs/来源与伦理草稿.md` 第 6 节），但静态网格无骨骼的问题不变，故评估替换为带正规绑定的 CC0 手模。
+
+资产：Godot XR Tools `hand_r.gltf`（CC0，自包含 glTF，26 根命名骨骼）+ 上游 `License.md`，存于 `blender/vendor/godot-xr-hands/`（gitignore 不入库）。Blender 4.5.14 便携版解压于 `blender/vendor/blender-4.5.14-windows-x64/`（本机此前未装 Blender）。
+
+脚本：`blender/build_godot_hand_poc.py`。已跑通的最短闭环：
+- `inspect`：导入 → 删除 glTF 内混入的无蒙皮 Icosphere 占位网格（42 顶点，会撑爆包围盒）→ 输出 6 向朝向图与 bones.json；
+- `letters`：固定世界轴卷曲（手指沿 +Y、拇指沿 +Z，故屈曲轴统一取世界 +Z；绕掌法线 +X 做收拢）→ A/B/U 掌心向相机渲染。坐标系结论：手指 +Y、拇指 +Z、掌心 +X。
+
+实测结果：B（四指伸展收拇指）、U（食中伸直、无名小卷曲）的剪影已经正确可读；A 握拳结构正确（拳眼、指节朝向正确），指节根部有轻微挤压需调参。与"骨架永远正确、变形全由正规蒙皮负责"的预期一致，不再有幽灵手指问题。教训：不要按骨骼自身局部轴卷曲（该骨架各骨 roll 不一致，会拧成麻花），用固定世界轴 + 逐字母角度表。
+
+待办：A 拳松紧与拇指贴食指侧的角度微调；逐个字母对照 GF 0021—2019 原图人工核对（ZH/CH/SH 的 OCR 疑点仍未解）；EEVEE 材质/白底渲染对齐现有基线风格；30 字母角度表化。
+
+---
+
 ## 1. 资产与页面对应关系核查
 
 | 资产文件 | 来源/阶段 | 状态说明 |

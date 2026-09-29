@@ -205,7 +205,10 @@ main {
   object-fit: contain;
 }
 .stage-media canvas { pointer-events: none; }
-.stage[data-mirror="true"] .stage-media { transform: scaleX(-1); }
+.stage[data-mirror="true"] .stage-media video,
+.stage[data-mirror="true"] .stage-media canvas {
+  transform: scaleX(-1);
+}
 
 .placeholder {
   display: grid;

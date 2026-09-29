@@ -291,12 +291,15 @@ LM_BONES = [
 
 
 def cmd_landmarks(arm, mesh):
-    """摆姿 → 经渲染相机投影导出 21 点 frame JSON，供 practice/src/eval-handframe.mjs 判定。"""
+    """摆姿 → 经渲染相机投影导出 21 点 golden JSON 到 practice/src/pose-goldens/（入库）。
+
+    pose-goldens.test.js 断言 8×8 恒等矩阵：每个 golden 仅通过自身字母。
+    改角度表或改判定规则后：重跑本模式 + node practice/src/pose-goldens.test.js。"""
     from bpy_extras.object_utils import world_to_camera_view
     sc = setup_render()
     center, palm_normal, finger_up = palm_frame(arm)
     axis = flex_axis()
-    outdir = os.path.join(POC, "landmarks")
+    outdir = os.path.join(ROOT, "..", "practice", "src", "pose-goldens")
     os.makedirs(outdir, exist_ok=True)
     for letter in LETTERS:
         apply_pose(arm, letter, palm_normal, finger_up, axis)

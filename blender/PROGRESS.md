@@ -40,6 +40,10 @@
 
 结论：示范资产与判定规则无系统性冲突；3D 姿态可作为规则的回归基准（改规则后重跑 landmarks → eval 即可验证）。局限：关键点是关节投影而非 MediaPipe 检测输出，未覆盖检测噪声路径。
 
+## 0d. golden 回归门固化（2026-09-30）
+
+交叉验证固化为持续门禁：`-- landmarks` 模式的导出目标从 vendor 临时目录改为 `practice/src/pose-goldens/`（入库，8 个 JSON + README）；新增 `practice/src/pose-goldens.test.js`，断言 8×8 恒等矩阵（每个 golden 仅通过自身字母——矩阵恰为满秩单位阵，先离线验证过再固化）。运行：`node practice/src/pose-goldens.test.js`。与 `fixtures/` 的分工：golden 是合成标准姿态、可直接断言 pass/fail；真人 fixtures 无独立标注、只做冒烟。规则或角度表任何一侧变更，矩阵必须仍为单位阵。
+
 ---
 
 ## 1. 资产与页面对应关系核查

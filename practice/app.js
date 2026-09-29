@@ -488,7 +488,7 @@ async function main() {
     }
   }
 
-  selectLetter(byId.get("GF0021.U") || byId.get(mainIds[0]) || letters[0]);
+  selectLetter(byId.get("GF0021.A") || byId.get(mainIds[0]) || letters[0]);
   setStatus("打开摄像头，对照左边示范。识别在本机，视频不上传。");
   applyMirror();
   setLiveButtons(false);

@@ -85,11 +85,14 @@ def flex_axis():
 
 
 def curl(arm, name, deg, axis):
-    """Rotate bone around a fixed world flex axis (computed at rest pose)."""
+    """Rotate bone around a fixed world flex axis, pivoting at the joint (bone head)."""
     pb = arm.pose.bones[name]
-    rot = Matrix.Rotation(math.radians(deg), 4, axis.normalized())
     M = arm.matrix_world @ pb.matrix
-    pb.matrix = arm.matrix_world.inverted() @ (rot @ M)
+    head = M.translation.copy()
+    hinge = (Matrix.Translation(head)
+             @ Matrix.Rotation(math.radians(deg), 4, axis.normalized())
+             @ Matrix.Translation(-head))
+    pb.matrix = arm.matrix_world.inverted() @ (hinge @ M)
     bpy.context.view_layer.update()
 
 
@@ -176,9 +179,11 @@ LETTERS = {
           "Ring": (30, 95, 100, 60), "Little": (30, 95, 100, 60)},
 }
 THUMB_CURL = {"A": 45.0, "B": 60.0, "U": 55.0}
-# 绕掌法线的开合角（度），rest 姿态手指自然张开，需收拢
-SPLAY = {"A": {}, "B": {"Index": 4, "Middle": 1.5, "Ring": -1.5, "Little": -4},
-         "U": {"Index": 6, "Middle": -5}}
+# 拇指掌骨绕 finger_up 的对掌角（负值 = 扫向掌心一侧）
+THUMB_OPPOSE = {"A": -30.0, "B": -45.0, "U": -40.0}
+# 绕掌法线的开合角（度），rest 姿态手指自然张开，需收拢；正角向拇指侧
+SPLAY = {"A": {}, "B": {"Index": -4, "Middle": -1.5, "Ring": 1.5, "Little": 4},
+         "U": {"Index": -6, "Middle": 5}}
 
 
 def cmd_letters(arm, mesh):
@@ -194,6 +199,8 @@ def cmd_letters(arm, mesh):
             name = f"{finger}_Metacarpal_R"
             if deg and name in arm.pose.bones:
                 curl(arm, name, deg, palm_normal)
+        if "Thumb_Metacarpal_R" in arm.pose.bones:
+            curl(arm, "Thumb_Metacarpal_R", THUMB_OPPOSE[letter], finger_up)
         pose_letter(arm, curls, axis)
         for seg in ("Metacarpal", "Proximal", "Distal"):
             name = f"Thumb_{seg}_R"
@@ -203,9 +210,9 @@ def cmd_letters(arm, mesh):
         c = (lo + hi) / 2
         dist = (hi - lo).length * 1.35
         across = palm_normal.cross(finger_up).normalized()
-        views = [(f"GF0021.{letter}_front.png", palm_normal)]
+        views = [(f"GF0021.{letter}_front.png", -palm_normal)]
         if letter == "A":
-            views += [(f"GF0021.{letter}_back.png", -palm_normal),
+            views += [(f"GF0021.{letter}_back.png", palm_normal),
                       (f"GF0021.{letter}_side.png", across)]
         for fname, direction in views:
             add_camera(c + direction * dist, c, finger_up)

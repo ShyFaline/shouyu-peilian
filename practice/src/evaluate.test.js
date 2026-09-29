@@ -655,7 +655,7 @@ test("能力：J 几何通过不得写成完整掌握", () => {
   const blob = `${view.title} ${view.hint}`;
   assert.doesNotMatch(blob, /完整掌握|字母已掌握|完整 J|已会/);
   if (judged.decision === "pass") {
-    assert.equal(view.title, "姿态接近，停稳");
+    assert.equal(view.title, "做对了，保持住");
   }
 });
 
@@ -663,7 +663,7 @@ test("pose_practice V 连续保持后 decision=pass，文案不是到位/掌握"
   const judged = holdPass(letterV, vApartHand(), 6);
   assert.equal(judged.decision, "pass");
   const view = presentJudge(judged);
-  assert.equal(view.title, "姿态接近，停稳");
+  assert.equal(view.title, "做对了，保持住");
   assert.doesNotMatch(`${view.title}${view.hint}`, /到位|字母已掌握|完整掌握/);
   const failView = presentJudge({
     decision: "fail",

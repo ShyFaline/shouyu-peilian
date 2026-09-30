@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+  <meta name="theme-color" content="#f5f1e8" />
+  <title>跟着练 · 指间</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到主要内容</a>
+  <header class="site-header">
+    <a class="brand" href="./index.html" aria-label="指间首页"><span class="brand-seal" aria-hidden="true">指</span><span>指间<small>手指字母陪练</small></span></a>
+    <nav aria-label="主导航"><a href="./index.html">首页</a><a href="./learn.html" aria-current="page">跟着练</a><a href="./sources.html">关于与来源</a></nav>
+  </header>
+  <main id="main" class="learn">
+    <div class="page-heading">
+      <div>
+        <p class="eyebrow" id="learn-eyebrow">跟着练 · 一次一个手型</p>
+        <h1 id="learn-title">看清楚，再试一试。</h1>
+        <div class="mode-switch" role="group" aria-label="练习模式">
+          <button type="button" id="mode-learn" aria-pressed="true">跟练</button>
+          <button type="button" id="mode-test" aria-pressed="false">自测</button>
+        </div>
+      </div>
+      <p id="status" class="status" role="status">先看示范，准备好后再打开摄像头。</p>
+    </div>
+    <div class="practice-grid">
+      <section id="demo-panel" class="panel demo" aria-labelledby="demo-label">
+        <p class="panel-label">01 / 看示范</p>
+        <div id="demo-stage" class="demo-stage" data-mode="font"><img id="demo-image" alt="" /><div id="demo-glyph" class="glyph" aria-hidden="true">a</div></div>
+        <h2 id="demo-label" class="demo-label">正在准备字母…</h2>
+        <p id="capability" class="capability-note"></p>
+        <p id="how" class="how"></p>
+        <section id="letter-library" aria-labelledby="library-title">
+          <h3 id="library-title" class="library-title">选一个字母</h3>
+          <section id="practice-group" class="letter-group" aria-labelledby="practice-group-title">
+            <h4 id="practice-group-title" class="letter-group-title">可跟练（<span id="practice-count">0</span>）</h4>
+            <p class="letter-group-note">先看示范，再试着摆出手型。打开摄像头后，可以获得静态手型提示。</p>
+            <div id="letter-btns" class="letter-btns"></div>
+          </section>
+          <details id="review-group" class="letter-group">
+            <summary class="letter-group-title">待核对（<span id="review-count">0</span>）</summary>
+            <p class="letter-group-note">这些字母暂不判定对错，可以查看示范，但不作为过关依据。</p>
+            <div id="atlas-btns" class="letter-btns"></div>
+          </details>
+          <details id="demo-group" class="letter-group">
+            <summary class="letter-group-title">仅示范（<span id="demo-count">0</span>）</summary>
+            <p class="letter-group-note">这些字母目前只提供外形示范，不开放跟练判定。</p>
+            <div id="demo-btns" class="letter-btns"></div>
+          </details>
+          <details id="similar-hints" class="similar-hints" hidden>
+            <summary>相似手型提示</summary>
+            <p id="similar-hints-text" class="atlas-note"></p>
+            <div id="similar-hint-btns" class="letter-btns"></div>
+          </details>
+        </section>
+      </section>
+      <section id="test-panel" class="panel test-prompt" aria-labelledby="test-letter" hidden>
+        <p class="panel-label">自测 · 静态手型</p>
+        <h2 id="test-letter" class="demo-label">正在准备字母…</h2>
+        <p id="test-scope" class="capability-note">只核静态手型。</p>
+        <p class="letter-group-note">不看示范。需要对照时，请回到跟练。待核对和仅示范的字母不能自测。</p>
+        <div class="test-actions">
+          <button type="button" id="test-retry">重试本题</button>
+          <button type="button" id="test-next" class="primary">下一题</button>
+          <button type="button" id="test-back">回到跟练看示范</button>
+        </div>
+        <p class="library-title">本题可换的静态字母</p>
+        <div id="test-letter-btns" class="letter-btns"></div>
+        <p id="test-outcome" class="test-outcome" hidden></p>
+      </section>
+      <section class="panel live" aria-labelledby="live-title">
+        <h2 id="live-title" class="panel-label">02 / 动手试试</h2>
+        <div id="stage" class="stage" data-mirror="true"><div class="stage-media"><video id="video" playsinline autoplay muted></video><canvas id="overlay"></canvas><div class="placeholder"><div><span class="camera-mark" aria-hidden="true">＋</span><strong>准备好时，再打开摄像头</strong><span>让整只手出现在画面里，保持光线明亮</span></div></div></div><div class="live-verdict"><p id="verdict" data-state="idle">先看一看示范</p><p id="hint">不用急，准备好再开始。</p></div></div>
+        <p id="pass-seal" class="pass-seal" hidden><span class="pass-seal-mark" aria-hidden="true">通过</span><span id="pass-seal-text" aria-live="polite"></span></p>
+        <div class="toolbar"><button id="start-btn" type="button" class="primary">打开摄像头</button><button id="stop-btn" type="button" disabled>停止摄像头</button><label><input id="mirror-toggle" type="checkbox" checked /> 镜像画面</label></div>
+        <details class="export"><summary>高级工具 · 问题排查</summary><p class="atlas-note">仅在排查问题时使用。下载手部关键点。</p><label><input id="export-toggle" type="checkbox" /> 允许下载当前手部关键点</label><button id="export-btn" type="button" disabled>下载 JSON</button></details>
+      </section>
+    </div>
+    <section id="records" class="panel records" aria-labelledby="records-title">
+      <h2 id="records-title" class="panel-label">本机练习记录</h2>
+      <p class="letter-group-note">仅此浏览器。清除浏览器数据会丢失。只记下静态通过次数。</p>
+      <p id="persist-note" class="persist-note" hidden>当前记录只留在本次页面，未能写入此浏览器存储。</p>
+      <p id="records-empty" class="atlas-note">还没有通过记录。真实通过静态手型后，会记在这里。</p>
+      <div id="records-list" class="records-list"></div>
+      <div class="records-actions">
+        <button type="button" id="records-clear">清除记录</button>
+      </div>
+      <div id="records-clear-confirm" class="records-confirm" hidden>
+        <p>清除此浏览器中的练习记录？清除后不能恢复。</p>
+        <button type="button" id="records-clear-yes">确认清除</button>
+        <button type="button" id="records-clear-no">取消</button>
+      </div>
+    </section>
+    <noscript><p class="panel">学习页面需要启用 JavaScript 才能加载字母与练习提示。<a href="./index.html">返回首页</a></p></noscript>
+  </main>
+  <footer class="site-footer"><span>一步一步，慢慢来。</span><a href="./sources.html">关于、隐私与来源</a></footer>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

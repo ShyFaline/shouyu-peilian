@@ -8,6 +8,7 @@
 - 提交前必须通过测试：
   - `node practice/src/evaluate.test.js`
   - `node --experimental-vm-modules practice/src/reliability.test.js`
+  - `node practice/src/pose-goldens.test.js`（合成 golden，只做规则回归，不等于国标或真实检测通过）
 
 ## 项目速览
 

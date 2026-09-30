@@ -1,0 +1,26 @@
+name: Required tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: evaluate.test.js
+        run: node practice/src/evaluate.test.js
+      - name: reliability.test.js
+        run: node --experimental-vm-modules practice/src/reliability.test.js
+      - name: pose-goldens.test.js
+        run: node practice/src/pose-goldens.test.js

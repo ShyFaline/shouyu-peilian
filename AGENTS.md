@@ -9,6 +9,7 @@
   - `node practice/src/evaluate.test.js`
   - `node --experimental-vm-modules practice/src/reliability.test.js`
   - `node practice/src/pose-goldens.test.js`（合成 golden，只做规则回归，不等于国标或真实检测通过）
+  - `node practice/src/motion.test.js`（动态判定合成序列回归，同上不等价声明）
 
 ## 项目速览
 

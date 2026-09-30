@@ -163,7 +163,7 @@ function judgeMotion(hold, motion, spec, input, geom) {
       resetHold(hold);
       return { decision: "fail", issues: geom.audit || geom.issues || [] };
     }
-    observePass(hold, { videoTime, nowMs });
+    observePass(hold, { ok: true, videoTime, nowMs });
     if (!holdReady(hold)) {
       return { decision: "fail", issues: [{ code: "hold.pending", hint: "保持手型" }] };
     }

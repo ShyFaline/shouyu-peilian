@@ -30,6 +30,7 @@ export const KNOWN_RULE_KEYS = [
   "thumb_between",
   "thumb_index",
   "hook",
+  "motion", // 时序规则，由 motion.js 处理；evaluate 只识别、不参与单帧几何
 ];
 
 export const CURL_HINT = {

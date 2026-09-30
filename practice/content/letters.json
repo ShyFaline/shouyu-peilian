@@ -212,7 +212,7 @@
       "standard": "GF 0021-2019",
       "label": "J",
       "title": "字母 J",
-      "how": "静态同 I（小指伸直）。完整字母还要顺势画钩，第一期只核手型。",
+      "how": "小指伸直，其余收起，顺势向下画钩。画钩方向以规范原图为准（待人工对图）。",
       "demo": "j",
       "rules": {
         "extended": [
@@ -224,7 +224,8 @@
           "middle",
           "ring"
         ],
-        "pointing": "up"
+        "pointing": "up",
+        "motion": { "kind": "trace", "finger": "pinky", "path": "hook" }
       },
       "practiceStatus": "pose_practice"
     },
@@ -541,7 +542,7 @@
       "standard": "GF 0021-2019",
       "label": "Z",
       "title": "字母 Z",
-      "how": "静态：食指伸直，其余收起。完整字母还要画 Z，第一期只核手型。",
+      "how": "食指伸直，其余收起，并顺势画出 Z 形。起笔方向以规范原图为准（待人工对图）。",
       "demo": "z",
       "rules": {
         "extended": [
@@ -551,7 +552,8 @@
           "middle",
           "ring",
           "pinky"
-        ]
+        ],
+        "motion": { "kind": "trace", "finger": "index", "path": "z" }
       },
       "practiceStatus": "pose_practice"
     },
@@ -646,7 +648,7 @@
       "standard": "GF 0021-2019",
       "label": "Ê",
       "title": "字母 ê",
-      "how": "近 E：中指、无名指、小指并拢伸直，食指弯曲贴拇指。与 E 很接近。",
+      "how": "手型同 E：中指、无名指、小指并拢伸直，食指弯曲贴拇指；同时手上下晃动两下。",
       "demo": "ê",
       "rules": {
         "extended": [
@@ -661,7 +663,8 @@
         "spread": {
           "middle_ring": "together",
           "ring_pinky": "together"
-        }
+        },
+        "motion": { "kind": "shake", "part": "hand", "axis": "vertical", "cycles": 2 }
       },
       "practiceStatus": "demo_only"
     },
@@ -670,7 +673,7 @@
       "standard": "GF 0021-2019",
       "label": "Ü",
       "title": "字母 ü",
-      "how": "食指、中指并拢伸直，同时拇指伸出。",
+      "how": "食指、中指并拢伸直，同时拇指伸出；手指前后晃动两下。（前后晃动的摄像头可检测性待实机验证）",
       "demo": "ü",
       "rules": {
         "extended": [
@@ -684,7 +687,8 @@
         ],
         "spread": {
           "index_middle": "together"
-        }
+        },
+        "motion": { "kind": "shake", "part": "fingers", "axis": "forward", "cycles": 2 }
       },
       "practiceStatus": "pending_review"
     }

@@ -1,0 +1,1106 @@
+{
+  "id": "godot-xr-v2",
+  "generated_on": "2026-09-30",
+  "purpose": "候选示范图，供主代理目检。未替换 practice/content/demos。",
+  "source": {
+    "mesh": "blender/vendor/godot-xr-hands/hand_r.gltf",
+    "asset_copyright_gltf": "CC0 Public Domain",
+    "license_file": "blender/vendor/godot-xr-hands/LICENSE.md",
+    "license": "CC0 1.0 Universal",
+    "author": "DigitalN8m4r3 aka Miodrag Sejic",
+    "year": 2022,
+    "license_file_head": "To the extent possible under law, DigitalN8m4r3 aka Miodrag Sejic\nhas waived all copyright and related or neighboring rights to Hand Models for the Godot XR Tools.\nThis work is published from: Austria.\nDate: 7th November 2022\n\nCreative Comm"
+  },
+  "script": "blender/build_godot_hand_candidate.py",
+  "reuses": "blender/build_godot_hand_poc.py helpers (import/curl/camera/render); original main is __name__-guarded",
+  "rest_frame": {
+    "palm_normal_world": [
+      0.982,
+      0.0248,
+      -0.1874
+    ],
+    "finger_up_world": [
+      -0.0369,
+      0.9974,
+      -0.0612
+    ],
+    "across_radial_world": [
+      0.1854,
+      0.067,
+      0.9804
+    ],
+    "flex_axis_world": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "notes": [
+      "rest: fingers along +Y, thumb along +Y/+Z (radial), palm_normal ≈ +X (dorsal).",
+      "palmar direction is -palm_normal.",
+      "positive finger curl around world +Z moves a +Y phalanx toward -X (into the palm).",
+      "positive thumb swing around palm_normal moves the thumb more +Z and down — that is out, not into the palm.",
+      "negative thumb swing around palm_normal takes the thumb across the palm toward ulnar.",
+      "negative thumb metacarpal around finger_up increases palmar offset (thenar).",
+      "thumb IP fold around palm_normal (negative) stays in the palmar plane; fold around +Z punches palmar-out."
+    ]
+  },
+  "bone_mapping": {
+    "conclusion": "Thumb has Metacarpal/Proximal/Distal/Tip (no Intermediate). Distal.tail equals Tip.head for all five digits at rest.",
+    "mediapipe21": [
+      "0 Wrist_R.head",
+      "1 Thumb_Metacarpal_R.head (CMC)",
+      "2 Thumb_Proximal_R.head (MCP)",
+      "3 Thumb_Distal_R.head (IP)",
+      "4 Thumb_Distal_R.tail == Thumb_Tip_R.head (tip)",
+      "5 Index_Proximal_R.head (MCP) … Distal.head (DIP), Distal.tail (tip); same pattern Middle/Ring/Little"
+    ],
+    "rest_distal_tail_vs_tip_head": {
+      "Thumb": {
+        "distal_tail": [
+          -0.02616,
+          0.09344,
+          0.0892
+        ],
+        "tip_head": [
+          -0.02616,
+          0.09344,
+          0.0892
+        ],
+        "delta": 0.0
+      },
+      "Index": {
+        "distal_tail": [
+          0.00666,
+          0.16987,
+          0.04279
+        ],
+        "tip_head": [
+          0.00666,
+          0.16987,
+          0.04279
+        ],
+        "delta": 0.0
+      },
+      "Middle": {
+        "distal_tail": [
+          0.00327,
+          0.17632,
+          -0.00771
+        ],
+        "tip_head": [
+          0.00327,
+          0.17632,
+          -0.00771
+        ],
+        "delta": 0.0
+      },
+      "Ring": {
+        "distal_tail": [
+          -0.00041,
+          0.16183,
+          -0.04465
+        ],
+        "tip_head": [
+          -0.00041,
+          0.16183,
+          -0.04465
+        ],
+        "delta": 0.0
+      },
+      "Little": {
+        "distal_tail": [
+          -0.01099,
+          0.1278,
+          -0.06379
+        ],
+        "tip_head": [
+          -0.01099,
+          0.1278,
+          -0.06379
+        ],
+        "delta": 0.0
+      }
+    }
+  },
+  "pose_parameters": {
+    "fist_per_finger_metacarpal_proximal_intermediate_distal": {
+      "Index": [
+        0,
+        80,
+        90,
+        55
+      ],
+      "Middle": [
+        0,
+        85,
+        95,
+        58
+      ],
+      "Ring": [
+        5,
+        88,
+        98,
+        60
+      ],
+      "Little": [
+        8,
+        90,
+        100,
+        62
+      ]
+    },
+    "i_fist_letter_I_only": {
+      "Index": [
+        0,
+        80,
+        90,
+        55
+      ],
+      "Middle": [
+        0,
+        85,
+        95,
+        58
+      ],
+      "Ring": [
+        0,
+        88,
+        98,
+        60
+      ]
+    },
+    "extended": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "letter_fingers": {
+      "A": {
+        "Index": [
+          0,
+          80,
+          90,
+          55
+        ],
+        "Middle": [
+          0,
+          85,
+          95,
+          58
+        ],
+        "Ring": [
+          5,
+          88,
+          98,
+          60
+        ],
+        "Little": [
+          8,
+          90,
+          100,
+          62
+        ]
+      },
+      "B": {
+        "Index": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "Middle": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "Ring": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "Little": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "U": {
+        "Index": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "Middle": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "Ring": [
+          5,
+          88,
+          98,
+          60
+        ],
+        "Little": [
+          8,
+          90,
+          100,
+          62
+        ]
+      },
+      "V": {
+        "Index": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "Middle": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "Ring": [
+          5,
+          88,
+          98,
+          60
+        ],
+        "Little": [
+          8,
+          90,
+          100,
+          62
+        ]
+      },
+      "W": {
+        "Index": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "Middle": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "Ring": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "Little": [
+          8,
+          90,
+          100,
+          62
+        ]
+      },
+      "L": {
+        "Index": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "Middle": [
+          0,
+          85,
+          95,
+          58
+        ],
+        "Ring": [
+          5,
+          88,
+          98,
+          60
+        ],
+        "Little": [
+          8,
+          90,
+          100,
+          62
+        ]
+      },
+      "Y": {
+        "Little": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "Index": [
+          0,
+          80,
+          90,
+          55
+        ],
+        "Middle": [
+          0,
+          85,
+          95,
+          58
+        ],
+        "Ring": [
+          5,
+          88,
+          98,
+          60
+        ]
+      },
+      "I": {
+        "Little": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "Index": [
+          0,
+          80,
+          90,
+          55
+        ],
+        "Middle": [
+          0,
+          85,
+          95,
+          58
+        ],
+        "Ring": [
+          0,
+          88,
+          98,
+          60
+        ]
+      }
+    },
+    "splay_deg_around_palm_normal": {
+      "A": {},
+      "B": {},
+      "U": {
+        "Index": -5,
+        "Middle": 4
+      },
+      "V": {
+        "Index": 12,
+        "Middle": -12
+      },
+      "W": {
+        "Index": 15,
+        "Ring": -15
+      },
+      "L": {
+        "Index": -2
+      },
+      "Y": {
+        "Little": -8
+      },
+      "I": {
+        "Index": -8,
+        "Middle": 3,
+        "Ring": 10,
+        "Little": -6
+      }
+    },
+    "b_finger_adduction": {
+      "method": "rest MCP→tip projected on palm; rotate Proximal around palm_normal to match Middle (parallel phalanges). Metacarpal left at rest.",
+      "rest_angle_vs_middle_deg": {
+        "Index": 16.5815,
+        "Middle": 0.0,
+        "Ring": -9.7626,
+        "Little": -16.0087
+      },
+      "applied_proximal_deg_around_palm_normal": {
+        "Index": -16.5815,
+        "Middle": 0.0,
+        "Ring": 9.7626,
+        "Little": 16.0087
+      },
+      "post_pose_angle_vs_middle_deg": {
+        "Index": -0.0,
+        "Middle": 0.0,
+        "Ring": -0.0,
+        "Little": -0.0
+      },
+      "post_pose_tip_radial": {
+        "Index": 0.03062,
+        "Middle": 0.00717,
+        "Ring": -0.01514,
+        "Little": -0.03499
+      },
+      "adjacent_tip_radial_deltas": {
+        "Index-Middle": 0.02345,
+        "Middle-Ring": 0.02231,
+        "Ring-Little": 0.01985
+      }
+    },
+    "b_thumb": {
+      "swing_deg_around_palm_normal": -44,
+      "metacarpal_deg_around_finger_up": 36,
+      "proximal_deg": -62,
+      "distal_deg": -28,
+      "fold_axis": "palm",
+      "cmc_deg_around_across": -14,
+      "tmeta_before_swing": false
+    },
+    "thumb": {
+      "A": {
+        "swing_deg_around_palm_normal": -22,
+        "metacarpal_deg_around_finger_up": 4,
+        "proximal_deg": 0,
+        "distal_deg": 0,
+        "fold_axis": "palm"
+      },
+      "B": {
+        "swing_deg_around_palm_normal": -44,
+        "metacarpal_deg_around_finger_up": 36,
+        "proximal_deg": -62,
+        "distal_deg": -28,
+        "fold_axis": "palm",
+        "cmc_deg_around_across": -14,
+        "tmeta_before_swing": false,
+        "source": "B_THUMB (letter-B only; U/I keep THUMB tuples)"
+      },
+      "U": {
+        "swing_deg_around_palm_normal": -22,
+        "metacarpal_deg_around_finger_up": -12,
+        "proximal_deg": -38,
+        "distal_deg": -42,
+        "fold_axis": "palm"
+      },
+      "V": {
+        "swing_deg_around_palm_normal": -55,
+        "metacarpal_deg_around_finger_up": -10,
+        "proximal_deg": -30,
+        "distal_deg": -35,
+        "fold_axis": "palm"
+      },
+      "W": {
+        "swing_deg_around_palm_normal": -70,
+        "metacarpal_deg_around_finger_up": -5,
+        "proximal_deg": -30,
+        "distal_deg": -30,
+        "fold_axis": "palm"
+      },
+      "L": {
+        "swing_deg_around_palm_normal": 8,
+        "metacarpal_deg_around_finger_up": -22,
+        "proximal_deg": 0,
+        "distal_deg": 0,
+        "fold_axis": "palm"
+      },
+      "Y": {
+        "swing_deg_around_palm_normal": 6,
+        "metacarpal_deg_around_finger_up": -12,
+        "proximal_deg": 0,
+        "distal_deg": 0,
+        "fold_axis": "palm"
+      },
+      "I": {
+        "swing_deg_around_palm_normal": -22,
+        "metacarpal_deg_around_finger_up": -12,
+        "proximal_deg": -38,
+        "distal_deg": -42,
+        "fold_axis": "palm"
+      }
+    },
+    "palm_yaw_deg_non_A": 18.0,
+    "A_front_view": "0.86*across + 0.22*palm_normal (radial 3/4, dorsum to the right)"
+  },
+  "letter_notes": {
+    "A": "四指握拳、拇指贴拳侧朝上；正面取桡侧三分之四，手背在画面右侧，不是正背朝观者。",
+    "B": "四指并拢直立，拇指沿掌面折入贴掌。",
+    "U": "争议未核：按仓库规则食中伸直并拢、无名小指握拳；不是规范已核。",
+    "V": "食中分开成 V，无名小指握拳，拇指折向无名指远节一侧。",
+    "W": "食中无名分开成 W，小指握拳，拇指折向小指远节一侧。",
+    "L": "食指朝上、其余握拳，拇指张开；原文无直角，未按 90° 硬摆。",
+    "Y": "伸拇、小指，食中无名握拳。拇指用微外展保持伸出，不用跨掌内收。",
+    "I": "争议未核：按仓库规则小指伸直、其余握拳、拇指入掌；OCR 食/小指未对图。屈指用接近 A 的 I_FIST 并掌面内收，不共用四指拳的无名指掌骨杯状。"
+  },
+  "known_limits": [
+    "姿态按手型要求摆，不是为二维判定规则过关调参；未导出 landmarks，未改 pose-goldens。",
+    "U：原文四指并拢 vs 仓库二指，冲突未裁定；本图按仓库二指，保持标识为争议。",
+    "I：OCR 食指直立 vs 仓库小指伸直，未对原图；本图按仓库小指，保持标识为争议。屈起三指用接近 A 的 I_FIST（无名指掌骨 0°，不用四指拳的 5° 孤立杯状）并 Index−8/Middle+3/Ring+10 掌面内收；小指仍伸直。过屈会把指尖抬回。未宣称视觉验收。",
+    "A：手背向右 ≠ 正背朝观者；本图用桡侧三分之四。",
+    "L：原文无「直角」字样，张开角是工程近似。",
+    "V/W 拇指「搭在远节」是朝该指远节折入，低模上约 2–3 cm 量级，不是精确表面接触。",
+    "握拳未使用旧 FIST 的掌骨 30°，以免掌骨连带整掌变形。",
+    "B：四指并拢绕 Proximal(MCP) 对齐 rest MCP→tip 与中指掌面方向，不转掌骨。",
+    "B 拇指：按变形后掌面蒙皮最近顶点有符号距离调 CMC/IP，不是为判定规则过关，也不宣称视觉/国标验收。低模无软组织接触解算。",
+    "B 拇指实测（关节相对掌面，+为掌前）：r2 tip +15.8mm ip +14.6mm mcp +5.0mm、远节 palmar 0.035 ulnar 0.995 up 0.089、近节 up 0.76（远节 -50° 折角）。r3 swing -44 / tmeta +36 / 近节 -62 / 远节 -28 / across -14：tip +10.1mm ip +10.5mm mcp +3.4mm，远节 palmar 0.005 ulnar 0.994 up 0.114，近节 up 0.50 ulnar 0.86。关节在拇指体内，毫米级间隙不等于皮肤贴合；远节仍略朝上、指尖偏尺侧，未宣称贴掌或视觉验收。flex± 与 tmeta_before_swing 会穿掌，B 不用。",
+    "Workbench 预览材质，不是最终片场灯光。",
+    "本脚本只做关节有限、包围盒合理、PNG 非空检查，不宣称视觉验收，也不写国标正确或标准答案。",
+    "旧 PoC 为过 thumb.not_curled 把 B/U/V/W/I 拇指绕 palm_normal 正摆 ~55°，实测拇指落到腕下方桡侧外伸。"
+  ],
+  "outputs": {
+    "A": {
+      "front": "candidates\\godot-xr-v2\\GF0021.A_front.png",
+      "side": "candidates\\godot-xr-v2\\GF0021.A_side.png"
+    },
+    "B": {
+      "front": "candidates\\godot-xr-v2\\GF0021.B_front.png",
+      "side": "candidates\\godot-xr-v2\\GF0021.B_side.png"
+    },
+    "U": {
+      "front": "candidates\\godot-xr-v2\\GF0021.U_front.png",
+      "side": "candidates\\godot-xr-v2\\GF0021.U_side.png"
+    },
+    "V": {
+      "front": "candidates\\godot-xr-v2\\GF0021.V_front.png",
+      "side": "candidates\\godot-xr-v2\\GF0021.V_side.png"
+    },
+    "W": {
+      "front": "candidates\\godot-xr-v2\\GF0021.W_front.png",
+      "side": "candidates\\godot-xr-v2\\GF0021.W_side.png"
+    },
+    "L": {
+      "front": "candidates\\godot-xr-v2\\GF0021.L_front.png",
+      "side": "candidates\\godot-xr-v2\\GF0021.L_side.png"
+    },
+    "Y": {
+      "front": "candidates\\godot-xr-v2\\GF0021.Y_front.png",
+      "side": "candidates\\godot-xr-v2\\GF0021.Y_side.png"
+    },
+    "I": {
+      "front": "candidates\\godot-xr-v2\\GF0021.I_front.png",
+      "side": "candidates\\godot-xr-v2\\GF0021.I_side.png"
+    }
+  },
+  "measured_tips_after_pose": {
+    "A": {
+      "Thumb": {
+        "world": [
+          -0.0315,
+          0.1111,
+          0.0513
+        ],
+        "palmar": 0.0402,
+        "radial": 0.0542,
+        "up": 0.1224
+      },
+      "Index": {
+        "world": [
+          0.0069,
+          0.0579,
+          0.0428
+        ],
+        "palmar": 0.0023,
+        "radial": 0.0494,
+        "up": 0.0684
+      },
+      "Middle": {
+        "world": [
+          0.0035,
+          0.055,
+          -0.0077
+        ],
+        "palmar": -0.0038,
+        "radial": -0.0009,
+        "up": 0.0687
+      },
+      "Ring": {
+        "world": [
+          0.0041,
+          0.0547,
+          -0.0446
+        ],
+        "palmar": -0.0113,
+        "radial": -0.037,
+        "up": 0.0707
+      },
+      "Little": {
+        "world": [
+          -0.008,
+          0.055,
+          -0.0638
+        ],
+        "palmar": -0.003,
+        "radial": -0.058,
+        "up": 0.0726
+      }
+    },
+    "B": {
+      "Thumb": {
+        "world": [
+          -0.0243,
+          0.0645,
+          -0.0482
+        ],
+        "palmar": 0.0157,
+        "radial": -0.0451,
+        "up": 0.0817
+      },
+      "Index": {
+        "world": [
+          0.0017,
+          0.1714,
+          0.0168
+        ],
+        "palmar": -0.0003,
+        "radial": 0.0306,
+        "up": 0.1834
+      },
+      "Middle": {
+        "world": [
+          0.0033,
+          0.1763,
+          -0.0077
+        ],
+        "palmar": -0.0066,
+        "radial": 0.0072,
+        "up": 0.1898
+      },
+      "Ring": {
+        "world": [
+          0.0024,
+          0.1645,
+          -0.0295
+        ],
+        "palmar": -0.0095,
+        "radial": -0.0151,
+        "up": 0.1793
+      },
+      "Little": {
+        "world": [
+          -0.0076,
+          0.132,
+          -0.0456
+        ],
+        "palmar": -0.0019,
+        "radial": -0.035,
+        "up": 0.1483
+      }
+    },
+    "U": {
+      "Thumb": {
+        "world": [
+          -0.0516,
+          0.086,
+          -0.0121
+        ],
+        "palmar": 0.0487,
+        "radial": -0.0134,
+        "up": 0.102
+      },
+      "Index": {
+        "world": [
+          0.0038,
+          0.1709,
+          0.0282
+        ],
+        "palmar": -0.0003,
+        "radial": 0.0421,
+        "up": 0.1822
+      },
+      "Middle": {
+        "world": [
+          0.0056,
+          0.1767,
+          0.0044
+        ],
+        "palmar": -0.0066,
+        "radial": 0.0195,
+        "up": 0.1894
+      },
+      "Ring": {
+        "world": [
+          0.0041,
+          0.0547,
+          -0.0446
+        ],
+        "palmar": -0.0113,
+        "radial": -0.037,
+        "up": 0.0707
+      },
+      "Little": {
+        "world": [
+          -0.008,
+          0.055,
+          -0.0638
+        ],
+        "palmar": -0.003,
+        "radial": -0.058,
+        "up": 0.0726
+      }
+    },
+    "V": {
+      "Thumb": {
+        "world": [
+          -0.0466,
+          0.0664,
+          -0.0537
+        ],
+        "palmar": 0.0365,
+        "radial": -0.0545,
+        "up": 0.0848
+      },
+      "Index": {
+        "world": [
+          0.0134,
+          0.1621,
+          0.0771
+        ],
+        "palmar": -0.0003,
+        "radial": 0.0912,
+        "up": 0.17
+      },
+      "Middle": {
+        "world": [
+          -0.0034,
+          0.1699,
+          -0.0435
+        ],
+        "palmar": -0.0066,
+        "radial": -0.0296,
+        "up": 0.1858
+      },
+      "Ring": {
+        "world": [
+          0.0041,
+          0.0547,
+          -0.0446
+        ],
+        "palmar": -0.0113,
+        "radial": -0.037,
+        "up": 0.0707
+      },
+      "Little": {
+        "world": [
+          -0.008,
+          0.055,
+          -0.0638
+        ],
+        "palmar": -0.003,
+        "radial": -0.058,
+        "up": 0.0726
+      }
+    },
+    "W": {
+      "Thumb": {
+        "world": [
+          -0.0495,
+          0.048,
+          -0.0676
+        ],
+        "palmar": 0.0372,
+        "radial": -0.0699,
+        "up": 0.0674
+      },
+      "Index": {
+        "world": [
+          0.015,
+          0.1591,
+          0.0853
+        ],
+        "palmar": -0.0003,
+        "radial": 0.0994,
+        "up": 0.1664
+      },
+      "Middle": {
+        "world": [
+          0.0033,
+          0.1763,
+          -0.0077
+        ],
+        "palmar": -0.0066,
+        "radial": 0.0072,
+        "up": 0.1898
+      },
+      "Ring": {
+        "world": [
+          -0.0077,
+          0.1478,
+          -0.0848
+        ],
+        "palmar": -0.0095,
+        "radial": -0.0723,
+        "up": 0.1664
+      },
+      "Little": {
+        "world": [
+          -0.008,
+          0.055,
+          -0.0638
+        ],
+        "palmar": -0.003,
+        "radial": -0.058,
+        "up": 0.0726
+      }
+    },
+    "L": {
+      "Thumb": {
+        "world": [
+          -0.0551,
+          0.0817,
+          0.0912
+        ],
+        "palmar": 0.0717,
+        "radial": 0.087,
+        "up": 0.0915
+      },
+      "Index": {
+        "world": [
+          0.0055,
+          0.1704,
+          0.037
+        ],
+        "palmar": -0.0003,
+        "radial": 0.051,
+        "up": 0.1811
+      },
+      "Middle": {
+        "world": [
+          0.0035,
+          0.055,
+          -0.0077
+        ],
+        "palmar": -0.0038,
+        "radial": -0.0009,
+        "up": 0.0687
+      },
+      "Ring": {
+        "world": [
+          0.0041,
+          0.0547,
+          -0.0446
+        ],
+        "palmar": -0.0113,
+        "radial": -0.037,
+        "up": 0.0707
+      },
+      "Little": {
+        "world": [
+          -0.008,
+          0.055,
+          -0.0638
+        ],
+        "palmar": -0.003,
+        "radial": -0.058,
+        "up": 0.0726
+      }
+    },
+    "Y": {
+      "Thumb": {
+        "world": [
+          -0.0413,
+          0.0853,
+          0.0944
+        ],
+        "palmar": 0.0586,
+        "radial": 0.0929,
+        "up": 0.0943
+      },
+      "Index": {
+        "world": [
+          0.0069,
+          0.0579,
+          0.0428
+        ],
+        "palmar": 0.0023,
+        "radial": 0.0494,
+        "up": 0.0684
+      },
+      "Middle": {
+        "world": [
+          0.0035,
+          0.055,
+          -0.0077
+        ],
+        "palmar": -0.0038,
+        "radial": -0.0009,
+        "up": 0.0687
+      },
+      "Ring": {
+        "world": [
+          0.0041,
+          0.0547,
+          -0.0446
+        ],
+        "palmar": -0.0113,
+        "radial": -0.037,
+        "up": 0.0707
+      },
+      "Little": {
+        "world": [
+          -0.0141,
+          0.1216,
+          -0.081
+        ],
+        "palmar": -0.0019,
+        "radial": -0.0715,
+        "up": 0.1404
+      }
+    },
+    "I": {
+      "Thumb": {
+        "world": [
+          -0.0516,
+          0.086,
+          -0.0121
+        ],
+        "palmar": 0.0487,
+        "radial": -0.0134,
+        "up": 0.102
+      },
+      "Index": {
+        "world": [
+          0.0049,
+          0.0562,
+          0.0194
+        ],
+        "palmar": -0.0001,
+        "radial": 0.026,
+        "up": 0.0683
+      },
+      "Middle": {
+        "world": [
+          0.0039,
+          0.0552,
+          0.0014
+        ],
+        "palmar": -0.0025,
+        "radial": 0.0081,
+        "up": 0.0684
+      },
+      "Ring": {
+        "world": [
+          0.0103,
+          0.0549,
+          -0.0165
+        ],
+        "palmar": -0.0121,
+        "radial": -0.0083,
+        "up": 0.0689
+      },
+      "Little": {
+        "world": [
+          -0.0134,
+          0.1234,
+          -0.0768
+        ],
+        "palmar": -0.0019,
+        "radial": -0.0671,
+        "up": 0.1418
+      }
+    }
+  },
+  "b_thumb_vs_palm_mesh": {
+    "n_palm_surface_samples": 143,
+    "joints": {
+      "cmc": {
+        "signed_palmar_of_surface_m": -0.01121,
+        "euclid_to_nearest_m": 0.0176,
+        "nearest_surface": [
+          -0.0213,
+          -0.0135,
+          0.019
+        ],
+        "world": [
+          -0.01,
+          -0.0,
+          0.02
+        ],
+        "palmar_of_center": 0.016,
+        "radial": 0.0201,
+        "up": 0.0127
+      },
+      "mcp": {
+        "signed_palmar_of_surface_m": 0.00342,
+        "euclid_to_nearest_m": 0.00493,
+        "nearest_surface": [
+          -0.0043,
+          0.048,
+          0.016
+        ],
+        "world": [
+          -0.0073,
+          0.0448,
+          0.0182
+        ],
+        "palmar_of_center": 0.0119,
+        "radial": 0.0218,
+        "up": 0.0573
+      },
+      "ip": {
+        "signed_palmar_of_surface_m": 0.01048,
+        "euclid_to_nearest_m": 0.01161,
+        "nearest_surface": [
+          -0.008,
+          0.0584,
+          -0.0208
+        ],
+        "world": [
+          -0.0183,
+          0.0631,
+          -0.0181
+        ],
+        "palmar_of_center": 0.0155,
+        "radial": -0.0146,
+        "up": 0.0782
+      },
+      "tip": {
+        "signed_palmar_of_surface_m": 0.01007,
+        "euclid_to_nearest_m": 0.01334,
+        "nearest_surface": [
+          -0.0129,
+          0.0594,
+          -0.0433
+        ],
+        "world": [
+          -0.0243,
+          0.0645,
+          -0.0482
+        ],
+        "palmar_of_center": 0.0157,
+        "radial": -0.0451,
+        "up": 0.0817
+      }
+    },
+    "distal_dir": {
+      "world": [
+        -0.1931,
+        0.047,
+        -0.9801
+      ],
+      "palmar_component": 0.0048,
+      "ulnar_component": 0.9935,
+      "up_component": 0.114
+    },
+    "proximal_dir": {
+      "world": [
+        -0.2617,
+        0.4342,
+        -0.862
+      ],
+      "palmar_component": 0.0847,
+      "ulnar_component": 0.8645,
+      "up_component": 0.4955
+    },
+    "palm_surface_palmar_of_center": {
+      "min": -0.0171,
+      "max": 0.0318,
+      "median": 0.0045
+    },
+    "palm_vertex_groups": [
+      "Wrist_R",
+      "Index_Metacarpal_R",
+      "Middle_Metacarpal_R",
+      "Ring_Metacarpal_R",
+      "Little_Metacarpal_R",
+      "Palm_R"
+    ]
+  },
+  "contact_sheet": "contact-sheet.png",
+  "contact_sheet_layout": "rows A,B,U,V,W,L,Y,I; cols front, side; white matte"
+}

@@ -5,13 +5,16 @@
 阈值：与 practice/app.js 相同（numHands=2, minHandDetectionConfidence=0.6, minHandPresenceConfidence=0.5, minTrackingConfidence=0.5）
 JSON：practice/src/render-loop/out/<id>.json（有手才写；不写 fixtures/）
 
-| 字母 | 手数 | pass | issue codes |
-|---|---|---|---|
-| GF0021.A | 1 | true | — |
-| GF0021.B | 0 | false | no_hand |
-| GF0021.U | 0 | false | no_hand |
-| GF0021.V | 0 | false | no_hand |
-| GF0021.L | 0 | false | no_hand |
-| GF0021.Y | 0 | false | no_hand |
-| GF0021.I | 1 | false | pinky.not_extended,thumb.not_curled |
-| GF0021.W | 0 | false | no_hand |
+| 字母 | 手数 | 已评估 | 几何 pass | 不可评估原因 | issue codes |
+|---|---|---|---|---|---|
+
+「已评估」= 尺寸可追溯且核心真的算完。`几何 pass` 只在已评估时有意义；
+不可评估的行**不是动作负例**，不得计入任何通过率分子分母。
+| GF0021.A | 1 | 是 | true | — | — |
+| GF0021.B | 0 | **否** | n/a | no_hand | no_hand |
+| GF0021.U | 0 | **否** | n/a | no_hand | no_hand |
+| GF0021.V | 0 | **否** | n/a | no_hand | no_hand |
+| GF0021.L | 1 | 是 | false | — | thumb_index.angle |
+| GF0021.Y | 1 | 是 | true | — | — |
+| GF0021.I | 1 | 是 | true | — | — |
+| GF0021.W | 0 | **否** | n/a | no_hand | no_hand |

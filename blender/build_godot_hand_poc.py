@@ -340,4 +340,5 @@ def main():
         cmd_letters(arm, mesh)
 
 
-main()
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,121 @@
+{
+  "id": "practice-content-demos",
+  "updated": "2026-09-30",
+  "purpose": "练习页正面示范图的来源与目检记录。PNG 给人看，不进入 MediaPipe，不参与 evaluate()。",
+  "naming": "{letterId}_front.png，letterId 与 letters.json 的 id 一致",
+  "generator": "blender/build_godot_hand_candidate.py",
+  "candidateDir": "blender/candidates/godot-xr-v2/",
+  "mesh": {
+    "path": "blender/vendor/godot-xr-hands/hand_r.gltf",
+    "license": "CC0 1.0 Universal",
+    "licenseFile": "practice/vendor/godot-xr-hands/LICENSE.md",
+    "author": "DigitalN8m4r3 aka Miodrag Sejic",
+    "year": 2022,
+    "upstream": "https://github.com/GodotVR/godot-xr-tools"
+  },
+  "legacyMesh": {
+    "name": "Blender Studio Human Base Meshes v1.4.1 realistic_hand",
+    "license": "CC0 1.0 Universal",
+    "blend": "blender/hand_gf0021.blend",
+    "note": "绑到本仓库 HandRig 后由 blender/render_gf0021.py 一类脚本出图。仅 U 仍用这批旧图。"
+  },
+  "inspection": {
+    "date": "2026-09-30",
+    "method": "主代理逐张查看 godot-xr-v2 正侧两图",
+    "pass": [
+      "A",
+      "B",
+      "L",
+      "Y",
+      "I"
+    ],
+    "passWithLimits": [
+      "V",
+      "W"
+    ],
+    "rejected": [
+      "U"
+    ]
+  },
+  "letters": {
+    "GF0021.A": {
+      "file": "GF0021.A_front.png",
+      "inUse": "godot-xr-v2",
+      "connectedOn": "2026-09-30",
+      "script": "blender/build_godot_hand_candidate.py",
+      "sourcePng": "blender/candidates/godot-xr-v2/GF0021.A_front.png",
+      "license": "CC0 1.0 Universal",
+      "inspection": "pass",
+      "notes": "正侧均自然，无悬空/突兀折角/明显穿插。"
+    },
+    "GF0021.B": {
+      "file": "GF0021.B_front.png",
+      "inUse": "godot-xr-v2",
+      "connectedOn": "2026-09-30",
+      "script": "blender/build_godot_hand_candidate.py",
+      "sourcePng": "blender/candidates/godot-xr-v2/GF0021.B_front.png",
+      "license": "CC0 1.0 Universal",
+      "inspection": "pass",
+      "notes": "正侧均自然，无悬空/突兀折角/明显穿插。"
+    },
+    "GF0021.L": {
+      "file": "GF0021.L_front.png",
+      "inUse": "godot-xr-v2",
+      "connectedOn": "2026-09-30",
+      "script": "blender/build_godot_hand_candidate.py",
+      "sourcePng": "blender/candidates/godot-xr-v2/GF0021.L_front.png",
+      "license": "CC0 1.0 Universal",
+      "inspection": "pass",
+      "notes": "正侧均自然，无悬空/突兀折角/明显穿插。"
+    },
+    "GF0021.Y": {
+      "file": "GF0021.Y_front.png",
+      "inUse": "godot-xr-v2",
+      "connectedOn": "2026-09-30",
+      "script": "blender/build_godot_hand_candidate.py",
+      "sourcePng": "blender/candidates/godot-xr-v2/GF0021.Y_front.png",
+      "license": "CC0 1.0 Universal",
+      "inspection": "pass",
+      "notes": "正侧均自然，无悬空/突兀折角/明显穿插。"
+    },
+    "GF0021.V": {
+      "file": "GF0021.V_front.png",
+      "inUse": "godot-xr-v2",
+      "connectedOn": "2026-09-30",
+      "script": "blender/build_godot_hand_candidate.py",
+      "sourcePng": "blender/candidates/godot-xr-v2/GF0021.V_front.png",
+      "license": "CC0 1.0 Universal",
+      "inspection": "pass_with_limits",
+      "notes": "V 字形态正确，侧面可见拇指搭在屈指上，但拇指与远节是近似接触、非精确贴面。"
+    },
+    "GF0021.W": {
+      "file": "GF0021.W_front.png",
+      "inUse": "godot-xr-v2",
+      "connectedOn": "2026-09-30",
+      "script": "blender/build_godot_hand_candidate.py",
+      "sourcePng": "blender/candidates/godot-xr-v2/GF0021.W_front.png",
+      "license": "CC0 1.0 Universal",
+      "inspection": "pass_with_limits",
+      "notes": "W 字形态正确，侧面可见拇指搭在屈指上，但拇指与远节是近似接触、非精确贴面。"
+    },
+    "GF0021.I": {
+      "file": "GF0021.I_front.png",
+      "inUse": "godot-xr-v2",
+      "connectedOn": "2026-09-30",
+      "script": "blender/build_godot_hand_candidate.py",
+      "sourcePng": "blender/candidates/godot-xr-v2/GF0021.I_front.png",
+      "license": "CC0 1.0 Universal",
+      "inspection": "pass",
+      "notes": "修订版候选：无名指掌骨杯状弯曲 5°→0，屈指径向收拢（Index −8°/Middle +3°/Ring +10°），正侧均呈自然拳形加小指伸直，与 letters.json「小指伸直，其余握拳」一致。字母内容本身的 OCR 争议仍在，属内容核对问题，与本图无关。"
+    },
+    "GF0021.U": {
+      "file": "GF0021.U_front.png",
+      "inUse": "legacy-hbm",
+      "connectedOn": null,
+      "script": "blender/hand_gf0021.blend 既有渲染管线",
+      "license": "CC0 1.0 Universal（Human Base Meshes v1.4.1）",
+      "inspection": "rejected_godot_xr_v2",
+      "notes": "Godot XR v2 候选未接入：内容 pending_review 争议未核定。本文件仍是替换前的旧示范图。未改 letters.json 状态。"
+    }
+  }
+}

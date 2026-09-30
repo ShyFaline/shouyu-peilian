@@ -8,6 +8,7 @@ import { QUALITY_HINT } from "./inputQuality.js";
 import { createHold as makeHold, holdReady, observePass, resetHold } from "./passState.js";
 import { canExportSnapshot, createSnapshot, serializeSnapshot } from "./snapshot.js";
 import { stopCamera } from "./camera.js";
+import { attachRotator, frameForDrag, parseRotIndex, rotFrameUrl, stepFrame } from "./rotator.js";
 
 const root = dirname(fileURLToPath(import.meta.url));
 const UNIT = { coordSpace: "equal_scale_unit" };
@@ -62,6 +63,15 @@ function curlThumb(lm) {
   lm[4] = pt(0.44, 0.76);
 }
 
+/** 拇指竖直伸出（正立 A、Y 用；side 判定已加宽，对角 45° 属斜向不算侧）。 */
+function extendThumbUp(lm) {
+  lm[1] = pt(0.42, 0.80);
+  lm[2] = pt(0.42, 0.70);
+  lm[3] = pt(0.42, 0.46);
+  lm[4] = pt(0.42, 0.34);
+}
+
+/** 拇指横向伸出（L 用）。 */
 function extendThumbSide(lm) {
   lm[1] = pt(0.42, 0.80);
   lm[2] = pt(0.38, 0.70);
@@ -113,10 +123,10 @@ function palm() {
   return lm;
 }
 
-/** A：握拳，拇指伸出。 */
+/** A：握拳，拇指伸出朝上。 */
 function aHand() {
   const lm = palm();
-  extendThumbSide(lm);
+  extendThumbUp(lm);
   setFinger(lm, 5, false, 0.44);
   setFinger(lm, 9, false, 0.50);
   setFinger(lm, 13, false, 0.56);
@@ -146,10 +156,10 @@ function lHand() {
   return lm;
 }
 
-/** Y：拇指、小指伸出，其余收起。 */
+/** Y：拇指、小指伸出，其余收起。pointing 探针是 extended[0]=thumb，须朝上。 */
 function yHand() {
   const lm = palm();
-  extendThumbSide(lm);
+  extendThumbUp(lm);
   setFinger(lm, 5, false, 0.44);
   setFinger(lm, 9, false, 0.50);
   setFinger(lm, 13, false, 0.56);
@@ -321,6 +331,37 @@ test("I 正例通过", () => {
 test("W 正例通过", () => {
   const result = evaluate(letterW, wHand(), UNIT);
   assert.equal(result.pass, true, JSON.stringify(result.audit || result.issues));
+});
+
+/** 画面内上下翻转（y -> 1.5 - y）。角度/夹角不变，只有 pointing 的 up 变 down。 */
+function upsideDown(lm) {
+  return lm.map((p) => pt(p.x, 1.5 - p.y, p.z));
+}
+
+test("主路径可练字母必须有 pointing 规则（朝向缺失回归门）", () => {
+  for (const letter of [letterA, letterB, letterV, letterL, letterY, letterI, letterW, letterJ]) {
+    assert.equal(letter.rules.pointing, "up", `${letter.id} 缺 pointing 规则`);
+  }
+});
+
+test("指尖朝下不得 pass，hint 提示朝上", () => {
+  const cases = [
+    ["GF0021.V", letterV, vApartHand()],
+    ["GF0021.L", letterL, lHand()],
+    ["GF0021.A", letterA, aHand()],
+    ["GF0021.B", letterB, bHand()],
+    ["GF0021.Y", letterY, yHand()],
+    ["GF0021.I", letterI, iHand()],
+    ["GF0021.W", letterW, wHand()],
+    ["GF0021.J", letterJ, iHand()],
+  ];
+  for (const [name, letter, lm] of cases) {
+    const result = evaluate(letter, upsideDown(lm), UNIT);
+    assert.equal(result.pass, false, `${name} 倒置仍 pass`);
+    const blob = (result.audit || result.issues).map((issue) => `${issue.code} ${issue.hint}`).join("；");
+    assert.match(blob, /pointing\.up/, `${name} 缺 pointing.up：${blob}`);
+    assert.match(blob, /指尖朝上/, `${name} 缺中文提示：${blob}`);
+  }
 });
 
 test("空 rules 不得 pass", () => {
@@ -615,7 +656,7 @@ test("能力：J 几何通过不得写成完整掌握", () => {
   const blob = `${view.title} ${view.hint}`;
   assert.doesNotMatch(blob, /完整掌握|字母已掌握|完整 J|已会/);
   if (judged.decision === "pass") {
-    assert.equal(view.title, "姿态接近，停稳");
+    assert.equal(view.title, "做对了，保持住");
   }
 });
 
@@ -623,7 +664,7 @@ test("pose_practice V 连续保持后 decision=pass，文案不是到位/掌握"
   const judged = holdPass(letterV, vApartHand(), 6);
   assert.equal(judged.decision, "pass");
   const view = presentJudge(judged);
-  assert.equal(view.title, "姿态接近，停稳");
+  assert.equal(view.title, "做对了，保持住");
   assert.doesNotMatch(`${view.title}${view.hint}`, /到位|字母已掌握|完整掌握/);
   const failView = presentJudge({
     decision: "fail",
@@ -690,6 +731,87 @@ test("结构检查（非行为）：app/旧离线入口接线", () => {
   assert.doesNotMatch(runPy, /"conf": conf/);
   assert.match(runPy, /imageWidth/);
   assert.match(runPy, /geometry_pass/);
+});
+
+test("R1 rot 索引解析：合法映射、垃圾输入回退空", () => {
+  const good = parseRotIndex({ frames: 24, letters: { "GF0021.A": true, "GF0021.U": false } });
+  assert.equal(good.get("GF0021.A"), 24);
+  assert.equal(good.has("GF0021.U"), false, "非 true 的字母不得启用旋转");
+  for (const bad of [null, undefined, {}, { frames: "24" }, { frames: 2, letters: { A: true } }, { frames: 24, letters: null }]) {
+    assert.equal(parseRotIndex(bad).size, 0, JSON.stringify(bad));
+  }
+});
+
+test("R2 帧 URL 取模回绕，非法输入给空串", () => {
+  assert.equal(rotFrameUrl("GF0021.A", 0, 24), "./content/demos/rot/GF0021.A/00.webp");
+  assert.equal(rotFrameUrl("GF0021.A", -1, 24), "./content/demos/rot/GF0021.A/23.webp");
+  assert.equal(rotFrameUrl("GF0021.A", 25, 24), "./content/demos/rot/GF0021.A/01.webp");
+  assert.equal(rotFrameUrl("GF0021.A", 1.5, 24), "");
+  assert.equal(rotFrameUrl("GF0021.A", 0, 0), "");
+});
+
+test("R3 拖动位移换算：拖满宽度=半圈，右拖帧号增大，非法宽度回起始帧", () => {
+  assert.equal(frameForDrag({ dx: 0, width: 240, frames: 24, startFrame: 0 }), 0);
+  assert.equal(frameForDrag({ dx: 240, width: 240, frames: 24, startFrame: 0 }), 12);
+  assert.equal(frameForDrag({ dx: -20, width: 240, frames: 24, startFrame: 0 }), 23, "左拖回绕");
+  assert.equal(frameForDrag({ dx: 20, width: 240, frames: 24, startFrame: 23 }), 0, "右拖回绕");
+  assert.equal(frameForDrag({ dx: 500, width: 0, frames: 24, startFrame: 7 }), 7);
+  assert.equal(frameForDrag({ dx: Number.NaN, width: 240, frames: 24, startFrame: 3 }), 3);
+  assert.equal(stepFrame(23, 1, 24), 0);
+  assert.equal(stepFrame(0, -1, 24), 23);
+});
+
+test("R4 attachRotator 拖动/键盘驱动换帧，detach 完整还原", () => {
+  const listeners = new Map();
+  const stage = {
+    dataset: {},
+    clientWidth: 240,
+    attrs: {},
+    addEventListener(type, fn) { listeners.set(type, fn); },
+    removeEventListener(type) { listeners.delete(type); },
+    setAttribute(k, v) { this.attrs[k] = v; },
+    removeAttribute(k) { delete this.attrs[k]; },
+    setPointerCapture() {},
+  };
+  const image = { src: "", alt: "" };
+  const detach = attachRotator({ stage, image, letterId: "GF0021.A", frames: 24, alt: "字母A标准手示范图" });
+  assert.equal(typeof detach, "function");
+  assert.equal(stage.dataset.rot, "true");
+  assert.equal(stage.attrs.role, "slider");
+  assert.equal(stage.attrs.tabindex, "0");
+
+  listeners.get("pointerdown")({ pointerId: 1, clientX: 100 });
+  listeners.get("pointermove")({ clientX: 140 });
+  assert.equal(image.src, "./content/demos/rot/GF0021.A/02.webp");
+  assert.equal(stage.dataset.rotFrame, "2");
+  assert.match(image.alt, /已旋转/);
+  listeners.get("pointerup")({});
+
+  let prevented = 0;
+  listeners.get("keydown")({ key: "ArrowRight", preventDefault() { prevented += 1; } });
+  assert.equal(image.src, "./content/demos/rot/GF0021.A/03.webp");
+  assert.equal(prevented, 1);
+  listeners.get("keydown")({ key: "ArrowLeft", preventDefault() { prevented += 1; } });
+  listeners.get("keydown")({ key: "ArrowLeft", preventDefault() { prevented += 1; } });
+  listeners.get("keydown")({ key: "ArrowLeft", preventDefault() { prevented += 1; } });
+  assert.equal(image.src, "./content/demos/rot/GF0021.A/00.webp", "回到正面");
+  assert.equal(image.alt, "字母A标准手示范图", "正面帧恢复原 alt");
+  listeners.get("keydown")({ key: "Enter", preventDefault() { prevented += 1; } });
+  assert.equal(prevented, 4, "非方向键不拦截");
+
+  listeners.get("pointermove")({ clientX: 500 });
+  assert.equal(image.src, "./content/demos/rot/GF0021.A/00.webp", "未按下时移动不换帧");
+
+  detach();
+  assert.equal(listeners.size, 0);
+  assert.equal(stage.dataset.rot, undefined);
+  assert.equal(stage.attrs.role, undefined);
+});
+
+test("R5 无旋转帧的字母 attachRotator 返回 null 且不改 stage", () => {
+  const stage = { dataset: {}, addEventListener() { throw new Error("不应监听"); } };
+  assert.equal(attachRotator({ stage, image: {}, letterId: "GF0021.U", frames: 0, alt: "" }), null);
+  assert.equal(attachRotator({ stage: null, image: {}, letterId: "GF0021.A", frames: 24, alt: "" }), null);
 });
 
 if (failed) {

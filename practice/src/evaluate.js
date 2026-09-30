@@ -11,6 +11,7 @@ export const EXTENDED_DEG = 142;
 export const CURLED_DEG = 100;
 export const TOGETHER_DEG = 22;
 export const APART_DEG = 24;
+export const WIDE_SIDE_RATIO = 1.9; // |dx| > |dy|*1.9 才算侧向；斜上/斜下仍算朝上/朝下
 
 export const SPREAD_PAIRS = [
   ["index", "middle"],
@@ -108,7 +109,7 @@ export function spreadBetween(lm, a, b) {
 
 export function pointingOf(lm, name) {
   const d = fingerDir(lm, name || "index");
-  if (Math.abs(d.x) > Math.abs(d.y) * 1.15) return "side";
+  if (Math.abs(d.x) > Math.abs(d.y) * WIDE_SIDE_RATIO) return "side";
   return d.y < 0 ? "up" : "down";
 }
 

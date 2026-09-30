@@ -4,6 +4,48 @@
 
 ---
 
+## 0. Godot XR 绑定手 PoC（2026-09-29 追加，本机 Kimi 执行）
+
+背景：Round1/Round2 两轮的 HBM 静态网格 + 自制权重路线失败（"幽灵手指"，Round2 渲染图全部带残影，与 DELIVERY_ROUND2.md 的"已修复"结论不符）。2026-09-29 核查确认 HBM bundle = Blender Studio 官方 CC0 demo 资产（证据已记入 `docs/来源与伦理草稿.md` 第 6 节），但静态网格无骨骼的问题不变，故评估替换为带正规绑定的 CC0 手模。
+
+资产：Godot XR Tools `hand_r.gltf`（CC0，自包含 glTF，26 根命名骨骼）+ 上游 `License.md`，存于 `blender/vendor/godot-xr-hands/`（gitignore 不入库）。Blender 4.5.14 便携版解压于 `blender/vendor/blender-4.5.14-windows-x64/`（本机此前未装 Blender）。
+
+脚本：`blender/build_godot_hand_poc.py`。已跑通的最短闭环：
+- `inspect`：导入 → 删除 glTF 内混入的无蒙皮 Icosphere 占位网格（42 顶点，会撑爆包围盒）→ 输出 6 向朝向图与 bones.json；
+- `letters`：固定世界轴卷曲（手指沿 +Y、拇指沿 +Z，故屈曲轴统一取世界 +Z；绕掌法线 +X 做收拢）→ A/B/U 掌心向相机渲染。坐标系结论：手指 +Y、拇指 +Z、掌心 +X。
+
+**关键 bug（2026-09-29 同日修复）：** 骨骼旋转必须用平移包裹的铰链旋转（`T(head)·R·T(-head)`，支点在骨骼头），不能用 `R @ pb.matrix` 裸乘——后者绕世界原点旋转，会把每节骨骼甩离关节，蒙皮被拉成"面条爪"（侧面视角最吓人，正面因有遮挡不易察觉）。此教训与 Round1/Round2 的失败同源：凡是绕错支点的旋转，渲染图都会骗人，必须出侧面/背面验证视角。
+
+实测结果：B（四指伸展收拇指）、U（食中伸直、无名小卷曲）的剪影已经正确可读；A 握拳结构正确（拳眼、指节朝向正确），指节根部有轻微挤压需调参。与"骨架永远正确、变形全由正规蒙皮负责"的预期一致，不再有幽灵手指问题。教训：不要按骨骼自身局部轴卷曲（该骨架各骨 roll 不一致，会拧成麻花），用固定世界轴 + 逐字母角度表。
+
+待办：A 拳松紧与拇指贴食指侧的角度微调（当前 A 侧面拇指仍前伸，THUMB_OPPOSE 角度或轴向需再调）；逐个字母对照 GF 0021—2019 原图人工核对（ZH/CH/SH 的 OCR 疑点仍未解）；EEVEE 材质/白底渲染对齐现有基线风格；30 字母角度表化。
+
+## 0b. 8 字母全量 PoC（2026-09-29 当日续）
+
+- **8 个字母全部角度表化并渲染**：`LETTERS`/`SPLAY`/`THUMB` 三张表按《docs/给Gemini的姿态规格.md》原文配置，每字母出 front + side 双视角（side 用于防支点类回归，见 0 节教训）。
+- **拇指轴向修正**：四指屈曲轴 = 世界 +Z；拇指屈曲轴 = finger_up（+Y），负角扫向掌心；拇指摆动轴 = 掌法线（+X），负角竖起。此前拇指绕 +Z 卷曲实为绕自身纵轴拧转，无效果。
+- **呈现角度按规格**：A 为「手背向右」→ 用背面视角；其余掌心视角绕竖轴偏 20° 模拟「掌心向前偏左」。注意现用胶囊基线的 A 画的是掌心，与 2019 呈现角度调整名单不符，新管线已按名单执行。
+- **风格对齐基线**：RGBA 透明底（基线即透明底 RGBA，练习页白卡片显示）；Standard view transform（AgX 会压灰白底）；暖肤材质 (1.0, 0.65, 0.48)；Workbench `paint.sl` 工作室光（rim.sl 过暗、FLAT 无体积感）。采样对齐基线肤色 (240,205,180)。
+- **遗留争议（渲染按仓库规则，未裁定）**：U「食中二指 vs 中无小」、「食指 vs 小指」均按仓库规则；ZH/CH/SH「OCR疑」未做；所有角度为工程近似值，未经人工对照 GF 原图。
+- **已知待调**：A 的拇指在握拳位仍偏显眼；V/W/L/Y 拇指为近似位；各字母姿态未经人工对图验收前不替换 `practice/content/demos/`。
+
+## 0c. 判定交叉验证（2026-09-29 当日续）：示范姿态 ↔ 判定规则一致性
+
+做法：`build_godot_hand_poc.py -- landmarks` 把每个摆好姿的字母的 21 个 MediaPipe 式关键点（骨骼关节映射：Proximal.head=MCP、Intermediate.head=PIP、Distal.head=DIP、Distal.tail=指尖）经渲染相机投影为归一化图像坐标，导出 frame JSON，逐个喂给官方离线判定器 `practice/src/eval-handframe.mjs`（共享 evaluate.js 同一套规则，未复制阈值）。
+
+结果：**8/8 geometry_pass**。首跑仅 A 通过，失败模式与修正：
+1. B/U/V/W/I `thumb.not_curled`：判定器 thumb 卷曲只看 IP 关节（lm 2/3/4）**二维内角 ≤100°**。拇指绕 finger_up(+Y) 的屈曲发生在深度方向，投影上不可见；改为"掌骨横摆（绕掌法线）+ 近/远节在掌面内折叠"，拇指二维投影弯折达标。这是"3D 解剖正确 ≠ 判定器 2D 可见"的典型例。
+2. L `thumb_index.not_90deg`：拇指横摆角 -35° 在 20° 偏航下投影不足 60°；提到 -75°。
+3. W `middle_ring.not_apart`：食/无各 ±12° 开合经投影压缩到 22°（阈值 24°）；提到 ±18°。
+
+结论：示范资产与判定规则无系统性冲突；3D 姿态可作为规则的回归基准（改规则后重跑 landmarks → eval 即可验证）。局限：关键点是关节投影而非 MediaPipe 检测输出，未覆盖检测噪声路径。
+
+## 0d. golden 回归门固化（2026-09-30）
+
+交叉验证固化为持续门禁：`-- landmarks` 模式的导出目标从 vendor 临时目录改为 `practice/src/pose-goldens/`（入库，8 个 JSON + README）；新增 `practice/src/pose-goldens.test.js`，断言 8×8 恒等矩阵（每个 golden 仅通过自身字母——矩阵恰为满秩单位阵，先离线验证过再固化）。运行：`node practice/src/pose-goldens.test.js`。与 `fixtures/` 的分工：golden 是合成标准姿态、可直接断言 pass/fail；真人 fixtures 无独立标注、只做冒烟。规则或角度表任何一侧变更，矩阵必须仍为单位阵。
+
+---
+
 ## 1. 资产与页面对应关系核查
 
 | 资产文件 | 来源/阶段 | 状态说明 |

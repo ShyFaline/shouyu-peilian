@@ -2,7 +2,9 @@
 
 浏览器本地跑的国标手指字母陪练：摄像头变成手的几何，几何再变成「像不像、差在哪」。识别在本机完成，默认不上传视频。
 
-字母包覆盖 GF 0021—2019 的 **32 个手指字母**（A–Z 以及 zh / ch / sh / ng / ê / ü）。主路径只练 **A B U V L Y I W**，其余进可折叠图鉴。默认字母是 **U**。
+字母包覆盖 GF 0021—2019 的 **32 个手指字母**（A–Z 以及 zh / ch / sh / ng / ê / ü）。当前本地版本从介绍首页进入跟练或静态自测，默认目标为 **A**。字母按实际能力分为可跟练9个、待核对18个、仅示范5个；U仍待核对，J/Z只核静态部分。跟练和自测通过记录仅保存在本浏览器，不保存视频或关键点。
+
+前端产品化改造尚未提交发布；在线站点不保证包含本地新增功能。已实现内容与待验收事项见 `docs/前端产品化迭代.md`。
 
 规划总稿：`总体目标与并行拆分.md`。
 
@@ -12,7 +14,7 @@ https://shyfaline.github.io/shouyu-peilian/
 
 手机或电脑浏览器直接打开，不用装东西。首次加载要下约 17 MB 的识别资源（wasm + 模型），慢一点是正常的，之后就进缓存。
 
-站点只发布 `practice/` 这一个目录，仓库里其它资料不上网。改动 `practice/**` 并推到 `main` 后，`.github/workflows/pages.yml` 会自动重新发布，大约一到两分钟生效。
+站点只发布 `practice/` 这一个目录，仓库里其它资料不上网。本地工作流配置为：改动 `practice/**` 或两个工作流并推到 `main` 后，`pages.yml` 先调用同一提交的可复用 `test.yml`，三组必跑全部成功后才执行部署。测试失败或取消时，依赖它的部署作业不会执行；手动发布也经过相同测试门。测试作业只有读取仓库权限，Pages和身份令牌写权限只授予部署作业。当前只完成本地结构校验与测试复跑，远端Actions结果和发布时间尚未验证。
 
 浏览器只允许在**安全上下文**里开摄像头：`127.0.0.1`、`localhost` 或 `https://`。线上是 https，可以直接用；局域网内用 `http://192.168.x.x` 打开则读不到摄像头。
 
@@ -22,17 +24,17 @@ https://shyfaline.github.io/shouyu-peilian/
 
 | 状态 | 判定 |
 |---|---|
-| `pending_review` | `decision` 不得为 pass。界面写「暂不判定」。开页 U 不能绿灯。 |
+| `pending_review` | `decision` 不得为 pass。界面写「暂不判定」。U不能记通过，也不能进入自测题目。 |
 | `demo_only` | 不得 pass。界面写「仅示范」。 |
-| `pose_practice` | 质量 ok 且几何通过且连续停稳后可以 pass。文案只写「姿态接近，停稳」。不得写「字母已掌握 / 完整 J、Z 已会」。 |
+| `pose_practice` | 质量、几何和持续保持均通过后可以 pass。保持不足时提示「姿态接近，停稳」，成功仅表示静态手型通过，不表示完整掌握。 |
 | 质量失败 | `undetermined`，文案「暂时无法判断」，不用「伸直 / 收起来」类动作 hint。 |
 | 无目标 / 空规则 / 未知规则字段 / 状态不允许判定 | `blocked` |
 
-J / Z 只核静态手型。示范优先读 `practice/content/demos/{字母ID}_front.png`；没有图时回退 SignPinyin 字体（字体不是识别模型）。
+J / Z 只核静态手型。跟练示范优先读 `practice/content/demos/{字母ID}_front.png`；没有图时回退 SignPinyin 字体（字体不是识别模型）。自测隐藏示范与动作答案。2026-09-30 起 A/B/I/L/V/W/Y 已接入 Godot XR（CC0）正面示范，并带 24 帧拖动旋转（`practice/content/demos/rot/`，`blender/build_godot_hand_turntable.py` 渲染）；仅 U 仍用旧 Human Base Meshes 图（内容争议未核定，无旋转帧）。明细见 `practice/content/demos/manifest.json`。
 
 ## 本地运行
 
-需要桌面 Chrome。在本目录开静态服务（不要用 `file://`）：
+使用桌面 Chrome。在本目录开静态服务（不要用 `file://`）：
 
 ```bash
 python -m http.server 8765
@@ -40,7 +42,7 @@ python -m http.server 8765
 
 打开：http://127.0.0.1:8765/practice/index.html
 
-点「打开摄像头」，先比 U（未核定，不会绿灯），再切 V。可点「停止摄像头」：`getTracks().stop()`，`video.srcObject = null`，清循环状态，允许再开。模型文件已放在 `practice/models` 与 `practice/vendor`，断网后刷新仍应能加载。来源页：http://127.0.0.1:8765/practice/sources.html
+先在首页选择学习或自测，再主动点「打开摄像头」。跟练可切换字母查看动作，自测不显示答案；切换模式会停止摄像头并清空保持状态。可随时点「停止摄像头」释放轨道，之后重新开始。模型资源在 `practice/models` 与 `practice/vendor`。记录入口为 `practice/learn.html#records`，静态自测入口为 `practice/learn.html?mode=test`。来源页：http://127.0.0.1:8765/practice/sources.html
 
 镜像时视频和 canvas 一起翻（`.stage-media`），左下角判定文字不翻。视频与 canvas 同一盒、`object-fit: contain`。
 
@@ -57,9 +59,10 @@ bun practice/src/evaluate.test.js
 ```bash
 node practice/src/evaluate.test.js
 node --experimental-vm-modules practice/src/reliability.test.js
+node practice/src/pose-goldens.test.js
 ```
 
-第二条需要支持 `vm.SourceTextModule` 的 Node（本轮使用 Node 22.22.2），执行真实 app/core，只模拟 DOM、媒体、RAF、时钟和 vendor 边界。不安装依赖。原源码匹配用例标为结构检查，不等于行为验证；VM 测试也不是真实浏览器或真人实验，不报准确率。
+第二条需要支持 `vm.SourceTextModule` 的 Node（本轮使用 Node 22.22.2），执行真实 app/core，只模拟 DOM、媒体、RAF、时钟和 vendor 边界。不安装依赖。原源码匹配用例标为结构检查，不等于行为验证；VM 测试也不是真实浏览器或真人实验，不报准确率。第三条是合成标准姿态的 8×8 规则回归：通过只表示示范与判定规则一致，不是国标正确，也不是真实检测通过。
 
 `fixtures` 测试枚举实际 JSON，检查 schema v2 并调用共享核心；0 个时明确打印“真人未执行”。无独立标签不算准确性。`evaluate` 仅单帧几何，`judge` 增加质量/内容与连续帧门；离线合同见 `practice/src/types.js`。旧文件缺有限正尺寸拒绝回放，不猜尺寸。
 
@@ -76,7 +79,8 @@ bun practice/src/eval-handframe.mjs <json路径> <字母ID>
 S1.5 渲染图闭环（不是真人，不是 S2）。对主路径 8 张 `practice/content/demos/GF0021.*_front.png` 跑 Hand Landmarker IMAGE 模式。有手写出 `practice/src/render-loop/out/<id>.json`，再调用上面的 eval。无手或检测失败记 `no_hand`，不编 landmarks。不写 `fixtures/`。阈值与 `practice/src/evaluate.js` 相同。汇总：`practice/src/render-loop/RESULTS.md`。渲染图，不是真人。不报准确率。
 
 ```bash
-python practice/src/render-loop/run.py
+# 需要 Python ≤3.12 且已安装 mediapipe / pillow / numpy（MediaPipe 尚不支持 3.13+）
+py -3.12 practice/src/render-loop/run.py
 ```
 
 ## 导出当前手 JSON

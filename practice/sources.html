@@ -3,36 +3,22 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+  <meta name="theme-color" content="#f5f1e8" />
   <title>来源与许可 · 手语学习陪练</title>
   <link rel="stylesheet" href="./styles.css" />
-  <style>
-    .sources { padding-bottom: 40px; }
-    .sources h1 { font-size: 28px; margin: 0 0 8px; }
-    .sources .lead { color: var(--muted); margin: 0 0 24px; line-height: 1.6; }
-    .sources article {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 18px 20px;
-      margin: 0 0 12px;
-    }
-    .sources h2 { margin: 0 0 8px; font-size: 18px; }
-    .sources p, .sources li { color: #ddd; line-height: 1.6; }
-    .sources a { color: var(--ok); }
-    .back { display: inline-block; margin: 20px 0 0; color: var(--ok); }
-  </style>
 </head>
 <body>
-  <header>
-    <div>
-      <p class="kicker">GF 0021—2019 · 引用与许可</p>
-      <h1>来源与许可</h1>
-    </div>
-    <p class="status">本页说明用了谁的什么。产品是陪练，不是翻译器，也不发「已学会手语」证书。</p>
+  <a class="skip-link" href="#main">跳到主要内容</a>
+  <header class="site-header">
+    <a class="brand" href="./index.html" aria-label="指间首页"><span class="brand-seal" aria-hidden="true">指</span><span>指间<small>手指字母陪练</small></span></a>
+    <nav aria-label="主导航"><a href="./index.html">首页</a><a href="./learn.html">跟着练</a><a href="./sources.html" aria-current="page">关于与来源</a></nav>
   </header>
 
-  <main class="sources" style="display:block">
-    <p class="lead">识别在本机完成，视频默认不上传。下面四条是提交包里必须能打开的出处。</p>
+  <main id="main" class="sources">
+    <p class="eyebrow">关于指间</p>
+    <h1>学习有据，隐私在手。</h1>
+    <p class="lead">指间是手指字母手型陪练，不是翻译器，也不替代完整的手语课程。你主动打开摄像头后，识别才会开始；视频仅在设备上处理，不上传。问题排查工具可手动下载关键点文件，不包含视频。</p>
 
     <article>
       <h2>1. MediaPipe Hand Landmarker</h2>
@@ -43,7 +29,7 @@
 
     <article>
       <h2>2. GF 0021—2019《汉语手指字母方案》</h2>
-      <p>内容层只引用这份国家规范（26 个拉丁字母 + zh / ch / sh / ng / ê / ü）。字母 ID 形如 <code>GF0021.U</code>。主路径练 A B U V L Y I W，其余在图鉴。</p>
+      <p>内容层只引用这份国家规范（26 个拉丁字母 + zh / ch / sh / ng / ê / ü）。练习页按内容核对进度分三组：可跟练（已核对且有静态判定）、待核对（能看示范，暂不判对错）、仅示范（只展示）。</p>
       <p>我们不发明「我们队的手语」，也不把 ASL 手指拼写当国标内容。争议或易混手型写在字母包备注里，不写进判定口号。</p>
       <p>教育部《汉语手指字母方案》官方入口：未找到官方 URL</p>
     </article>
@@ -51,23 +37,28 @@
     <article>
       <h2>3. SignPinyin 字体</h2>
       <p>示范区缺渲染图时，用 SignPinyin 字形占位，避免空白。许可：<strong>SIL Open Font License 1.1</strong>。</p>
-      <p><strong>SignPinyin 是字体，不是识别模型。</strong> 它不参与关键点检测，也不进入 <code>evaluate()</code>。有 <code>content/demos/</code> 下的 PNG 时，字体只作为角标。</p>
+      <p><strong>SignPinyin 是字体，不是识别模型。</strong> 它不参与关键点检测，也不进入 <code>evaluate()</code>。有 <code>content/demos/</code> 下的 PNG 时只显示渲染图，不再叠加字体角标——SignPinyin 的部分字形与国标手型不一致（如 U），并放会误导。</p>
       <p>上游：<a href="https://github.com/ErSanSan233/SignPinyin">SignPinyin</a></p>
     </article>
 
     <article>
-      <h2>4. Blender 标准手示范</h2>
-      <p>主路径 8 个字母的正面静图在 <code>content/demos/{字母ID}_front.png</code>，例如 <code>GF0021.U_front.png</code>。由 <code>blender/hand_gf0021.blend</code> 离线渲染；缺图时练习页回退字体，不报错。</p>
-      <p>2026-09-23 起网格改为追加 Blender Studio <strong>Human Base Meshes v1.4.1</strong> 的 <code>realistic_hand</code>（许可 <strong>CC0 1.0</strong>），再绑到本仓库 <code>HandRig</code> 上摆 GF 0021 草稿姿态。姿态、判定规则仍是本队的；没有把这只手送进识别循环。</p>
-      <p>上游：<a href="https://www.blender.org/download/demo-files/">Blender Demo Files · Human Base Meshes</a>（实际 zip：<code>download.blender.org/demo/asset-bundles/human-base-meshes/</code>）。</p>
-      <p><strong>Blender 示范不是识别模型。</strong> 3D 手只给学习者对照；不驱动虚拟人跟随摄像头，不把渲染图送进分类器。</p>
+      <h2>4. 标准手示范</h2>
+      <p>主路径 8 个字母的正面静图在 <code>content/demos/{字母ID}_front.png</code>，例如 <code>GF0021.U_front.png</code>。缺图时练习页回退字体，不报错。逐张来源见 <code>content/demos/manifest.json</code>。</p>
+      <p>2026-09-30 起，<strong>A、B、I、L、V、W、Y</strong> 七张正面图改用 Godot XR Tools 右手网格 <code>hand_r.gltf</code>，由 <code>blender/build_godot_hand_candidate.py</code> 离线渲染。网格许可 <strong>CC0 1.0 Universal</strong>，作者 DigitalN8m4r3 aka Miodrag Sejic（2022）。许可全文：<code>vendor/godot-xr-hands/LICENSE.md</code>。同一网格另由 <code>blender/build_godot_hand_turntable.py</code> 逐字母渲染 24 帧转盘（<code>content/demos/rot/</code>），供练习页左右拖动查看手型各个角度；U 与 J/Z 无旋转帧，保持静态示范或字形。V、W 的 V/W 字形正确，侧面可见拇指搭在屈指上，但拇指与远节是近似接触、并非精确贴面。</p>
+      <p><strong>U 未替换</strong>，仍用此前 Blender Studio <strong>Human Base Meshes v1.4.1</strong> 的 <code>realistic_hand</code>（许可 <strong>CC0 1.0</strong>）绑到本仓库 <code>HandRig</code> 后渲染的旧图，因其内容 pending_review 争议未核定。姿态与判定规则仍是本队的；没有把这些手送进识别循环。</p>
+      <p>上游：<a href="https://github.com/GodotVR/godot-xr-tools">Godot XR Tools</a>（新手模七字母）；<a href="https://www.blender.org/download/demo-files/">Blender Demo Files · Human Base Meshes</a>（仍在用的 U 旧图；实际 zip：<code>download.blender.org/demo/asset-bundles/human-base-meshes/</code>）。</p>
+      <p><strong>3D 示范不是识别模型。</strong> 只给学习者对照；不驱动虚拟人跟随摄像头，不把渲染图送进分类器。</p>
     </article>
 
-    <p><a class="back" href="./index.html">← 回到练习页</a></p>
+    <article>
+      <h2>5. 本机练习记录</h2>
+      <p>跟练和静态自测若真实通过，本页只在当前浏览器写入最小汇总：字母、模式、通过次数和最近时间。不保存图像、视频或手部关键点，也不上传、不同步到账号。</p>
+      <p>清除本站的浏览器数据会丢掉这些记录。记录只说明当时静态手型通过过，不代表完整掌握手语。摄像头仍只在你主动打开时向系统申请；本地记录不改变这一授权事实。</p>
+    </article>
+
+    <p><a class="back" href="./index.html">← 回到首页</a></p>
   </main>
 
-  <footer>
-    手语学习陪练 · 引用他人程序须标明 · 本仓库为本赛季新作品
-  </footer>
+  <footer class="site-footer"><span>指间 · 陪你慢慢学</span><a href="./learn.html">开始学习</a></footer>
 </body>
 </html>

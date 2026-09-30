@@ -1,0 +1,16 @@
+{
+  "id": "practice-content-demos-rot",
+  "updated": "2026-09-30",
+  "purpose": "练习页示范手模拖动旋转帧索引。帧文件在 ./GF0021.{X}/NN.webp；不在 letters 中的字母回退为静态正面图。",
+  "frameConvention": "00 帧 = 正面机位（与 {letterId}_front.png 一致）；帧号增大 = 向右拖动看到的方向",
+  "frames": 24,
+  "letters": {
+    "GF0021.A": true,
+    "GF0021.B": true,
+    "GF0021.I": true,
+    "GF0021.L": true,
+    "GF0021.V": true,
+    "GF0021.W": true,
+    "GF0021.Y": true
+  }
+}

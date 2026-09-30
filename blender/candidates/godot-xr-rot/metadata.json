@@ -1,0 +1,40 @@
+{
+  "id": "godot-xr-rot",
+  "generated_on": "2026-09-30",
+  "purpose": "练习页拖动旋转帧候选；目检通过后才复制进 practice/content/demos/rot/",
+  "generator": "blender/build_godot_hand_turntable.py",
+  "posesFrom": "blender/build_godot_hand_candidate.py",
+  "source": {
+    "mesh": "blender/vendor/godot-xr-hands/hand_r.gltf",
+    "license": "CC0 1.0 Universal",
+    "author": "DigitalN8m4r3 aka Miodrag Sejic",
+    "year": 2022
+  },
+  "frames": 24,
+  "size": 384,
+  "format": "webp q80 rgba",
+  "frameConvention": "00 帧与各字母 front_view_dir 同机位；帧号增大 = 相机绕 finger_up 俯视顺时针，观者看到手模左侧；前端右拖 = 帧号增大",
+  "letters": {
+    "GF0021.A": 24,
+    "GF0021.B": 24,
+    "GF0021.I": 24,
+    "GF0021.L": 24,
+    "GF0021.V": 24,
+    "GF0021.W": 24,
+    "GF0021.Y": 24
+  },
+  "bytes": {
+    "GF0021.A": 113388,
+    "GF0021.B": 126920,
+    "GF0021.I": 108042,
+    "GF0021.L": 113326,
+    "GF0021.V": 125290,
+    "GF0021.W": 132688,
+    "GF0021.Y": 114234
+  },
+  "known_limits": [
+    "U 内容争议未核定，仍用旧模正面图，无旋转帧。",
+    "V/W 拇指与远节近似接触、非精确贴面（继承 godot-xr-v2 结论）。",
+    "Workbench 预览材质，不是最终片场灯光。"
+  ]
+}

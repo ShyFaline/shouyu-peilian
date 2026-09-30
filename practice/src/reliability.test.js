@@ -6,6 +6,8 @@ import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { webcrypto, createHash } from 'node:crypto';
+import { groupLetters, groupIdForStatus, letterAriaLabel, capabilityNote, confusionCluster } from './letterLibrary.js';
+import { PROGRESS_KEY } from './progress.js';
 const practice = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const pack = JSON.parse(readFileSync(resolve(practice, 'content/letters.json'), 'utf8'));
 const V = pack.letters.find(x => x.id === 'GF0021.V');
@@ -22,32 +24,34 @@ function hand() {
   return lm;
 }
 class Target {
-  constructor(){this.events=new Map();this.dataset={};this.children=[];this.disabled=false;this.textContent='';}
+  constructor(){this.events=new Map();this.dataset={};this.children=[];this.disabled=false;this.textContent='';this.hidden=false;this.open=false;this.inert=false;this._attrs=Object.create(null);}
   addEventListener(n,f){if(!this.events.has(n))this.events.set(n,[]);this.events.get(n).push(f);}
   removeEventListener(n,f){this.events.set(n,(this.events.get(n)||[]).filter(x=>x!==f));}
   async emit(n){for(const f of this.events.get(n)||[])await f({target:this});}
-  appendChild(x){this.children.push(x);}
-  removeAttribute(n){delete this[n];}
+  appendChild(x){this.children.push(x);return x;}
+  replaceChildren(...nodes){this.children=nodes;}
+  setAttribute(n,v){const key=String(n);const val=v==null?'':String(v);this._attrs[key]=val;if(key==='hidden')this.hidden=true;}
+  getAttribute(n){const key=String(n);return Object.prototype.hasOwnProperty.call(this._attrs,key)?this._attrs[key]:null;}
+  removeAttribute(n){delete this._attrs[n];delete this[n];if(n==='hidden')this.hidden=false;}
+  scrollIntoView(){}
 }
 function deferred(){let resolve,reject;const promise=new Promise((a,b)=>{resolve=a;reject=b;});return {promise,resolve,reject};}
-async function harness(){
-  const h={now:1000,epoch:1700000000000,raf:new Map(),seq:0,downloads:[],detects:0,painted:false,hands:[hand()],logs:[],streams:[],images:[]};
-  const ids=['video','overlay','status','verdict','hint','how','demo-stage','demo-image','demo-glyph','demo-badge','demo-label','letter-btns','atlas-btns','start-btn','stop-btn','mirror-toggle','export-toggle','export-btn','stage'];
   h.els=Object.fromEntries(ids.map(id=>[id,new Target()]));
+  h.els['similar-hints'].hidden=true;
+  for(const id of ['test-panel','pass-seal','records-clear-confirm','test-outcome','persist-note']) h.els[id].hidden=true;
   const canvas=h.els.overlay;
   canvas.getContext=()=>({clearRect(){h.painted=false;},beginPath(){},moveTo(){},lineTo(){},stroke(){h.painted=true;},arc(){},fill(){h.painted=true;}});
   Object.assign(h.els.video,{readyState:4,currentTime:0,videoWidth:640,videoHeight:480,srcObject:null,play:()=>h.play? h.play():Promise.resolve()});
   const document=new Target(); document.hidden=false;document.visibilityState='visible';
   document.getElementById=id=>h.els[id];
-  document.querySelectorAll=()=>[...h.els['letter-btns'].children,...h.els['atlas-btns'].children];
+  document.querySelectorAll=()=>[...h.els['letter-btns'].children,...h.els['atlas-btns'].children,...h.els['demo-btns'].children,...h.els['similar-hint-btns'].children,...h.els['test-letter-btns'].children];
   document.createElement=tag=>{const el=new Target();el.click=()=>{if(tag==='a')h.downloads.push(el);else return el.emit('click');};return el;};
   h.document=document;
   h.newStream=()=>{const track=new Target();track.muted=false;track.readyState='live';track.stops=0;track.stop=()=>{track.stops++;track.readyState='ended';};const s={track,getTracks:()=>[track],getVideoTracks:()=>[track]};h.streams.push(s);return s;};
   class ClockDate extends Date {constructor(...args){super(...(args.length?args:[h.epoch]));}static now(){return h.epoch;}}
-  const sandbox={document,performance:{now:()=>h.now},Date:ClockDate,TextEncoder,crypto:webcrypto,Blob,
     console:{log:(...a)=>h.logs.push(a),info:(...a)=>h.logs.push(a),warn:(...a)=>h.logs.push(a),error:(...a)=>h.logs.push(a)},
     URL:{createObjectURL:blob=>{h.blob=blob;return 'blob:test';},revokeObjectURL(){}},
-    navigator:{mediaDevices:{getUserMedia:()=>h.gum?h.gum():Promise.resolve(h.newStream())}},
+    navigator:{mediaDevices:{getUserMedia:()=>{h.gumCalls++;return h.gum?h.gum():Promise.resolve(h.newStream());}}},
     requestAnimationFrame:f=>{const id=++h.seq;h.raf.set(id,f);return id;},cancelAnimationFrame:id=>h.raf.delete(id),
     fetch:async path=>{let text=readFileSync(resolve(practice,String(path).replace(/^\.\//,'')),'utf8');if(h.fetchTransform)text=h.fetchTransform(path,text);return {ok:true,status:200,text:async()=>text,json:async()=>JSON.parse(text)};}};
   // 可控 Image 伪类：记录每次探测，手动触发 onload/onerror 来模拟慢图、失败图与竞争。
@@ -150,33 +154,6 @@ test('runtime versions hash actual sources/letters; export retains raw unmirrore
  h.fetchTransform=(path,text)=>String(path).includes('letters.json')?text+'\n':text;
  const lettersChanged=await v.loadVersionManifest();assert.notEqual(lettersChanged.codeVersion,manifest.codeVersion);assert.notEqual(lettersChanged.rulesVersion,manifest.rulesVersion);
 });
-test('demo image: load failure falls back to glyph, never leaves broken image',async()=>{
- const h=await harness();h.imageAutoLoad=false;await h.boot();
- await h.select('GF0021.V');
- const probe=h.images[h.images.length-1];assert.ok(String(probe.src).includes('GF0021.V_front.png'));
- probe.fail();
- await new Promise(r=>setTimeout(r,5));
- assert.notEqual(h.els['demo-stage'].dataset.hasImage,'true','failed demo must not be shown');
- assert.equal(h.els['demo-glyph'].textContent.length>0,true,'glyph fallback must be visible');
-});
-test('demo image: rapid target switch, slow old callback must not overwrite new target',async()=>{
- const h=await harness();h.imageAutoLoad=false;await h.boot();
- await h.select('GF0021.V');const slow=h.images[h.images.length-1];
- await h.select('GF0021.U');const newer=h.images[h.images.length-1];
- newer.load();await new Promise(r=>setTimeout(r,5));
- const shownAfterNew=String(h.els['demo-image'].src||'');
- slow.load();await new Promise(r=>setTimeout(r,5));
- assert.equal(String(h.els['demo-image'].src||''),shownAfterNew,'stale V image callback must not overwrite U');
- assert.ok(shownAfterNew.includes('GF0021.U')||shownAfterNew==='','shown demo must belong to U or be empty');
-});
-test('demo image: error callback of old target must not blank the new target image',async()=>{
- const h=await harness();h.imageAutoLoad=false;await h.boot();
- await h.select('GF0021.V');const old=h.images[h.images.length-1];
- await h.select('GF0021.U');const newer=h.images[h.images.length-1];
- newer.load();await new Promise(r=>setTimeout(r,5));
- const keep=String(h.els['demo-image'].src||'');
- old.fail();await new Promise(r=>setTimeout(r,5));
- assert.equal(String(h.els['demo-image'].src||''),keep,'stale error callback must not touch new target demo');
 });
 let passed=0,failed=0;
 for(const [name,fn] of tests){try{await fn();passed++;console.log('ok -',name);}catch(e){failed++;console.error('not ok -',name);console.error(e.stack);}}

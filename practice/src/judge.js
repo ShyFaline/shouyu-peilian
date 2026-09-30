@@ -49,7 +49,7 @@ export function presentJudge(judged) {
     return { title: "暂不判定", hint: blob || "现在不能判定。", state: "idle" };
   }
   if (judged?.decision === "pass") {
-    return { title: "姿态接近，停稳", hint: "手型接近了，先停稳。", state: "ok" };
+    return { title: "做对了，保持住", hint: "手型已连续保持，通过了本字母的静态姿态。", state: "ok" };
   }
   if (issues.some((x) => x.code === "hold.pending")) {
     return { title: "姿态接近，停稳", hint: blob || "手指已经对上，保持这个姿势。", state: "idle" };

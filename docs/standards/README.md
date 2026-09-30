@@ -10,6 +10,8 @@
 | `GF0021-2019_汉语手指字母方案.pdf` | GF 0021—2019《汉语手指字母方案》全文扫描件 | 3,971,362 B；SHA-256 `0bbe8f28a915249ec24360409aeb1d5c835d5d1e52f4c99cc89d7486f9e88a9c`；10 页纯图像，无文本层 |
 | `pages/p01.png` … `p10.png` | 全页渲染，150 DPI（pymupdf），供无工具环境人工读图 | 1144×1740 px |
 | `pages/hp05.png` `hp06.png` `hp08.png` | 印刷页 2/3/5 的 200 DPI 复扫（A、B、I、L、U、V、W、Y 条文所在页） | 1526×2320 px |
+| `letters/{ID}.png` ×32 | **派生**：逐字母参考图（标号格+指式图），供 Blender 对位与人工对图 | `python tools/standard-figures/crop_figures.py` 重新生成；行坐标为程序量测初值，以 `_contact_sheet.png` 人工过目为准 |
+| `review/GF0021.{ID}_triptych.png` | **派生**：三联评审图（规范插图｜正面渲染｜侧面渲染），人工对图签字的评审附件 | `python tools/standard-figures/make_triptychs.py` 重新生成（依赖 Blender PoC 渲染先行） |
 
 ## 2. 取得记录
 

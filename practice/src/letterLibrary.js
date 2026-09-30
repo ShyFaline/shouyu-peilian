@@ -4,7 +4,7 @@ export const GROUP_META = {
   practice: {
     id: "practice",
     title: "可跟练",
-    note: "先看示范，再试着摆出手型。打开摄像头后，可以获得静态手型提示。",
+    note: "先看示范，再试着摆出手型与动作。打开摄像头后，可以获得手型与动作提示。",
   },
   review: {
     id: "review",
@@ -42,14 +42,15 @@ export function groupLetters(letters = []) {
   return groups;
 }
 
+/** 判定只核静态手型（该字母本身无动态成分，或动态规则未写入 rules.motion）。 */
 export function isStaticOnlyLetter(letter) {
-  return letter?.id === "GF0021.J" || letter?.id === "GF0021.Z";
+  return isPracticeable(letter) && !letter?.rules?.motion;
 }
 
 export function capabilityLabel(letter) {
   const group = groupIdForLetter(letter);
   if (group === "practice") {
-    return isStaticOnlyLetter(letter) ? "可跟练静态姿态，只核静态部分" : "可跟练静态姿态";
+    return isStaticOnlyLetter(letter) ? "可跟练，只核静态手型" : "可跟练，核手型与动作";
   }
   if (group === "demo") return "仅示范，不判定";
   return "待核对，暂不判定";
@@ -58,8 +59,8 @@ export function capabilityLabel(letter) {
 export function capabilityNote(letter) {
   const group = groupIdForLetter(letter);
   if (group === "practice") {
-    if (isStaticOnlyLetter(letter)) {
-      return "可跟练。规范中的这一字母带轨迹，这里只核静态手型。";
+    if (letter?.rules?.motion) {
+      return "可跟练。判定手型与动作；动作方向以规范原图人工对图为准。";
     }
     return "可跟练静态姿态。打开摄像头后，系统会对照当前手型给出提示。";
   }

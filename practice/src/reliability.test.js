@@ -196,16 +196,16 @@ test('U is not practiceable and stays 暂不判定',async()=>{
  assert.equal(h.els.verdict.textContent,'暂不判定');
  assert.match(h.els.capability.textContent,/暂不判定/);
 });
-test('J and Z capability notes cover static-only practice',async()=>{
+test('J and Z capability notes announce hand shape and motion judging',async()=>{
  const h=await harness();await h.boot();
  for(const id of ['GF0021.J','GF0021.Z']){
   const letter=pack.letters.find(l=>l.id===id);
-  assert.match(capabilityNote(letter),/静态/);
+  assert.match(capabilityNote(letter),/动作/);
   await h.select(id);
-  assert.match(h.els.capability.textContent,/静态/);
+  assert.match(h.els.capability.textContent,/动作/);
   const btn=h.els['letter-btns'].children.find(b=>b.dataset.id===id);
   assert.ok(btn);
-  assert.match(btn.getAttribute('aria-label'),/只核静态部分/);
+  assert.match(btn.getAttribute('aria-label'),/核手型与动作/);
  }
 });
 test('letter buttons expose unique accessible name and pressed state',async()=>{

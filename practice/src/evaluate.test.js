@@ -4,6 +4,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { angleDeg, APART_DEG, evaluate, isReadyToScore, spreadBetween, vecAngle } from "./evaluate.js";
 import { judge, presentJudge, createHold } from "./judge.js";
+import { createMotionState } from "./motion.js";
 import { QUALITY_HINT } from "./inputQuality.js";
 import { createHold as makeHold, holdReady, observePass, resetHold } from "./passState.js";
 import { canExportSnapshot, createSnapshot, serializeSnapshot } from "./snapshot.js";
@@ -658,6 +659,80 @@ test("能力：J 几何通过不得写成完整掌握", () => {
   if (judged.decision === "pass") {
     assert.equal(view.title, "做对了，保持住");
   }
+});
+
+test("J 完整判定：静态保持后画钩才 pass（合成轨迹，仅规则回归）", () => {
+  const hold = createHold();
+  const motion = createMotionState();
+  const tip0 = iHand()[20];
+  let last = null;
+  let f = 0;
+  const feed = (lm) => {
+    last = judge({
+      letter: letterJ, lm, hands: [lm], geom: UNIT,
+      videoTime: f, nowMs: f * 100,
+    }, hold, motion);
+    f += 1;
+  };
+  for (let i = 0; i < 6; i += 1) feed(iHand());
+  assert.notEqual(last.decision, "pass");
+  assert.ok(codesOf(last).includes("motion.pending"), JSON.stringify(last));
+  // 画钩：小指先下行 0.4，再水平 0.4（水平任一方向均可）
+  for (let i = 0; i < 8; i += 1) {
+    const lm = iHand();
+    lm[20] = pt(tip0.x, tip0.y + 0.05 * (i + 1));
+    feed(lm);
+  }
+  assert.notEqual(last.decision, "pass", "只下行不应 pass");
+  for (let i = 0; i < 8; i += 1) {
+    const lm = iHand();
+    lm[20] = pt(tip0.x - 0.05 * (i + 1), tip0.y + 0.4);
+    feed(lm);
+  }
+  assert.equal(last.decision, "pass", JSON.stringify(last));
+  assert.ok(last.motion, "pass 结果应透出 motion 视图");
+  assert.equal(presentJudge(last).title, "做对了");
+});
+
+test("J 判定 fail-closed：只摆静态不动作，或反方向轨迹，均不 pass", () => {
+  const hold = createHold();
+  const motion = createMotionState();
+  const tip0 = iHand()[20];
+  let last = null;
+  let f = 0;
+  const feed = (lm) => {
+    last = judge({
+      letter: letterJ, lm, hands: [lm], geom: UNIT,
+      videoTime: f, nowMs: f * 100,
+    }, hold, motion);
+    f += 1;
+  };
+  for (let i = 0; i < 6; i += 1) feed(iHand());
+  for (let i = 0; i < 10; i += 1) feed(iHand());
+  assert.notEqual(last.decision, "pass", "无动作不得 pass");
+
+  const hold2 = createHold();
+  const motion2 = createMotionState();
+  let g = 0;
+  const feed2 = (lm) => {
+    last = judge({
+      letter: letterJ, lm, hands: [lm], geom: UNIT,
+      videoTime: g, nowMs: g * 100,
+    }, hold2, motion2);
+    g += 1;
+  };
+  for (let i = 0; i < 6; i += 1) feed2(iHand());
+  for (let i = 0; i < 8; i += 1) {
+    const lm = iHand();
+    lm[20] = pt(tip0.x, tip0.y - 0.04 * (i + 1) <= 0 ? 0.01 : tip0.y - 0.04 * (i + 1));
+    feed2(lm);
+  }
+  assert.notEqual(last.decision, "pass", "上行轨迹不得 pass");
+});
+
+test("J 判定 fail-closed：不传 motion 状态永远不可 pass", () => {
+  const judged = holdPass(letterJ, iHand(), 12);
+  assert.notEqual(judged.decision, "pass");
 });
 
 test("pose_practice V 连续保持后 decision=pass，文案不是到位/掌握", () => {

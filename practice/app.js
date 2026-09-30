@@ -3,6 +3,7 @@ import { stopCamera, stopTracks } from "./src/camera.js";
 import { MAX_GAP_MS } from "./src/passState.js";
 import { loadVersionManifest } from "./src/versions.js";
 import { judge, presentJudge, createHold, resetHold } from "./src/judge.js";
+import { createMotionState, resetMotion } from "./src/motion.js";
 import { canExportSnapshot, createSnapshot, serializeSnapshot } from "./src/snapshot.js";
 import { groupLetters, capabilityNote, letterAriaLabel, confusionCluster, isPracticeable } from "./src/letterLibrary.js";
 import { attachRotator, parseRotIndex } from "./src/rotator.js";
@@ -107,6 +108,7 @@ let mirror = true;
 let lastSnapshot = null;
 let exportEnabled = false;
 let hold = createHold();
+let motion = createMotionState();
 let loopHandle = 0;
 let lastFrameAt = null; // monotonic time of last consumed video frame, independent of hold
 let lastClockTime = null; // Retain clock high-water even when feedback is invalidated.
@@ -126,6 +128,7 @@ let demoLetterId = null;
 
 function invalidateFrame(reason = "stale") {
   resetHold(hold);
+  resetMotion(motion);
   lastSnapshot = null;
   lastFrameAt = null;
   ctx.clearRect(0, 0, els.canvas.width, els.canvas.height);
@@ -282,12 +285,12 @@ function hidePassSeal() {
   if (els.passSealText) els.passSealText.textContent = "";
 }
 
-function showPassSeal() {
+function showPassSeal(judged) {
   if (!els.passSeal || !els.passSealText) return;
   els.passSealText.textContent = "";
   els.passSeal.hidden = false;
   els.passSeal.dataset.animate = "true";
-  els.passSealText.textContent = "记下一次静态通过";
+  els.passSealText.textContent = judged?.motion ? "记下一次手型与动作通过" : "记下一次静态通过";
 }
 
 function updateTestPrompt(letter) {
@@ -396,6 +399,7 @@ function setMode(next) {
   hidePassSeal();
   lastSnapshot = null;
   resetHold(hold);
+  resetMotion(motion);
   applyModeUi();
   if (mode === MODE_TEST && !isPracticeable(current)) {
     const nextLetter = practiceableLetters()[0];
@@ -483,7 +487,7 @@ function notePass(judged) {
     testOutcome = { letterId: current.id };
     showTestOutcome();
   }
-  showPassSeal();
+  showPassSeal(judged);
   renderRecords();
 }
 
@@ -594,7 +598,7 @@ async function loop() {
       letter: current, hands, lm: hands[0],
       geom: { width: w, height: h, coordSpace: "image_normalized" },
       videoTime, nowMs: now,
-    }, hold);
+    }, hold, motion);
     const epochAge = Date.now() - capturedAt;
     if (!activeFrameSource() || !freshFrame() || !Number.isFinite(epochAge) || epochAge < 0 || epochAge > MAX_GAP_MS) {
       invalidateFrame("stale");
@@ -695,6 +699,7 @@ function stopLive() {
   loopHandle = 0;
   stopCamera(els.video);
   resetHold(hold);
+  resetMotion(motion);
   lastVideoTime = -1;
   lastTimestamp = 0;
   lastSnapshot = null;

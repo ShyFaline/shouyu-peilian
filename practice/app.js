@@ -5,6 +5,7 @@ import { loadVersionManifest } from "./src/versions.js";
 import { judge, presentJudge, createHold, resetHold } from "./src/judge.js";
 import { canExportSnapshot, createSnapshot, serializeSnapshot } from "./src/snapshot.js";
 import { groupLetters, capabilityNote, letterAriaLabel, confusionCluster, isPracticeable } from "./src/letterLibrary.js";
+import { attachRotator, parseRotIndex } from "./src/rotator.js";
 import {
   MODE_LEARN,
   MODE_TEST,
@@ -46,6 +47,7 @@ const els = {
   demoImage: document.getElementById("demo-image"),
   demoGlyph: document.getElementById("demo-glyph"),
   demoLabel: document.getElementById("demo-label"),
+  demoRotHint: document.getElementById("demo-rot-hint"),
   capability: document.getElementById("capability"),
   letterBtns: document.getElementById("letter-btns"),
   atlasBtns: document.getElementById("atlas-btns"),
@@ -118,6 +120,9 @@ let testOutcome = null;
 let progress = emptyProgress();
 let persisted = true;
 let storage = null;
+let rotIndex = new Map();
+let detachRotator = null;
+let demoLetterId = null;
 
 function invalidateFrame(reason = "stale") {
   resetHold(hold);
@@ -168,10 +173,34 @@ function demoSrc(letter) {
 }
 
 function clearDemoVisuals() {
+  applyDemoRotator(null);
   els.demoGlyph.textContent = "";
   els.demoStage.dataset.mode = "font";
   els.demoImage.removeAttribute("src");
   els.demoImage.alt = "";
+}
+
+function updateRotHint() {
+  if (!els.demoRotHint) return;
+  els.demoRotHint.hidden = !(mode === MODE_LEARN && rotIndex.has(current?.id));
+}
+
+function applyDemoRotator(letter) {
+  if (detachRotator) {
+    detachRotator();
+    detachRotator = null;
+  }
+  demoLetterId = letter ? letter.id : null;
+  updateRotHint();
+  const frames = letter ? rotIndex.get(letter.id) : 0;
+  if (!frames) return;
+  detachRotator = attachRotator({
+    stage: els.demoStage,
+    image: els.demoImage,
+    letterId: letter.id,
+    frames,
+    alt: `${letter.title}标准手示范图`,
+  });
 }
 
 function showDemo(letter) {
@@ -188,6 +217,7 @@ function showDemo(letter) {
     els.demoImage.src = src;
     els.demoImage.alt = `${letter.title}标准手示范图`;
     els.demoStage.dataset.mode = "image";
+    applyDemoRotator(letter);
   };
   probe.onerror = () => {
     if (current?.id !== letter.id) return;
@@ -745,6 +775,15 @@ async function main() {
     setStatus("字母包是空的", "bad");
     return;
   }
+
+  fetch("./content/demos/rot/index.json", { cache: "no-store" })
+    .then((r) => (r && r.ok ? r.json() : null))
+    .then((raw) => {
+      rotIndex = parseRotIndex(raw);
+      if (mode === MODE_LEARN && rotIndex.has(demoLetterId)) applyDemoRotator(demoLetterId ? byId.get(demoLetterId) : null);
+      updateRotHint();
+    })
+    .catch(() => { /* 无旋转帧时示范区保持静态图 */ });
 
   try {
     mode = parsePracticeMode(globalThis.location?.search);

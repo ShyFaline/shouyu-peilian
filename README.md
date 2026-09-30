@@ -30,7 +30,7 @@ https://shyfaline.github.io/shouyu-peilian/
 | 质量失败 | `undetermined`，文案「暂时无法判断」，不用「伸直 / 收起来」类动作 hint。 |
 | 无目标 / 空规则 / 未知规则字段 / 状态不允许判定 | `blocked` |
 
-J / Z 只核静态手型。跟练示范优先读 `practice/content/demos/{字母ID}_front.png`；没有图时回退 SignPinyin 字体（字体不是识别模型）。自测隐藏示范与动作答案。2026-09-30 起 A/B/I/L/V/W/Y 已接入 Godot XR（CC0）正面示范；仅 U 仍用旧 Human Base Meshes 图（内容争议未核定）。明细见 `practice/content/demos/manifest.json`。
+J / Z 只核静态手型。跟练示范优先读 `practice/content/demos/{字母ID}_front.png`；没有图时回退 SignPinyin 字体（字体不是识别模型）。自测隐藏示范与动作答案。2026-09-30 起 A/B/I/L/V/W/Y 已接入 Godot XR（CC0）正面示范，并带 24 帧拖动旋转（`practice/content/demos/rot/`，`blender/build_godot_hand_turntable.py` 渲染）；仅 U 仍用旧 Human Base Meshes 图（内容争议未核定，无旋转帧）。明细见 `practice/content/demos/manifest.json`。
 
 ## 本地运行
 

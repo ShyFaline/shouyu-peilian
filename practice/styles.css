@@ -82,6 +82,10 @@ a.path-card:hover { background: var(--panel); transform: translateY(-4px); }
 .glyph { font-family: "SignPinyin", sans-serif; font-size: 180px; line-height: 1; min-height: 230px; display: flex; align-items: center; justify-content: center; }
 .glyph[data-wide="true"] { font-size: 110px; }
 .demo-stage[data-mode="font"] img, .demo-stage[data-mode="image"] .glyph { display: none; }
+.demo-stage[data-rot="true"] { cursor: ew-resize; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+.demo-stage[data-rot="true"] img { pointer-events: none; }
+.demo-stage[data-rot="true"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.demo-rot-hint { margin: 8px 0 0; color: var(--muted); font-size: 12px; text-align: center; }
 .demo-label { margin: 18px 0 8px; font-size: 24px; }
 .how { color: var(--muted); font-size: 14px; line-height: 1.9; min-height: 3em; }
 .library-title { font-family: inherit; font-size: 13px; margin: 22px 0 10px; }

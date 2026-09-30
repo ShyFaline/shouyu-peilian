@@ -22,20 +22,19 @@
   "inspection": {
     "date": "2026-09-30",
     "method": "主代理逐张查看 godot-xr-v2 正侧两图",
-    "pass": [
-      "A",
-      "B",
-      "L",
-      "Y",
-      "I"
-    ],
-    "passWithLimits": [
-      "V",
-      "W"
-    ],
-    "rejected": [
-      "U"
-    ]
+    "pass": ["A", "B", "L", "Y", "I"],
+    "passWithLimits": ["V", "W"],
+    "rejected": ["U"]
+  },
+  "rotFrames": {
+    "addedOn": "2026-09-30",
+    "purpose": "练习页示范手模拖动旋转帧（24 帧/字母，webp q80 384px），前端 src/rotator.js 按 rot/index.json 驱动换帧",
+    "generator": "blender/build_godot_hand_turntable.py",
+    "candidateDir": "blender/candidates/godot-xr-rot/",
+    "frameConvention": "00 帧 = 各字母正面机位（与 _front.png 一致）；帧号增大 = 向右拖动看到的方向（观者看到手模左侧）",
+    "letters": ["GF0021.A", "GF0021.B", "GF0021.I", "GF0021.L", "GF0021.V", "GF0021.W", "GF0021.Y"],
+    "inspection": "主代理按接触表逐字母目检 24 帧连续性与姿态正确性，全部通过；U 无帧（内容争议未核定），J/Z 无帧（字形回退）",
+    "mesh": "同 mesh 字段（Godot XR hand_r.gltf，CC0）"
   },
   "letters": {
     "GF0021.A": {

@@ -8,6 +8,7 @@ import { QUALITY_HINT } from "./inputQuality.js";
 import { createHold as makeHold, holdReady, observePass, resetHold } from "./passState.js";
 import { canExportSnapshot, createSnapshot, serializeSnapshot } from "./snapshot.js";
 import { stopCamera } from "./camera.js";
+import { attachRotator, frameForDrag, parseRotIndex, rotFrameUrl, stepFrame } from "./rotator.js";
 
 const root = dirname(fileURLToPath(import.meta.url));
 const UNIT = { coordSpace: "equal_scale_unit" };
@@ -730,6 +731,87 @@ test("结构检查（非行为）：app/旧离线入口接线", () => {
   assert.doesNotMatch(runPy, /"conf": conf/);
   assert.match(runPy, /imageWidth/);
   assert.match(runPy, /geometry_pass/);
+});
+
+test("R1 rot 索引解析：合法映射、垃圾输入回退空", () => {
+  const good = parseRotIndex({ frames: 24, letters: { "GF0021.A": true, "GF0021.U": false } });
+  assert.equal(good.get("GF0021.A"), 24);
+  assert.equal(good.has("GF0021.U"), false, "非 true 的字母不得启用旋转");
+  for (const bad of [null, undefined, {}, { frames: "24" }, { frames: 2, letters: { A: true } }, { frames: 24, letters: null }]) {
+    assert.equal(parseRotIndex(bad).size, 0, JSON.stringify(bad));
+  }
+});
+
+test("R2 帧 URL 取模回绕，非法输入给空串", () => {
+  assert.equal(rotFrameUrl("GF0021.A", 0, 24), "./content/demos/rot/GF0021.A/00.webp");
+  assert.equal(rotFrameUrl("GF0021.A", -1, 24), "./content/demos/rot/GF0021.A/23.webp");
+  assert.equal(rotFrameUrl("GF0021.A", 25, 24), "./content/demos/rot/GF0021.A/01.webp");
+  assert.equal(rotFrameUrl("GF0021.A", 1.5, 24), "");
+  assert.equal(rotFrameUrl("GF0021.A", 0, 0), "");
+});
+
+test("R3 拖动位移换算：拖满宽度=半圈，右拖帧号增大，非法宽度回起始帧", () => {
+  assert.equal(frameForDrag({ dx: 0, width: 240, frames: 24, startFrame: 0 }), 0);
+  assert.equal(frameForDrag({ dx: 240, width: 240, frames: 24, startFrame: 0 }), 12);
+  assert.equal(frameForDrag({ dx: -20, width: 240, frames: 24, startFrame: 0 }), 23, "左拖回绕");
+  assert.equal(frameForDrag({ dx: 20, width: 240, frames: 24, startFrame: 23 }), 0, "右拖回绕");
+  assert.equal(frameForDrag({ dx: 500, width: 0, frames: 24, startFrame: 7 }), 7);
+  assert.equal(frameForDrag({ dx: Number.NaN, width: 240, frames: 24, startFrame: 3 }), 3);
+  assert.equal(stepFrame(23, 1, 24), 0);
+  assert.equal(stepFrame(0, -1, 24), 23);
+});
+
+test("R4 attachRotator 拖动/键盘驱动换帧，detach 完整还原", () => {
+  const listeners = new Map();
+  const stage = {
+    dataset: {},
+    clientWidth: 240,
+    attrs: {},
+    addEventListener(type, fn) { listeners.set(type, fn); },
+    removeEventListener(type) { listeners.delete(type); },
+    setAttribute(k, v) { this.attrs[k] = v; },
+    removeAttribute(k) { delete this.attrs[k]; },
+    setPointerCapture() {},
+  };
+  const image = { src: "", alt: "" };
+  const detach = attachRotator({ stage, image, letterId: "GF0021.A", frames: 24, alt: "字母A标准手示范图" });
+  assert.equal(typeof detach, "function");
+  assert.equal(stage.dataset.rot, "true");
+  assert.equal(stage.attrs.role, "slider");
+  assert.equal(stage.attrs.tabindex, "0");
+
+  listeners.get("pointerdown")({ pointerId: 1, clientX: 100 });
+  listeners.get("pointermove")({ clientX: 140 });
+  assert.equal(image.src, "./content/demos/rot/GF0021.A/02.webp");
+  assert.equal(stage.dataset.rotFrame, "2");
+  assert.match(image.alt, /已旋转/);
+  listeners.get("pointerup")({});
+
+  let prevented = 0;
+  listeners.get("keydown")({ key: "ArrowRight", preventDefault() { prevented += 1; } });
+  assert.equal(image.src, "./content/demos/rot/GF0021.A/03.webp");
+  assert.equal(prevented, 1);
+  listeners.get("keydown")({ key: "ArrowLeft", preventDefault() { prevented += 1; } });
+  listeners.get("keydown")({ key: "ArrowLeft", preventDefault() { prevented += 1; } });
+  listeners.get("keydown")({ key: "ArrowLeft", preventDefault() { prevented += 1; } });
+  assert.equal(image.src, "./content/demos/rot/GF0021.A/00.webp", "回到正面");
+  assert.equal(image.alt, "字母A标准手示范图", "正面帧恢复原 alt");
+  listeners.get("keydown")({ key: "Enter", preventDefault() { prevented += 1; } });
+  assert.equal(prevented, 4, "非方向键不拦截");
+
+  listeners.get("pointermove")({ clientX: 500 });
+  assert.equal(image.src, "./content/demos/rot/GF0021.A/00.webp", "未按下时移动不换帧");
+
+  detach();
+  assert.equal(listeners.size, 0);
+  assert.equal(stage.dataset.rot, undefined);
+  assert.equal(stage.attrs.role, undefined);
+});
+
+test("R5 无旋转帧的字母 attachRotator 返回 null 且不改 stage", () => {
+  const stage = { dataset: {}, addEventListener() { throw new Error("不应监听"); } };
+  assert.equal(attachRotator({ stage, image: {}, letterId: "GF0021.U", frames: 0, alt: "" }), null);
+  assert.equal(attachRotator({ stage: null, image: {}, letterId: "GF0021.A", frames: 24, alt: "" }), null);
 });
 
 if (failed) {

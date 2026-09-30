@@ -87,8 +87,8 @@ function uTogetherHand() {
   curlThumb(lm);
   setFinger(lm, 5, true, 0.46);
   setFinger(lm, 9, true, 0.5);
-  setFinger(lm, 13, false, 0.56);
-  setFinger(lm, 17, false, 0.62);
+  setFinger(lm, 13, true, 0.54);
+  setFinger(lm, 17, true, 0.6);
   return lm;
 }
 
@@ -168,14 +168,28 @@ function yHand() {
   return lm;
 }
 
-/** I：小指伸直，其余握拳。 */
+/** I：仅食指伸直朝上（2026-10-01 官方文字转写），其余弯曲，拇指收。 */
 function iHand() {
   const lm = palm();
   curlThumb(lm);
-  setFinger(lm, 5, false, 0.44);
+  setFinger(lm, 5, true, 0.44);
   setFinger(lm, 9, false, 0.50);
   setFinger(lm, 13, false, 0.56);
-  setFinger(lm, 17, true, 0.62);
+  setFinger(lm, 17, false, 0.62);
+  return lm;
+}
+
+/** J：食指近节直立、远节回勾（hook），其余弯曲，拇指收。 */
+function jHand() {
+  const lm = palm();
+  curlThumb(lm);
+  lm[5] = pt(0.44, 0.58);
+  lm[6] = pt(0.44, 0.46);
+  lm[7] = pt(0.44, 0.34);
+  lm[8] = pt(0.54, 0.36); // 远节向掌心侧回勾，joint 角度须低于 EXTENDED_DEG
+  setFinger(lm, 9, false, 0.50);
+  setFinger(lm, 13, false, 0.56);
+  setFinger(lm, 17, false, 0.62);
   return lm;
 }
 
@@ -251,7 +265,7 @@ test("practiceStatus 四值且本轮无 accepted_practice", () => {
   }
   assert.ok(letterU.rules.curled.includes("thumb"));
   assert.ok(letterV.rules.curled.includes("thumb"));
-  assert.deepEqual(letterU.rules.extended, ["index", "middle"]);
+  assert.deepEqual(letterU.rules.extended, ["index", "middle", "ring", "pinky"]);
   assert.deepEqual(letterV.rules.extended, ["index", "middle"]);
 });
 
@@ -649,10 +663,15 @@ test("能力：U 几何通过不得 decision=pass", () => {
   assert.doesNotMatch(`${view.title}${view.hint}`, /到位/);
 });
 
+test("U 四指裁定后规则与 B 相同（词汇层不可区分，由 pending_review 兜底，升格前需掌心朝向能力）", () => {
+  assert.deepEqual(letterU.rules, letterB.rules);
+  assert.equal(letterU.practiceStatus, "pending_review");
+});
+
 test("能力：J 几何通过不得写成完整掌握", () => {
-  const geom = evaluate(letterJ, iHand(), UNIT);
+  const geom = evaluate(letterJ, jHand(), UNIT);
   assert.equal(geom.pass, true, JSON.stringify(geom.audit || geom.issues));
-  const judged = holdPass(letterJ, iHand(), 6);
+  const judged = holdPass(letterJ, jHand(), 6);
   const view = presentJudge(judged);
   const blob = `${view.title} ${view.hint}`;
   assert.doesNotMatch(blob, /完整掌握|字母已掌握|完整 J|已会/);
@@ -661,78 +680,23 @@ test("能力：J 几何通过不得写成完整掌握", () => {
   }
 });
 
-test("J 完整判定：静态保持后画钩才 pass（合成轨迹，仅规则回归）", () => {
-  const hold = createHold();
-  const motion = createMotionState();
-  const tip0 = iHand()[20];
-  let last = null;
-  let f = 0;
-  const feed = (lm) => {
-    last = judge({
-      letter: letterJ, lm, hands: [lm], geom: UNIT,
-      videoTime: f, nowMs: f * 100,
-    }, hold, motion);
-    f += 1;
-  };
-  for (let i = 0; i < 6; i += 1) feed(iHand());
-  assert.notEqual(last.decision, "pass");
-  assert.ok(codesOf(last).includes("motion.pending"), JSON.stringify(last));
-  // 画钩：小指先下行 0.4，再水平 0.4（水平任一方向均可）
-  for (let i = 0; i < 8; i += 1) {
-    const lm = iHand();
-    lm[20] = pt(tip0.x, tip0.y + 0.05 * (i + 1));
-    feed(lm);
-  }
-  assert.notEqual(last.decision, "pass", "只下行不应 pass");
-  for (let i = 0; i < 8; i += 1) {
-    const lm = iHand();
-    lm[20] = pt(tip0.x - 0.05 * (i + 1), tip0.y + 0.4);
-    feed(lm);
-  }
-  assert.equal(last.decision, "pass", JSON.stringify(last));
-  assert.ok(last.motion, "pass 结果应透出 motion 视图");
-  assert.equal(presentJudge(last).title, "做对了");
+test("J 静态判定：食指回勾保持后 pass（hook 规则回归）", () => {
+  const judged = holdPass(letterJ, jHand(), 6);
+  assert.equal(judged.decision, "pass", JSON.stringify(judged));
+  assert.equal(presentJudge(judged).title, "做对了，保持住");
 });
 
-test("J 判定 fail-closed：只摆静态不动作，或反方向轨迹，均不 pass", () => {
-  const hold = createHold();
-  const motion = createMotionState();
-  const tip0 = iHand()[20];
-  let last = null;
-  let f = 0;
-  const feed = (lm) => {
-    last = judge({
-      letter: letterJ, lm, hands: [lm], geom: UNIT,
-      videoTime: f, nowMs: f * 100,
-    }, hold, motion);
-    f += 1;
-  };
-  for (let i = 0; i < 6; i += 1) feed(iHand());
-  for (let i = 0; i < 10; i += 1) feed(iHand());
-  assert.notEqual(last.decision, "pass", "无动作不得 pass");
-
-  const hold2 = createHold();
-  const motion2 = createMotionState();
-  let g = 0;
-  const feed2 = (lm) => {
-    last = judge({
-      letter: letterJ, lm, hands: [lm], geom: UNIT,
-      videoTime: g, nowMs: g * 100,
-    }, hold2, motion2);
-    g += 1;
-  };
-  for (let i = 0; i < 6; i += 1) feed2(iHand());
-  for (let i = 0; i < 8; i += 1) {
-    const lm = iHand();
-    lm[20] = pt(tip0.x, tip0.y - 0.04 * (i + 1) <= 0 ? 0.01 : tip0.y - 0.04 * (i + 1));
-    feed2(lm);
-  }
-  assert.notEqual(last.decision, "pass", "上行轨迹不得 pass");
-});
-
-test("J 判定 fail-closed：不传 motion 状态永远不可 pass", () => {
-  const judged = holdPass(letterJ, iHand(), 12);
+test("J 判定 fail-closed：食指伸直（I 手型）不得 pass", () => {
+  const geom = evaluate(letterJ, iHand(), UNIT);
+  assert.equal(geom.pass, false);
+  assert.match(codesOf(geom), /index\.not_hooked/);
+  const judged = holdPass(letterJ, iHand(), 6);
   assert.notEqual(judged.decision, "pass");
+});
+
+test("J 判定 fail-closed：全握拳不得 pass", () => {
+  const geom = evaluate(letterJ, fistHand(), UNIT);
+  assert.equal(geom.pass, false);
 });
 
 test("pose_practice V 连续保持后 decision=pass，文案不是到位/掌握", () => {

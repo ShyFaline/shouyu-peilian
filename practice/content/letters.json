@@ -1,6 +1,6 @@
 {
   "standard": "GF 0021-2019",
-  "notes": "32 个汉语手指字母（26 个拉丁字母 + zh/ch/sh/ng/ê/ü）。规则是国标外形的几何近似，不是新发明的手语。J、Z 带轨迹，第一期只核静态手型。M/N/S、E/ê 容易混，练习页在相关字母下单独提示，以国标图为准。练习页按 practiceStatus 分组：pose_practice 可跟练、pending_review 待核对、demo_only 仅示范。mainPath 供 tools/assessment 采集评测使用，不驱动界面。",
+  "notes": "32 个汉语手指字母（26 个拉丁字母 + zh/ch/sh/ng/ê/ü）。规则是国标外形的几何近似，不是新发明的手语。全部 how/rules 已按官方原文文字转写（2026-10-01，docs/standards/pages/p05-p09.png 直读）。拇指\"贴近手掌/搭在某指上\"、掌心朝向、并拢程度等超出判定词汇的内容只进 how，不进 rules。D/S/M/N/SH/Q 在全握类（判定词汇层不可区分），其中 M/N/S 为 demo_only，D/Q/SH 为 pending_review；E/ê 仅示范。练习页按 practiceStatus 分组：pose_practice 可跟练、pending_review 待核对、demo_only 仅示范。mainPath 供 tools/assessment 采集评测使用，不驱动界面。",
   "mainPath": [
     "GF0021.A",
     "GF0021.B",
@@ -24,7 +24,7 @@
       "standard": "GF 0021-2019",
       "label": "A",
       "title": "字母 A",
-      "how": "握拳，拇指伸出。",
+      "how": "右手伸拇指，指尖朝上，食、中、无名、小指弯曲，指尖抵于掌心，手背向右。",
       "demo": "a",
       "rules": {
         "extended": [
@@ -45,7 +45,7 @@
       "standard": "GF 0021-2019",
       "label": "B",
       "title": "字母 B",
-      "how": "四指并拢伸直，拇指弯曲贴掌心。",
+      "how": "右手拇指向掌心弯曲，食、中、无名、小指并拢直立，掌心向前偏左。",
       "demo": "b",
       "rules": {
         "extended": [
@@ -71,7 +71,7 @@
       "standard": "GF 0021-2019",
       "label": "C",
       "title": "字母 C",
-      "how": "五指弯曲，留出开口，整体像 C。",
+      "how": "右手拇指向上弯曲，食、中、无名、小指并拢向下弯曲，指尖相对成 C 形，虎口朝内。",
       "demo": "c",
       "rules": {
         "shape": "c"
@@ -83,18 +83,16 @@
       "standard": "GF 0021-2019",
       "label": "D",
       "title": "字母 D",
-      "how": "食指伸直，其余弯曲，拇指与中指相抵。",
+      "how": "右手握拳，拇指搭在中指中节指上，虎口朝后上方。（与 S、M、N 同为全握形，判定器无法区分，仅示范。）",
       "demo": "d",
       "rules": {
-        "extended": [
-          "index"
-        ],
         "curled": [
+          "thumb",
+          "index",
           "middle",
           "ring",
           "pinky"
-        ],
-        "pinch": "middle"
+        ]
       },
       "practiceStatus": "pending_review"
     },
@@ -103,7 +101,7 @@
       "standard": "GF 0021-2019",
       "label": "E",
       "title": "字母 E",
-      "how": "中指、无名指、小指并拢伸直，食指弯曲与拇指相抵。",
+      "how": "右手拇、食指搭成圆形，中、无名、小指横伸，稍分开，指尖朝左，手背向外。",
       "demo": "e",
       "rules": {
         "extended": [
@@ -115,10 +113,7 @@
           "index"
         ],
         "pinch": "index",
-        "spread": {
-          "middle_ring": "together",
-          "ring_pinky": "together"
-        }
+        "pointing": "side"
       },
       "practiceStatus": "demo_only"
     },
@@ -127,18 +122,19 @@
       "standard": "GF 0021-2019",
       "label": "F",
       "title": "字母 F",
-      "how": "拇指与食指成圆，其余三指伸直。",
+      "how": "右手食、中指横伸，稍分开，指尖朝左，拇、无名、小指弯曲，拇指搭在无名指远节指上，手背向外。",
       "demo": "f",
       "rules": {
         "extended": [
-          "middle",
+          "index",
+          "middle"
+        ],
+        "curled": [
+          "thumb",
           "ring",
           "pinky"
         ],
-        "curled": [
-          "index"
-        ],
-        "shape": "o"
+        "pointing": "side"
       },
       "practiceStatus": "pending_review"
     },
@@ -147,14 +143,14 @@
       "standard": "GF 0021-2019",
       "label": "G",
       "title": "字母 G",
-      "how": "拇指、食指伸出，手侧向，其余手指收起。",
+      "how": "右手食指横伸，指尖朝左，中、无名、小指弯曲，指尖抵于掌心，拇指搭在中指中节指上，手背向外。",
       "demo": "g",
       "rules": {
         "extended": [
-          "thumb",
           "index"
         ],
         "curled": [
+          "thumb",
           "middle",
           "ring",
           "pinky"
@@ -168,7 +164,7 @@
       "standard": "GF 0021-2019",
       "label": "H",
       "title": "字母 H",
-      "how": "食指、中指并拢伸直，手侧放，其余收起。",
+      "how": "右手食、中指并拢直立，拇、无名、小指弯曲，拇指搭在无名指远节指上，掌心向前偏左。",
       "demo": "h",
       "rules": {
         "extended": [
@@ -176,13 +172,14 @@
           "middle"
         ],
         "curled": [
+          "thumb",
           "ring",
           "pinky"
         ],
         "spread": {
           "index_middle": "together"
         },
-        "pointing": "side"
+        "pointing": "up"
       },
       "practiceStatus": "pending_review"
     },
@@ -191,17 +188,17 @@
       "standard": "GF 0021-2019",
       "label": "I",
       "title": "字母 I",
-      "how": "小指伸直，其余握拳。",
+      "how": "右手食指直立，中、无名、小指弯曲，指尖抵于掌心，拇指搭在中指中节指上，掌心向前偏左。",
       "demo": "i",
       "rules": {
         "extended": [
-          "pinky"
+          "index"
         ],
         "curled": [
           "thumb",
-          "index",
           "middle",
-          "ring"
+          "ring",
+          "pinky"
         ],
         "pointing": "up"
       },
@@ -212,20 +209,17 @@
       "standard": "GF 0021-2019",
       "label": "J",
       "title": "字母 J",
-      "how": "小指伸直，其余收起，顺势向下画钩。画钩方向以规范原图为准（待人工对图）。",
+      "how": "右手食指弯曲，中节指背向上，中、无名、小指弯曲，指尖抵于掌心，拇指搭在中指中节指上，虎口朝内。",
       "demo": "j",
       "rules": {
-        "extended": [
-          "pinky"
-        ],
+        "hook": "index",
         "curled": [
           "thumb",
-          "index",
           "middle",
-          "ring"
+          "ring",
+          "pinky"
         ],
-        "pointing": "up",
-        "motion": { "kind": "trace", "finger": "pinky", "path": "hook" }
+        "pointing": "up"
       },
       "practiceStatus": "pose_practice"
     },
@@ -234,7 +228,7 @@
       "standard": "GF 0021-2019",
       "label": "K",
       "title": "字母 K",
-      "how": "食指、中指分开伸直，拇指贴中指，指尖朝上。",
+      "how": "右手食指直立，中指横伸，拇指搭在中指中节指上，无名、小指弯曲，指尖抵于掌心，虎口朝内。",
       "demo": "k",
       "rules": {
         "extended": [
@@ -242,13 +236,10 @@
           "middle"
         ],
         "curled": [
+          "thumb",
           "ring",
           "pinky"
-        ],
-        "spread": {
-          "index_middle": "apart"
-        },
-        "pointing": "up"
+        ]
       },
       "practiceStatus": "pending_review"
     },
@@ -257,7 +248,7 @@
       "standard": "GF 0021-2019",
       "label": "L",
       "title": "字母 L",
-      "how": "拇指、食指伸直成直角，其余收起。",
+      "how": "右手拇、食指张开，食指指尖朝上，中、无名、小指弯曲，指尖抵于掌心，掌心向前偏左。",
       "demo": "l",
       "rules": {
         "extended": [
@@ -279,15 +270,15 @@
       "standard": "GF 0021-2019",
       "label": "M",
       "title": "字母 M",
-      "how": "食指、中指、无名指弯曲包住拇指，小指收起。",
+      "how": "右手拇、小指弯曲，拇指搭在小指中节指上，食、中、无名指并拢弯曲搭在拇指上，指尖朝前下方，掌心向前偏左。",
       "demo": "m",
       "rules": {
         "curled": [
+          "thumb",
           "index",
           "middle",
           "ring",
-          "pinky",
-          "thumb"
+          "pinky"
         ]
       },
       "practiceStatus": "demo_only"
@@ -297,15 +288,15 @@
       "standard": "GF 0021-2019",
       "label": "N",
       "title": "字母 N",
-      "how": "食指、中指弯曲包住拇指，其余收起。",
+      "how": "右手拇、无名、小指弯曲，拇指搭在无名指中节指上，食、中指并拢弯曲搭在拇指上，指尖朝前下方，掌心向前偏左。",
       "demo": "n",
       "rules": {
         "curled": [
+          "thumb",
           "index",
           "middle",
           "ring",
-          "pinky",
-          "thumb"
+          "pinky"
         ]
       },
       "practiceStatus": "demo_only"
@@ -315,7 +306,7 @@
       "standard": "GF 0021-2019",
       "label": "O",
       "title": "字母 O",
-      "how": "五指弯曲，拇指食指相抵成 O。",
+      "how": "右手拇指向上弯曲，食、中、无名、小指并拢向下弯曲，拇、食、中指指尖相抵成 O 形，虎口朝内。",
       "demo": "o",
       "rules": {
         "shape": "o"
@@ -327,20 +318,18 @@
       "standard": "GF 0021-2019",
       "label": "P",
       "title": "字母 P",
-      "how": "手型近 K，指尖朝下。",
+      "how": "右手拇、食指搭成圆形，中、无名、小指并拢伸直，指尖朝下，虎口朝前偏左。",
       "demo": "p",
       "rules": {
         "extended": [
-          "index",
-          "middle"
-        ],
-        "curled": [
+          "middle",
           "ring",
           "pinky"
         ],
-        "spread": {
-          "index_middle": "apart"
-        },
+        "curled": [
+          "index"
+        ],
+        "pinch": "index",
         "pointing": "down"
       },
       "practiceStatus": "pending_review"
@@ -350,8 +339,26 @@
       "standard": "GF 0021-2019",
       "label": "Q",
       "title": "字母 Q",
-      "how": "拇指、食指伸出，指尖朝下，其余收起。",
+      "how": "右手拇指在下，食、中指并拢在上，拇、食、中指指尖相捏，指尖朝前偏左，无名、小指弯曲，指尖抵于掌心。",
       "demo": "q",
+      "rules": {
+        "curled": [
+          "thumb",
+          "index",
+          "middle",
+          "ring",
+          "pinky"
+        ]
+      },
+      "practiceStatus": "pending_review"
+    },
+    {
+      "id": "GF0021.R",
+      "standard": "GF 0021-2019",
+      "label": "R",
+      "title": "字母 R",
+      "how": "右手拇、食指张开，食指指尖朝左，拇指指尖朝上，中、无名、小指弯曲，指尖抵于掌心，手背向外。",
+      "demo": "r",
       "rules": {
         "extended": [
           "thumb",
@@ -362,27 +369,8 @@
           "ring",
           "pinky"
         ],
-        "pointing": "down"
-      },
-      "practiceStatus": "pending_review"
-    },
-    {
-      "id": "GF0021.R",
-      "standard": "GF 0021-2019",
-      "label": "R",
-      "title": "字母 R",
-      "how": "食指、中指交叉伸直，其余收起。",
-      "demo": "r",
-      "rules": {
-        "extended": [
-          "index",
-          "middle"
-        ],
-        "curled": [
-          "ring",
-          "pinky"
-        ],
-        "cross": "index_middle"
+        "thumb_index": "right_angle",
+        "pointing": "side"
       },
       "practiceStatus": "pending_review"
     },
@@ -391,15 +379,15 @@
       "standard": "GF 0021-2019",
       "label": "S",
       "title": "字母 S",
-      "how": "握拳，拇指贴在四指前面，不要把拇指竖起来。",
+      "how": "右手拇指贴近手掌，食、中、无名、小指并拢微曲与手掌成 90 度角，掌心向前偏左。",
       "demo": "s",
       "rules": {
         "curled": [
+          "thumb",
           "index",
           "middle",
           "ring",
-          "pinky",
-          "thumb"
+          "pinky"
         ]
       },
       "practiceStatus": "demo_only"
@@ -409,19 +397,19 @@
       "standard": "GF 0021-2019",
       "label": "T",
       "title": "字母 T",
-      "how": "握拳，拇指从食指和中指之间伸出。",
+      "how": "右手拇、中、无名指指尖相抵，食、小指直立，掌心向前偏左。",
       "demo": "t",
       "rules": {
         "extended": [
-          "thumb"
-        ],
-        "curled": [
           "index",
-          "middle",
-          "ring",
           "pinky"
         ],
-        "thumb_between": true
+        "curled": [
+          "thumb",
+          "middle",
+          "ring"
+        ],
+        "pointing": "up"
       },
       "practiceStatus": "pending_review"
     },
@@ -430,20 +418,22 @@
       "standard": "GF 0021-2019",
       "label": "U",
       "title": "字母 U",
-      "how": "食指、中指并拢伸直朝上，其余收起。",
+      "how": "右手拇指贴近手掌，食、中、无名、小指并拢直立，掌心向前偏左。",
       "demo": "u",
       "rules": {
         "extended": [
           "index",
-          "middle"
+          "middle",
+          "ring",
+          "pinky"
         ],
         "curled": [
-          "ring",
-          "pinky",
           "thumb"
         ],
         "spread": {
-          "index_middle": "together"
+          "index_middle": "together",
+          "middle_ring": "together",
+          "ring_pinky": "together"
         },
         "pointing": "up"
       },
@@ -454,7 +444,7 @@
       "standard": "GF 0021-2019",
       "label": "V",
       "title": "字母 V",
-      "how": "食指、中指分开伸直成 V，其余收起。",
+      "how": "右手食、中指直立分开成 V 形，拇、无名、小指弯曲，拇指搭在无名指远节指上，掌心向前偏左。",
       "demo": "v",
       "rules": {
         "extended": [
@@ -462,9 +452,9 @@
           "middle"
         ],
         "curled": [
+          "thumb",
           "ring",
-          "pinky",
-          "thumb"
+          "pinky"
         ],
         "spread": {
           "index_middle": "apart"
@@ -478,7 +468,7 @@
       "standard": "GF 0021-2019",
       "label": "W",
       "title": "字母 W",
-      "how": "食指、中指、无名指分开伸直，拇指和小指收起。",
+      "how": "右手食、中、无名指直立分开成 W 形，拇、小指弯曲，拇指搭在小指远节指上，掌心向前偏左。",
       "demo": "w",
       "rules": {
         "extended": [
@@ -503,16 +493,20 @@
       "standard": "GF 0021-2019",
       "label": "X",
       "title": "字母 X",
-      "how": "食指弯曲成钩，其余握拳。",
+      "how": "右手食、中指直立，中指搭在食指上，拇、无名、小指弯曲，拇指搭在无名指远节指上，掌心向前偏左。",
       "demo": "x",
       "rules": {
+        "extended": [
+          "index",
+          "middle"
+        ],
         "curled": [
           "thumb",
-          "middle",
           "ring",
           "pinky"
         ],
-        "hook": "index"
+        "cross": "index_middle",
+        "pointing": "up"
       },
       "practiceStatus": "pending_review"
     },
@@ -521,7 +515,7 @@
       "standard": "GF 0021-2019",
       "label": "Y",
       "title": "字母 Y",
-      "how": "拇指、小指伸出，其余收起。",
+      "how": "右手伸拇、小指，指尖朝上，食、中、无名指弯曲，掌心向前偏左。",
       "demo": "y",
       "rules": {
         "extended": [
@@ -542,18 +536,19 @@
       "standard": "GF 0021-2019",
       "label": "Z",
       "title": "字母 Z",
-      "how": "食指伸直，其余收起，并顺势画出 Z 形。起笔方向以规范原图为准（待人工对图）。",
+      "how": "右手食、小指横伸，指尖朝左，拇、中、无名指弯曲，拇指搭在中、无名指远节指上，手背向外。",
       "demo": "z",
       "rules": {
         "extended": [
-          "index"
-        ],
-        "curled": [
-          "middle",
-          "ring",
+          "index",
           "pinky"
         ],
-        "motion": { "kind": "trace", "finger": "index", "path": "z" }
+        "curled": [
+          "thumb",
+          "middle",
+          "ring"
+        ],
+        "pointing": "side"
       },
       "practiceStatus": "pose_practice"
     },
@@ -562,22 +557,22 @@
       "standard": "GF 0021-2019",
       "label": "ZH",
       "title": "字母 ZH",
-      "how": "食指、中指、无名指并拢伸直，拇指和小指收起。",
+      "how": "右手食、中、小指横伸，食、中指并拢，指尖朝左，拇、无名指弯曲，拇指搭在无名指远节指上，手背向外。",
       "demo": "zh",
       "rules": {
         "extended": [
           "index",
           "middle",
-          "ring"
+          "pinky"
         ],
         "curled": [
           "thumb",
-          "pinky"
+          "ring"
         ],
         "spread": {
-          "index_middle": "together",
-          "middle_ring": "together"
-        }
+          "index_middle": "together"
+        },
+        "pointing": "side"
       },
       "practiceStatus": "pending_review"
     },
@@ -586,18 +581,19 @@
       "standard": "GF 0021-2019",
       "label": "CH",
       "title": "字母 CH",
-      "how": "拇指、食指、中指伸出，无名指和小指收起（2019 年后手形）。",
+      "how": "右手拇指在下，食、中、无名、小指并拢在上，指尖朝左成扁コ形，虎口朝内。",
       "demo": "ch",
       "rules": {
         "extended": [
-          "thumb",
           "index",
-          "middle"
-        ],
-        "curled": [
+          "middle",
           "ring",
           "pinky"
-        ]
+        ],
+        "curled": [
+          "thumb"
+        ],
+        "pointing": "side"
       },
       "practiceStatus": "pending_review"
     },
@@ -606,20 +602,16 @@
       "standard": "GF 0021-2019",
       "label": "SH",
       "title": "字母 SH",
-      "how": "拇指与食指伸直，夹角小于 L，其余收起。",
+      "how": "右手拇指贴近手掌，食、中指并拢微曲与手掌成 90 度角，无名、小指弯曲，指尖抵于掌心，掌心向前偏左。",
       "demo": "sh",
       "rules": {
-        "extended": [
-          "thumb",
-          "index"
-        ],
         "curled": [
+          "thumb",
+          "index",
           "middle",
           "ring",
           "pinky"
-        ],
-        "thumb_index": "parallel",
-        "pointing": "up"
+        ]
       },
       "practiceStatus": "pending_review"
     },
@@ -628,18 +620,19 @@
       "standard": "GF 0021-2019",
       "label": "NG",
       "title": "字母 NG",
-      "how": "中指伸直，其余手指收起。",
+      "how": "右手小指横伸，指尖朝左，拇、食、中、无名指弯曲，拇指搭在食、中、无名指上，手背向外。",
       "demo": "ng",
       "rules": {
         "extended": [
-          "middle"
+          "pinky"
         ],
         "curled": [
           "thumb",
           "index",
-          "ring",
-          "pinky"
-        ]
+          "middle",
+          "ring"
+        ],
+        "pointing": "side"
       },
       "practiceStatus": "pending_review"
     },
@@ -648,7 +641,7 @@
       "standard": "GF 0021-2019",
       "label": "Ê",
       "title": "字母 ê",
-      "how": "手型同 E：中指、无名指、小指并拢伸直，食指弯曲贴拇指；同时手上下晃动两下。",
+      "how": "用 E 的指式（拇、食指搭成圆形，中、无名、小指横伸，稍分开），手上下晃动两下。",
       "demo": "ê",
       "rules": {
         "extended": [
@@ -660,11 +653,13 @@
           "index"
         ],
         "pinch": "index",
-        "spread": {
-          "middle_ring": "together",
-          "ring_pinky": "together"
-        },
-        "motion": { "kind": "shake", "part": "hand", "axis": "vertical", "cycles": 2 }
+        "pointing": "side",
+        "motion": {
+          "kind": "shake",
+          "part": "hand",
+          "axis": "vertical",
+          "cycles": 2
+        }
       },
       "practiceStatus": "demo_only"
     },
@@ -673,22 +668,30 @@
       "standard": "GF 0021-2019",
       "label": "Ü",
       "title": "字母 ü",
-      "how": "食指、中指并拢伸直，同时拇指伸出；手指前后晃动两下。（前后晃动的摄像头可检测性待实机验证）",
+      "how": "用 U 的指式（四指并拢直立，拇指贴掌），食、中、无名、小指前后晃动两下。",
       "demo": "ü",
       "rules": {
         "extended": [
-          "thumb",
           "index",
-          "middle"
-        ],
-        "curled": [
+          "middle",
           "ring",
           "pinky"
         ],
+        "curled": [
+          "thumb"
+        ],
         "spread": {
-          "index_middle": "together"
+          "index_middle": "together",
+          "middle_ring": "together",
+          "ring_pinky": "together"
         },
-        "motion": { "kind": "shake", "part": "fingers", "axis": "forward", "cycles": 2 }
+        "pointing": "up",
+        "motion": {
+          "kind": "shake",
+          "part": "fingers",
+          "axis": "forward",
+          "cycles": 2
+        }
       },
       "practiceStatus": "pending_review"
     }

@@ -66,6 +66,15 @@ test("golden schema：21 点、有限坐标、带尺寸", () => {
 });
 
 test("恒等矩阵：每个 golden 仅通过自身字母", () => {
+  // 已知规则集碰撞：2026-10-01 U 四指裁定后，U 与 B 的规则在词汇层完全相同
+  // （区别只在掌心朝向，超出现有判定词汇；U 维持 pending_review 兜底，
+  // 升格前需先补掌心朝向能力，见 docs/规范对图-AI预审-2026-09-30.md）。
+  // 注意只登记 B 示范姿态 × U 规则单向：U 的 golden 仍是旧二指姿态（见下）。
+  const KNOWN_RULE_COLLISIONS = new Set(["GF0021.B×GF0021.U"]);
+  // 过期 golden：姿态按旧规则摆的，与 2026-10-01 官方文字转写后的规则已知不一致，
+  // 待 Blender 重摆重渲后更新（I 小指→食指；U 二指→四指）。在此之前自我配对
+  // 预期 fail——重渲修好 golden 后此断言会翻红，提醒移除本表。
+  const STALE_GOLDENS = new Set(["GF0021.I", "GF0021.U"]);
   for (const [frameId, frame] of goldens) {
     const geom = {
       width: frame.imageWidth,
@@ -76,7 +85,14 @@ test("恒等矩阵：每个 golden 仅通过自身字母", () => {
       const letter = byId[targetId];
       assert.ok(letter, `letters.json 缺 ${targetId}`);
       const result = evaluate(letter, frame.landmarks, geom);
-      const expect = frameId === targetId;
+      const pairKey = `${frameId}×${targetId}`;
+      let expect = frameId === targetId || KNOWN_RULE_COLLISIONS.has(pairKey);
+      if (frameId === targetId && STALE_GOLDENS.has(frameId)) {
+        expect = false;
+        if (!result.pass) {
+          console.warn(`STALE golden ${frameId}：姿态与 2026-10-01 转写规则不一致（待重渲），当前按预期失败`);
+        }
+      }
       assert.equal(result.pass, expect,
         `${frameId} × ${targetId} 期望 pass=${expect}，实际 ${result.pass}：` +
         JSON.stringify(result.audit || result.issues));

@@ -29,6 +29,6 @@
 - **不是** 识别模型，不进入 MediaPipe，不参与 `evaluate()`。
 - SignPinyin 只是缺图时的字形回退，**也不是**识别模型。
 
-逐张网格、许可、接入日期与目检结论见同目录 `manifest.json`。2026-09-30 起 A/B/I/L/V/W/Y 用 Godot XR（CC0）新手模；U 仍为 Human Base Meshes 旧图。
+逐张网格、许可、接入日期与目检结论见同目录 `manifest.json`。2026-10-01 起全部 32 字母用 Godot XR（CC0）新手模按新姿态表重渲（`blender/build_godot_hand_poc.py`），旧 Human Base Meshes 图全部退役。
 
 渲染脚本应能用 `blender -b` 复现；姿态名与 `GF0021.*` 对齐。

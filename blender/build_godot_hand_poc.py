@@ -5,7 +5,7 @@ Output: blender/vendor/godot-xr-hands/poc/*.png + bones.json
 
 Usage:
   blender -b --python build_godot_hand_poc.py -- inspect   # dump bones + 6 orientation views
-  blender -b --python build_godot_hand_poc.py -- letters   # render A/B posed, palm to camera
+  blender -b --python build_godot_hand_poc.py -- letters   # 渲染全部 32 字母正/侧面（姿态表 2026-10-01 按官方原文全量重排）
 """
 
 import bpy
@@ -181,44 +181,128 @@ def cmd_inspect(arm, mesh):
 
 FIST = (30, 95, 100, 60)   # 弯曲抵掌心
 EXT = (5, 0, 0, 0)         # 伸直（rest 微曲）
+BENT90 = (10, 90, 5, 5)    # 并拢微曲与手掌成 90 度角（S/SH 类：近节折 90，关节保持直）
+HOOK = (5, 10, 90, 20)     # J：PIP 折 90°，中节指背向上，远节随弯
+PINCH = (10, 60, 70, 45)   # 拇食指搭圈时的食指（E/F/P）
+TOUCH = (10, 75, 70, 45)   # 指尖相抵类（T 的中/无名指）
+C_CURVE = (20, 55, 55, 35) # C：五指弯曲成 C
 
+# 2026-10-01 全量重排：按 letters.json 官方原文转写逐字母摆姿。
+# 四指键：Index/Middle/Ring/Little → (掌骨, 近节, 中节, 远节) 屈曲角。
 LETTERS = {
-    # 原文页2：伸拇指指尖朝上，四指弯曲抵掌心，手背向右（2019 呈现角度调整名单）
-    "A": {f: FIST for f in FINGERS},
-    # 原文页2：四指并拢直立，拇指向掌心弯曲贴掌，掌心向前偏左
-    "B": {f: EXT for f in FINGERS},
-    # 【冲突记录用草稿】OCR 与仓库规则未裁定；按仓库规则：食中二指伸直并拢
-    "U": {"Index": EXT, "Middle": EXT, "Ring": FIST, "Little": FIST},
-    # 原文页5：食中指直立分开成 V，拇无名小弯曲，拇指搭无名指远节
-    "V": {"Index": EXT, "Middle": EXT, "Ring": FIST, "Little": FIST},
-    # 原文页5：食中无名直立分开成 W，拇小指弯曲，拇指搭小指远节
-    "W": {"Index": EXT, "Middle": EXT, "Ring": EXT, "Little": FIST},
-    # 原文页3：拇食指张开、食指朝上，中无名小弯曲抵掌心；原文无「直角」，张开角待人工对图
+    "A": {f: FIST for f in FINGERS},                                  # 握拳伸拇指
+    "B": {f: EXT for f in FINGERS},                                   # 四指并拢直立
+    "C": {f: C_CURVE for f in FINGERS},                               # 五指弯曲成 C
+    "D": {f: FIST for f in FINGERS},                                  # 握拳，拇指搭中指中节
+    "E": {"Index": PINCH, "Middle": EXT, "Ring": EXT, "Little": EXT}, # 拇食指搭圈，三指横伸
+    "F": {"Index": PINCH, "Middle": EXT, "Ring": FIST, "Little": FIST},
+    "G": {"Index": EXT, "Middle": FIST, "Ring": FIST, "Little": FIST},
+    "H": {"Index": EXT, "Middle": EXT, "Ring": FIST, "Little": FIST},
+    "I": {"Index": EXT, "Middle": FIST, "Ring": FIST, "Little": FIST},# 食指直立（按原文文字）
+    "J": {"Index": HOOK, "Middle": FIST, "Ring": FIST, "Little": FIST},
+    "K": {"Index": EXT, "Middle": EXT, "Ring": FIST, "Little": FIST}, # 食指直立、中指横伸（见 SPLAY）
     "L": {"Index": EXT, "Middle": FIST, "Ring": FIST, "Little": FIST},
-    # 原文页5：伸拇、小指，食中无名弯曲
-    "Y": {"Little": EXT, "Index": FIST, "Middle": FIST, "Ring": FIST},
-    # 【待人工对图】OCR「食指直立」与仓库「小指伸直」冲突；按仓库规则渲染
-    "I": {"Little": EXT, "Index": FIST, "Middle": FIST, "Ring": FIST},
+    "M": {f: FIST for f in FINGERS},
+    "N": {f: FIST for f in FINGERS},
+    "O": {f: C_CURVE for f in FINGERS},                               # 拇食中指尖相抵成 O
+    "P": {"Index": PINCH, "Middle": EXT, "Ring": EXT, "Little": EXT}, # 同 E 手型，指尖朝下
+    "Q": {"Index": TOUCH, "Middle": TOUCH, "Ring": FIST, "Little": FIST}, # 拇食中指尖相捏
+    "R": {"Index": EXT, "Middle": FIST, "Ring": FIST, "Little": FIST},# 食指朝左、拇指朝上
+    "S": {f: BENT90 for f in FINGERS},                                # 四指并拢微曲 90 度
+    "T": {"Index": EXT, "Middle": TOUCH, "Ring": TOUCH, "Little": EXT},
+    "U": {f: EXT for f in FINGERS},                                   # 四指并拢直立（2026-10-01 四指裁定）
+    "V": {"Index": EXT, "Middle": EXT, "Ring": FIST, "Little": FIST},
+    "W": {"Index": EXT, "Middle": EXT, "Ring": EXT, "Little": FIST},
+    "X": {"Index": EXT, "Middle": EXT, "Ring": FIST, "Little": FIST}, # 食中直立交叉（见 SPLAY）
+    "Y": {"Index": FIST, "Middle": FIST, "Ring": FIST, "Little": EXT},
+    "Z": {"Index": EXT, "Middle": FIST, "Ring": FIST, "Little": EXT}, # 食小指横伸
+    "ZH": {"Index": EXT, "Middle": EXT, "Ring": FIST, "Little": EXT}, # 食中小指横伸，食中并拢
+    "CH": {f: EXT for f in FINGERS},                                  # 四指并拢横伸成扁コ
+    "SH": {"Index": BENT90, "Middle": BENT90, "Ring": FIST, "Little": FIST},
+    "NG": {"Index": FIST, "Middle": FIST, "Ring": FIST, "Little": EXT}, # 小指横伸
+    "EH": {"Index": PINCH, "Middle": EXT, "Ring": EXT, "Little": EXT},  # 用 E 的指式
+    "UE": {f: EXT for f in FINGERS},                                  # 用 U 的指式
 }
+
 # 绕掌法线（+X）的开合角：正角 = 向拇指侧（+Z）
-SPLAY = {"A": {}, "B": {"Index": -4, "Middle": -1.5, "Ring": 1.5, "Little": 4},
-         "U": {"Index": -6, "Middle": 5},
-         "V": {"Index": 12, "Middle": -12},
-         "W": {"Index": 18, "Ring": -18},
-         "L": {"Index": -2}, "Y": {"Little": -10}, "I": {"Little": -6}}
+TOGETHER4 = {"Index": -6, "Middle": -1.5, "Ring": 1.5, "Little": 6}
+SPLAY = {
+    "A": {}, "B": TOGETHER4, "C": {}, "D": {},
+    "E": {"Middle": -2, "Ring": 2, "Little": 8},       # 三指稍分开
+    "F": {"Index": -2, "Middle": 4},                   # 食中稍分开
+    "G": {"Index": 4},
+    "H": {"Index": -6, "Middle": 6},                   # 食中并拢
+    "I": {"Index": 4},
+    "J": {"Index": 3},
+    "K": {"Index": -6, "Middle": 75},                  # 中指横伸（向拇指侧）
+    "L": {"Index": -2},
+    "M": {"Index": -4, "Middle": -1, "Ring": 2, "Little": 4},
+    "N": {"Index": -3, "Middle": 2},
+    "O": {},
+    "P": {"Middle": -2, "Ring": 2, "Little": 8},
+    "Q": {"Index": -3, "Middle": 3, "Little": -10},
+    "R": {"Index": 4},
+    "S": TOGETHER4,
+    "T": {"Index": 10, "Little": -12},                 # 食、小指直立分开
+    "U": TOGETHER4,
+    "V": {"Index": 12, "Middle": -12},
+    "W": {"Index": 18, "Ring": -18},
+    "X": {"Index": -7, "Middle": 7},                   # 交叉：中指搭在食指上
+    "Y": {"Little": -12},
+    "Z": {"Index": 6, "Little": -8},
+    "ZH": {"Index": -2, "Middle": 2, "Little": -9},    # 食中并拢，小指离开
+    "CH": TOGETHER4,
+    "SH": {"Index": -3, "Middle": 3},
+    "NG": {"Little": 14},
+    "EH": {"Middle": -2, "Ring": 2, "Little": 8},
+    "UE": {"Index": -6, "Middle": -1.5, "Ring": 1.5, "Little": 12},  # ü：小指稍离开
+}
+
 # 拇指 = (摆角@掌法线, meta屈曲@finger_up, prox折叠@掌法线, dist折叠@掌法线)
 # 判定器 thumb 卷曲 = 二维 IP 内角（lm2/3/4，阈值 ≤100°），折叠必须发生在掌面（≈成像面）内
-THUMB = {"A": (-80, -10, 0, 0),       # 竖起，指尖朝上
-         "B": (55, -20, 35, 45),      # 横折过掌面 + 末端回钩
-         "U": (50, -20, 35, 45),
-         "V": (45, -20, 30, 40),      # 搭无名指远节
-         "W": (55, -20, 30, 40),      # 搭小指远节
-         "L": (-75, 0, 0, 0),         # 张开（二维投影需接近直角）
-         "Y": (-55, 0, 0, 0),         # 伸出
-         "I": (50, -20, 35, 45)}
-# 呈现角度：A 手背向右（背面视角）；其余掌心向前偏左（掌心视角 + 绕竖轴偏转）
-VIEW = {"A": "back"}
+TUCK_MID = (-28, -8, -72, -100)  # 搭中指中节指上
+TUCK_RING = (-30, -8, -70, -95)  # 搭无名指远节指上
+TUCK_PALM = (-36, 0, -50, -95)   # 贴近手掌
+TUCK_PINKY = (-35, -8, -65, -95) # 搭小指远节指上（W）
+THUMB = {
+    "A": (-80, -10, 0, 0),     # 竖起，指尖朝上
+    "B": TUCK_PALM,
+    "C": (-15, -8, -45, -40),    # 向上弯曲成 C 的一边
+    "D": TUCK_MID,               # 握拳搭中指中节
+    "E": (-20, -10, -45, -50),   # 与食指搭圈
+    "F": TUCK_RING, "G": TUCK_MID, "H": TUCK_RING,
+    "I": TUCK_MID, "J": TUCK_MID, "K": TUCK_MID,
+    "L": (-75, 0, 0, 0),       # 张开（二维投影需接近直角）
+    "M": (-42, -8, -70, -58), "N": (-42, -8, -70, -58),
+    "O": (-15, -8, -50, -45),    # 向上弯曲参与 O 形
+    "P": (-20, -10, -45, -50),   # 与食指搭圈
+    "Q": (-35, -12, -45, -45),   # 在下与食中指尖相捏
+    "R": (-80, -10, 0, 0),       # 拇指指尖朝上（同 A 的竖拇指）
+    "S": TUCK_PALM, "T": (-40, -8, -65, -55),  # T：与中无名指尖相抵
+    "U": TUCK_PALM,
+    "V": TUCK_RING, "W": TUCK_PINKY, "X": TUCK_RING,
+    "Y": (-5, 0, 0, 0),        # 伸出（向外侧展开、斜向上）
+    "Z": (-40, -8, -45, -45), "ZH": TUCK_RING, "CH": (-30, -8, -20, -20),
+    "SH": TUCK_PALM, "NG": (-40, -8, -45, -45),
+    "EH": (-20, -10, -45, -50), "UE": TUCK_PALM,
+}
+
+# 呈现角度：view ∈ {palm（掌心向前偏左）, back（手背向观者）}；roll = 相机绕视线旋转角（度）。
+# 横伸字母（指尖朝左）用 back + roll；P 指尖朝下用 palm + roll 180。
+ORIENT = {
+    "A": ("back", 0),
+    "E": ("back", 270), "F": ("back", 270), "G": ("back", 270),
+    "P": ("palm", 180),
+    "R": ("back", 270),
+    "Z": ("back", 270), "ZH": ("back", 270), "CH": ("back", 270), "NG": ("back", 270),
+    "EH": ("back", 270),
+}
 PALM_YAW_DEG = 20.0
+
+
+def orient_of(letter):
+    view, roll = ORIENT.get(letter, ("palm", 0))
+    return view, roll
 
 
 def apply_pose(arm, letter, palm_normal, finger_up, axis):
@@ -239,10 +323,19 @@ def apply_pose(arm, letter, palm_normal, finger_up, axis):
 
 
 def front_view_dir(letter, palm_normal, finger_up):
-    if VIEW.get(letter) == "back":
+    view, _roll = orient_of(letter)
+    if view == "back":
         return palm_normal.copy()   # 手背向观者
     yaw = Matrix.Rotation(math.radians(PALM_YAW_DEG), 3, finger_up)
     return (yaw @ -palm_normal).normalized()   # 掌心向前偏左
+
+
+def view_up(letter, view_dir, finger_up):
+    """相机上方向：默认手指朝上；roll 使横伸字母的指尖在画面里朝左/朝下。"""
+    _view, roll = orient_of(letter)
+    if not roll:
+        return finger_up.copy()
+    return (Matrix.Rotation(math.radians(roll), 3, view_dir) @ finger_up).normalized()
 
 
 def reset_pose(arm):
@@ -265,10 +358,12 @@ def cmd_letters(arm, mesh):
         c = (lo + hi) / 2
         dist = (hi - lo).length * 1.35
         across = palm_normal.cross(finger_up).normalized()
-        views = [(f"GF0021.{letter}_front.png", front_view_dir(letter, palm_normal, finger_up)),
-                 (f"GF0021.{letter}_side.png", across)]   # 侧面验证视角，防支点类回归
-        for fname, direction in views:
-            add_camera(c + direction * dist, c, finger_up)
+        front_dir = front_view_dir(letter, palm_normal, finger_up)
+        front_up = view_up(letter, front_dir, finger_up)
+        views = [(f"GF0021.{letter}_front.png", front_dir, front_up),
+                 (f"GF0021.{letter}_side.png", across, finger_up)]   # 侧面验证视角，防支点类回归
+        for fname, direction, up in views:
+            add_camera(c + direction * dist, c, up)
             render(sc, os.path.join(POC, fname))
             bpy.data.objects.remove(sc.camera)
         reset_pose(arm)
@@ -293,20 +388,22 @@ LM_BONES = [
 def cmd_landmarks(arm, mesh):
     """摆姿 → 经渲染相机投影导出 21 点 golden JSON 到 practice/src/pose-goldens/（入库）。
 
-    pose-goldens.test.js 断言 8×8 恒等矩阵：每个 golden 仅通过自身字母。
-    改角度表或改判定规则后：重跑本模式 + node practice/src/pose-goldens.test.js。"""
+    pose-goldens.test.js 断言恒等矩阵：每个 golden 仅通过自身字母（B×U 碰撞除外）。
+    只导出 8 个主路径字母；改角度表或改判定规则后：重跑本模式 + node practice/src/pose-goldens.test.js。"""
     from bpy_extras.object_utils import world_to_camera_view
+    golden_ids = ["A", "B", "I", "L", "U", "V", "W", "Y"]
     sc = setup_render()
     center, palm_normal, finger_up = palm_frame(arm)
     axis = flex_axis()
     outdir = os.path.join(ROOT, "..", "practice", "src", "pose-goldens")
     os.makedirs(outdir, exist_ok=True)
-    for letter in LETTERS:
+    for letter in golden_ids:
         apply_pose(arm, letter, palm_normal, finger_up, axis)
         lo, hi = world_bbox(mesh)
         c = (lo + hi) / 2
         dist = (hi - lo).length * 1.35
-        cam = add_camera(c + front_view_dir(letter, palm_normal, finger_up) * dist, c, finger_up)
+        front_dir = front_view_dir(letter, palm_normal, finger_up)
+        cam = add_camera(c + front_dir * dist, c, view_up(letter, front_dir, finger_up))
         pts = []
         for bone, end in LM_BONES:
             pb = arm.pose.bones[bone]

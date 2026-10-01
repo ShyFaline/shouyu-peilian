@@ -23,8 +23,12 @@ OUT = ROOT / "docs" / "standards" / "review"
 CELL = 512
 LABEL_H = 36
 
-# 当前 PoC 角度表覆盖的字母；扩充角度表后在此追加
-LETTERS = ["A", "B", "I", "L", "U", "V", "W", "Y"]
+# 全部 32 个字母（2026-10-01 姿态表全量重排后）
+LETTERS = [
+    "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
+    "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
+    "ZH", "CH", "SH", "NG", "EH", "UE",
+]
 
 
 def fit(img, size):

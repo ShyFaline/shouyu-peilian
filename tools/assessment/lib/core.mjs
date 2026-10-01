@@ -17,7 +17,7 @@ import { fileURLToPath } from "node:url";
 import { geometryError, toGeometryPoints } from "../../../practice/src/coords.js";
 import { evaluate } from "../../../practice/src/evaluate.js";
 import { assessInputQuality, QUALITY_HINT } from "../../../practice/src/inputQuality.js";
-import { createHold, holdReady, holdView, observePass, MAX_GAP_MS, PASS_FRAMES } from "../../../practice/src/passState.js";
+import { createHold, holdReady, holdView, observePass, MAX_GAP_MS, PASS_MS } from "../../../practice/src/passState.js";
 import { judge } from "../../../practice/src/judge.js";
 
 export const WORKSPACE_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
@@ -42,7 +42,7 @@ export function loadLetters(root = WORKSPACE_ROOT) {
 }
 
 export { geometryError, toGeometryPoints, evaluate, assessInputQuality, judge, QUALITY_HINT };
-export { createHold, holdReady, holdView, observePass, PASS_FRAMES, MAX_GAP_MS };
+export { createHold, holdReady, holdView, observePass, PASS_MS, MAX_GAP_MS };
 
 /**
  * 保持门生效阈值。judge() 只透出 holdView()（frames/elapsedMs），不透出阈值，
@@ -50,7 +50,7 @@ export { createHold, holdReady, holdView, observePass, PASS_FRAMES, MAX_GAP_MS }
  * 两者仍标 UNVERIFIED，报告必须带上这个警告。
  */
 export function holdThresholds() {
-  return { passFrames: PASS_FRAMES, maxGapMs: MAX_GAP_MS, unverified: true, source: "practice/src/passState.js" };
+  return { passMs: PASS_MS, maxGapMs: MAX_GAP_MS, unverified: true, source: "practice/src/passState.js" };
 }
 
 /**

@@ -84,10 +84,10 @@ async function harness(opts={}){
   h.tick=async({ms=30,fresh=true}={})=>{h.advance(ms);if(fresh)h.els.video.currentTime+=.03;const callbacks=[...h.raf.values()];h.raf.clear();for(const f of callbacks)await f(h.now);};
   h.select=async(id='GF0021.V')=>{const b=document.querySelectorAll().find(x=>x.dataset.id===id);assert.ok(b);await b.emit('click');};
   h.start=()=>h.els['start-btn'].emit('click');h.stop=()=>h.els['stop-btn'].emit('click');
-  h.pass=async()=>{await h.boot();await h.select();await h.start();for(let i=0;i<6;i++)await h.tick();assert.equal(h.els.verdict.dataset.state,'ok','synthetic V reaches pass after six frames');};
+  h.pass=async()=>{await h.boot();await h.select();await h.start();for(let i=0;i<31;i++)await h.tick({ms:100});assert.equal(h.els.verdict.dataset.state,'ok','synthetic V reaches pass after holding 3 seconds');};
   h.download=async()=>{h.els['export-toggle'].checked=true;await h.els['export-toggle'].emit('change');await h.els['export-btn'].emit('click');};
   h.invalid=async()=>{assert.notEqual(h.els.verdict.dataset.state,'ok');assert.equal(h.painted,false);const n=h.downloads.length;await h.download();assert.equal(h.downloads.length,n,'invalid snapshot must not download');};
-  h.recover=async()=>{for(let i=0;i<5;i++){await h.tick();assert.notEqual(h.els.verdict.dataset.state,'ok','must recount six new frames');}await h.tick();assert.equal(h.els.verdict.dataset.state,'ok');};
+  h.recover=async()=>{for(let i=0;i<30;i++){await h.tick({ms:100});assert.notEqual(h.els.verdict.dataset.state,'ok','must accumulate 3 seconds of new frames');}await h.tick({ms:100});assert.equal(h.els.verdict.dataset.state,'ok');};
   return h;
 }
 const tests=[];const test=(name,fn)=>tests.push([name,fn]);
@@ -367,7 +367,7 @@ test('refresh reads sanitized records; unknown schema and illegal rows are dropp
 });
 test('storage throws do not crash practice; clear confirm, cancel, and failure',async()=>{
  const broken=await harness();broken.storageGetThrow=true;await broken.boot();
- await broken.select();await broken.start();for(let i=0;i<6;i++)await broken.tick();
+ await broken.select();await broken.start();for(let i=0;i<31;i++)await broken.tick({ms:100});
  assert.equal(broken.els.verdict.dataset.state,'ok');
  assert.equal(recordCount(broken,'GF0021.V','learn'),1);
  assert.equal(broken.els['persist-note'].hidden,false);
@@ -395,9 +395,9 @@ test('success seal is only shown on a recorded pass',async()=>{
  const h=await harness();await h.boot();
  assert.equal(h.els['pass-seal'].hidden,true);
  await h.select();await h.start();
- for(let i=0;i<5;i++)await h.tick();
+ for(let i=0;i<30;i++)await h.tick({ms:100});
  assert.equal(h.els['pass-seal'].hidden,true);
- await h.tick();
+ await h.tick({ms:100});
  assert.equal(h.els.verdict.dataset.state,'ok');
  assert.equal(h.els['pass-seal'].hidden,false);
  assert.equal(h.els['pass-seal'].dataset.animate,'true');
@@ -412,7 +412,7 @@ test('test fail feedback stays generic and frozen outcome survives empty frames'
  assert.doesNotMatch(`${h.els.verdict.textContent}${h.els.hint.textContent}`,/对照左边/);
  assert.equal(recordCount(h,'GF0021.A','test'),0);
  await h.select('GF0021.V');
- for(let i=0;i<6;i++)await h.tick();
+ for(let i=0;i<31;i++)await h.tick({ms:100});
  assert.equal(recordCount(h,'GF0021.V','test'),1);
  assert.equal(h.els['test-outcome'].hidden,false);
  h.hands=[];await h.tick();
@@ -444,16 +444,16 @@ test('recordPass and parseProgress keep canonical ISO and drop out-of-range or o
  assert.equal(mixed.entries[0].letterId,V.id);
  assert.equal(mixed.entries[0].lastAt,iso);
 });
-test('canRecordPass rejects zero/negative/fractional hold and status mismatch; real V still records',async()=>{
+test('canRecordPass rejects zero/negative/missing hold duration and status mismatch; real V still records',async()=>{
  const h=await harness(),s=await h.core('practiceSession');
  const attempt={mode:'learn',letterId:V.id,recorded:false};
- const base={judged:{decision:'pass',quality:{ok:true},practiceStatus:V.practiceStatus,hold:{frames:6,passFrames:6}},letter:V,mode:'learn',attempt};
+ const base={judged:{decision:'pass',quality:{ok:true},practiceStatus:V.practiceStatus,hold:{elapsedMs:3000,passMs:3000}},letter:V,mode:'learn',attempt};
  assert.equal(s.canRecordPass(base),true);
- for(const passFrames of [0,-1,1.5,NaN,Infinity]){
-  assert.equal(s.canRecordPass({...base,judged:{...base.judged,hold:{frames:6,passFrames}}}),false,String(passFrames));
+ for(const passMs of [0,-1,NaN,Infinity]){
+  assert.equal(s.canRecordPass({...base,judged:{...base.judged,hold:{elapsedMs:3000,passMs}}}),false,String(passMs));
  }
- for(const frames of [5,0,-6,6.5,5.9]){
-  assert.equal(s.canRecordPass({...base,judged:{...base.judged,hold:{frames,passFrames:6}}}),false,String(frames));
+ for(const elapsedMs of [2999.9,0,-3000,NaN]){
+  assert.equal(s.canRecordPass({...base,judged:{...base.judged,hold:{elapsedMs,passMs:3000}}}),false,String(elapsedMs));
  }
  assert.equal(s.canRecordPass({...base,judged:{...base.judged,practiceStatus:'pending_review'}}),false);
  assert.equal(s.canRecordPass({...base,judged:{...base.judged,practiceStatus:'accepted_practice'}}),false);
@@ -487,8 +487,8 @@ test('quest mode unlocks sequentially, persists separately, and celebrates passe
  await btns[1].emit('click');
  assert.equal(h.els['demo-label'].textContent,'字母 A','locked level cannot be selected');
  h.hands=[aHand()];
- await h.start();for(let i=0;i<6;i++)await h.tick();
- assert.equal(h.els.verdict.dataset.state,'ok','A hand passes level 1');
+ await h.start();for(let i=0;i<31;i++)await h.tick({ms:100});
+ assert.equal(h.els.verdict.dataset.state,'ok','A hand passes level 1 after holding 3 seconds');
  assert.equal(h.els['pass-seal'].hidden,false);
  assert.equal(h.els['confetti-layer'].classList.contains('is-burst'),true,'pass triggers celebration');
  assert.equal(h.els['confetti-layer'].children.length>0,true,'confetti pieces spawned');

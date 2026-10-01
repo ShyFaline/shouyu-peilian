@@ -573,6 +573,6 @@
     "sourceType": "synthetic",
     "humanReviewed": false,
     "synthetic": true,
-    "intent": "只有 5 帧：不应 pass"
+    "intent": "只有 5 帧、累计 400ms 不足 3 秒：不应 pass"
   }
 }

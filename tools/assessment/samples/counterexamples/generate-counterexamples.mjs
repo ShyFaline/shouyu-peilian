@@ -241,11 +241,11 @@ seq(
   Array.from({ length: 8 }, (_, i) => ({ videoTime: i / 30, nowMs: t0 + i * 100, landmarks: badHand })),
   "动作错误：几何不合格，与「保持未完成」不是同一种",
 );
-// 保持未完成：几何合格但帧数不足
+// 保持未完成：几何合格但保持不足 3 秒
 seq(
   "ce-seq-hold-pending",
   Array.from({ length: 5 }, (_, i) => ({ videoTime: i / 30, nowMs: t0 + i * 100, landmarks: okHand })),
-  "保持未完成：几何合格但没停稳，与「动作错误」不是同一种",
+  "保持未完成：几何合格但没停满 3 秒，与「动作错误」不是同一种",
 );
 // 无效时间轴：缺 nowMs
 seq(
@@ -253,11 +253,11 @@ seq(
   Array.from({ length: 8 }, (_, i) => ({ videoTime: i / 30, landmarks: okHand })),
   "无效时间轴：缺 nowMs，应在校验层判 invalid，不进判定链",
 );
-// 正常通过
+// 正常通过：累计保持满 3 秒
 seq(
   "ce-seq-pass",
-  Array.from({ length: 8 }, (_, i) => ({ videoTime: i / 30, nowMs: t0 + i * 100, landmarks: okHand })),
-  "序列通过",
+  Array.from({ length: 31 }, (_, i) => ({ videoTime: i / 30, nowMs: t0 + i * 100, landmarks: okHand })),
+  "序列通过（31 帧 × 100ms，累计 3000ms）",
 );
 
 writeIn("sequence-levels", "labels.json", {

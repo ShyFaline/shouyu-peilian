@@ -81,10 +81,10 @@ export function canRecordPass({ judged, letter, mode, attempt } = {}) {
   if (mode !== MODE_LEARN && mode !== MODE_TEST && mode !== MODE_QUEST) return false;
   if (!attempt || attempt.recorded) return false;
   if (attempt.mode !== mode || attempt.letterId !== letter.id) return false;
-  const frames = judged.hold?.frames;
-  const need = judged.hold?.passFrames;
-  if (!Number.isInteger(need) || need < 1) return false;
-  if (!Number.isInteger(frames) || frames < need) return false;
+  const elapsedMs = judged.hold?.elapsedMs;
+  const need = judged.hold?.passMs;
+  if (!Number.isFinite(need) || !(need > 0)) return false;
+  if (!Number.isFinite(elapsedMs) || elapsedMs < need) return false;
   return true;
 }
 

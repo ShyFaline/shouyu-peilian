@@ -126,7 +126,7 @@ if (!quiet) {
   console.log(`失败分类: ${JSON.stringify(t.failureClassCounts)}`);
   console.log(`阻断原因: ${JSON.stringify(report.blockReasons)}`);
   console.log(
-    `保持门阈值: passFrames=${report.holdThresholds.passFrames} maxGapMs=${report.holdThresholds.maxGapMs}` +
+    `保持门阈值: passMs=${report.holdThresholds.passMs} maxGapMs=${report.holdThresholds.maxGapMs}` +
       `${report.holdThresholds.unverified ? "（仍标 UNVERIFIED，序列层结论受此限制）" : ""}`,
   );
   if (labelInfo.provided) {

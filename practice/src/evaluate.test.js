@@ -219,7 +219,8 @@ function codesOf(result) {
   return list.map((issue) => issue.code).join("|");
 }
 
-function holdPass(letter, lm, n = 6) {
+// 保持门是按累计时长（PASS_MS=3000ms）而不是帧数放行，默认 13 帧 × 250ms 刚好跨满 3 秒
+function holdPass(letter, lm, n = 13) {
   const hold = createHold();
   let last = null;
   for (let i = 0; i < n; i += 1) {
@@ -229,7 +230,7 @@ function holdPass(letter, lm, n = 6) {
       hands: [lm],
       geom: UNIT,
       videoTime: i,
-      nowMs: i * 16,
+      nowMs: i * 250,
     }, hold);
   }
   return last;
@@ -424,14 +425,14 @@ test("A02 几何合格时低 score / 缺 score 不得仅因此 undetermined；�
   const lm = vApartHand();
   const holdLow = createHold();
   let low;
-  for (let i = 0; i < 6; i += 1) {
+  for (let i = 0; i < 13; i += 1) {
     low = judge({
       letter: letterV,
       lm,
       hands: [lm],
       geom: UNIT,
       videoTime: i,
-      nowMs: i * 16,
+      nowMs: i * 250,
       handedness: { category: "Right", score: 0.05 },
     }, holdLow);
     assert.notEqual(low.decision, "undetermined", "score=0.05 不得仅因此 undetermined");
@@ -439,14 +440,14 @@ test("A02 几何合格时低 score / 缺 score 不得仅因此 undetermined；�
   assert.equal(low.decision, "pass", "低分也不该挡住几何合格的 V");
   const hold = createHold();
   let last;
-  for (let i = 0; i < 6; i += 1) {
+  for (let i = 0; i < 13; i += 1) {
     last = judge({
       letter: letterV,
       lm,
       hands: [lm],
       geom: UNIT,
       videoTime: i,
-      nowMs: i * 16,
+      nowMs: i * 250,
       handedness: { category: "Right" },
     }, hold);
     assert.notEqual(last.decision, "undetermined", "缺 score 不得仅因此 undetermined");
@@ -524,20 +525,33 @@ test("A05 结构检查（非浏览器行为）：镜像下 .live-verdict 不得 
   }
 });
 
-test("A06 passState 连续 pass×6 开放；undetermined/超时归零；同一 videoTime 不双计", () => {
+test("A06 passState 保持满 3 秒开放；中断/超时归零；同一 videoTime 不双计", () => {
+  // 25 帧 × 120ms = 累计 3000ms，应放行
   const hold = makeHold();
-  for (let i = 0; i < 6; i += 1) {
-    observePass(hold, { ok: true, videoTime: i, nowMs: i * 30 });
+  for (let i = 0; i <= 25; i += 1) {
+    observePass(hold, { ok: true, videoTime: i, nowMs: i * 120 });
   }
-  assert.equal(hold.frames, 6);
+  assert.equal(hold.frames, 26);
+  assert.equal(hold.elapsedMs, 3000);
   assert.equal(holdReady(hold), true);
 
+  // 时长不足不放行：6 帧 × 100ms 只有 500ms
+  const holdShort = makeHold();
+  for (let i = 0; i < 6; i += 1) {
+    observePass(holdShort, { ok: true, videoTime: i, nowMs: i * 100 });
+  }
+  assert.equal(holdShort.frames, 6);
+  assert.equal(holdShort.elapsedMs, 500);
+  assert.equal(holdReady(holdShort), false);
+
+  // ok=false 清零，重新累计
   const hold2 = makeHold();
   for (let i = 0; i < 5; i += 1) {
     observePass(hold2, { ok: true, videoTime: i, nowMs: i * 30 });
   }
   observePass(hold2, { ok: false, videoTime: 5, nowMs: 150 });
   assert.equal(hold2.frames, 0);
+  assert.equal(hold2.elapsedMs, 0);
   observePass(hold2, { ok: true, videoTime: 6, nowMs: 180 });
   assert.equal(hold2.frames, 1);
   assert.equal(holdReady(hold2), false);
@@ -616,16 +630,16 @@ test("DS-R3 createSnapshot 拒绝 verdict 类伪标签字段（不是静默忽�
   assert.equal(clean.ok, true);
 });
 
-test("DS-R4 holdView 透出保持门阈值；judge 出口携带 passFrames/maxGapMs", () => {
+test("DS-R4 holdView 透出保持门阈值；judge 出口携带 passMs/maxGapMs", () => {
   const hold = makeHold();
   const view = observePass(hold, { ok: true, videoTime: 0, nowMs: 0 });
-  assert.equal(view.passFrames, 6);
+  assert.equal(view.passMs, 3000);
   assert.equal(view.maxGapMs, 400);
   const judged = judge(
     { letter: letterV, hands: [vApartHand()], geom: UNIT, videoTime: 0, nowMs: 0 },
     makeHold(),
   );
-  assert.equal(judged.hold.passFrames, 6);
+  assert.equal(judged.hold.passMs, 3000);
   assert.equal(judged.hold.maxGapMs, 400);
 });
 
@@ -671,7 +685,7 @@ test("U 四指裁定后规则与 B 相同（词汇层不可区分，由 pending_
 test("能力：J 几何通过不得写成完整掌握", () => {
   const geom = evaluate(letterJ, jHand(), UNIT);
   assert.equal(geom.pass, true, JSON.stringify(geom.audit || geom.issues));
-  const judged = holdPass(letterJ, jHand(), 6);
+  const judged = holdPass(letterJ, jHand());
   const view = presentJudge(judged);
   const blob = `${view.title} ${view.hint}`;
   assert.doesNotMatch(blob, /完整掌握|字母已掌握|完整 J|已会/);
@@ -681,7 +695,7 @@ test("能力：J 几何通过不得写成完整掌握", () => {
 });
 
 test("J 静态判定：食指回勾保持后 pass（hook 规则回归）", () => {
-  const judged = holdPass(letterJ, jHand(), 6);
+  const judged = holdPass(letterJ, jHand());
   assert.equal(judged.decision, "pass", JSON.stringify(judged));
   assert.equal(presentJudge(judged).title, "做对了，保持住");
 });
@@ -700,7 +714,7 @@ test("J 判定 fail-closed：全握拳不得 pass", () => {
 });
 
 test("pose_practice V 连续保持后 decision=pass，文案不是到位/掌握", () => {
-  const judged = holdPass(letterV, vApartHand(), 6);
+  const judged = holdPass(letterV, vApartHand());
   assert.equal(judged.decision, "pass");
   const view = presentJudge(judged);
   assert.equal(view.title, "做对了，保持住");

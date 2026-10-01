@@ -51,8 +51,8 @@
  * @property {"pending_review"|"demo_only"|"pose_practice"|"accepted_practice"} practiceStatus
  * @property {Issue[]} issues
  * @property {{ ok: boolean, reason: string }} quality
- * @property {{ frames: number, elapsedMs: number, passFrames: number, maxGapMs: number }} hold
- * hold.passFrames/maxGapMs 为保持门阈值透出（UNVERIFIED 初值），供离线统计读取。
+ * @property {{ frames: number, elapsedMs: number, passMs: number, maxGapMs: number }} hold
+ * hold.passMs/maxGapMs 为保持门阈值透出（UNVERIFIED 初值），供离线统计读取。
  */
 
 /**

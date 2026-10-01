@@ -1,9 +1,9 @@
 /**
- * 连续有效才开放 pass。
- * passFrames=6, maxGapMs=400 是初值，UNVERIFIED 待验证，不是实验结论。
+ * 连续有效保持才开放 pass。
+ * passMs=3000（正确手型至少保持 3 秒）、maxGapMs=400 是初值，UNVERIFIED 待验证，不是实验结论。
  */
 
-export const PASS_FRAMES = 6; // UNVERIFIED 待验证
+export const PASS_MS = 3000; // UNVERIFIED 待验证
 export const MAX_GAP_MS = 400; // UNVERIFIED 待验证
 
 export function createHold(opts = {}) {
@@ -12,7 +12,7 @@ export function createHold(opts = {}) {
     elapsedMs: 0,
     lastVideoTime: null,
     lastTs: null,
-    passFrames: opts.passFrames ?? PASS_FRAMES,
+    passMs: opts.passMs ?? PASS_MS,
     maxGapMs: opts.maxGapMs ?? MAX_GAP_MS,
   };
 }
@@ -31,7 +31,7 @@ export function holdView(hold) {
     frames: hold?.frames || 0,
     elapsedMs: hold?.elapsedMs || 0,
     // 透出保持门阈值，供离线统计与调试读取；值仍为 UNVERIFIED 初值，不代表实验结论。
-    passFrames: hold?.passFrames ?? PASS_FRAMES,
+    passMs: hold?.passMs ?? PASS_MS,
     maxGapMs: hold?.maxGapMs ?? MAX_GAP_MS,
   };
 }
@@ -67,5 +67,5 @@ export function observePass(hold, { ok, videoTime, nowMs } = {}) {
 }
 
 export function holdReady(hold) {
-  return (hold?.frames || 0) >= (hold?.passFrames ?? PASS_FRAMES);
+  return (hold?.elapsedMs || 0) >= (hold?.passMs ?? PASS_MS);
 }

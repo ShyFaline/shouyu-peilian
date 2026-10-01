@@ -127,7 +127,7 @@
       "labelVersion": "synthetic-labels-1",
       "truthOrigin": "spec-derived-gate",
       "humanReviewed": false,
-      "note": "6 帧 100ms 间隔，门应开放"
+      "note": "31 帧 100ms 间隔，累计保持 3 秒，门应开放"
     },
     {
       "sampleId": "syn-seq-v-short",
@@ -140,7 +140,7 @@
       "labelVersion": "synthetic-labels-1",
       "truthOrigin": "spec-derived-gate",
       "humanReviewed": false,
-      "note": "只有 5 帧，门不应开放"
+      "note": "只有 5 帧（400ms），不足 3 秒，门不应开放"
     },
     {
       "sampleId": "syn-seq-v-expired",
@@ -192,7 +192,7 @@
       "labelVersion": "synthetic-labels-1",
       "truthOrigin": "spec-derived-gate",
       "humanReviewed": false,
-      "note": "前两帧没手不算损坏，后 6 帧应开放"
+      "note": "前两帧没手不算损坏，后续保持满 3 秒应开放"
     }
   ]
 }

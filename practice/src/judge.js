@@ -73,7 +73,7 @@ export function presentJudge(judged) {
     return { title: blob || "动作没做完，请重试", hint: "", state: "bad" };
   }
   if (issues.some((x) => x.code === "hold.pending")) {
-    return { title: "姿态接近，停稳", hint: blob || "手指已经对上，保持这个姿势。", state: "idle" };
+    return { title: "姿态接近，停稳", hint: blob || "手指已经对上，保持这个姿势 3 秒。", state: "idle" };
   }
   return {
     title: "对照左边改动作",
@@ -165,7 +165,7 @@ function judgeMotion(hold, motion, spec, input, geom) {
     }
     observePass(hold, { ok: true, videoTime, nowMs });
     if (!holdReady(hold)) {
-      return { decision: "fail", issues: [{ code: "hold.pending", hint: "保持手型" }] };
+      return { decision: "fail", issues: [{ code: "hold.pending", hint: "保持手型 3 秒" }] };
     }
     startCollecting(motion, nowMs);
     return { decision: "fail", issues: [{ code: "motion.pending", hint: motionHint(spec) }] };
@@ -314,7 +314,7 @@ export function judge(input = {}, hold, motion = null) {
       return result({
         decision: "fail",
         practiceStatus,
-        issues: [{ code: "hold.pending", hint: "姿态接近，停稳" }],
+        issues: [{ code: "hold.pending", hint: "保持这个手型 3 秒" }],
         quality: { ok: true, reason: "ok" },
         hold: holdState,
       });

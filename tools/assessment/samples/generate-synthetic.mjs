@@ -186,14 +186,14 @@ function writeSeq(id, targetLetterId, frames, intent, patch = {}) {
 
 const lm = buildHand(POSES.V_OK);
 const t0 = 1758700100000;
-// 6 帧、间隔 100ms（<400ms）：应开放 pass
-writeSeq("syn-seq-v-pass", "GF0021.V", Array.from({ length: 6 }, (_, i) => ({ videoTime: i / 30, nowMs: t0 + i * 100, landmarks: lm })), "6 个不同 videoTime、间隔 100ms：应 pass");
-// 只有 5 帧：不应 pass
-writeSeq("syn-seq-v-short", "GF0021.V", Array.from({ length: 5 }, (_, i) => ({ videoTime: i / 30, nowMs: t0 + i * 100, landmarks: lm })), "只有 5 帧：不应 pass");
+// 31 帧、间隔 100ms（<400ms）：累计保持 3000ms，应开放 pass
+writeSeq("syn-seq-v-pass", "GF0021.V", Array.from({ length: 31 }, (_, i) => ({ videoTime: i / 30, nowMs: t0 + i * 100, landmarks: lm })), "31 个不同 videoTime、间隔 100ms、累计 3000ms：应 pass");
+// 只有 5 帧（累计 400ms，不足 3 秒）：不应 pass
+writeSeq("syn-seq-v-short", "GF0021.V", Array.from({ length: 5 }, (_, i) => ({ videoTime: i / 30, nowMs: t0 + i * 100, landmarks: lm })), "只有 5 帧、累计 400ms 不足 3 秒：不应 pass");
 // 6 帧但间隔 401ms：超时清零，不应 pass
 writeSeq("syn-seq-v-expired", "GF0021.V", Array.from({ length: 6 }, (_, i) => ({ videoTime: i / 30, nowMs: t0 + i * 401, landmarks: lm })), "6 帧但每帧间隔 401ms：应超时清零，不 pass");
 // 重复 videoTime 不计数
-writeSeq("syn-seq-v-dup", "GF0021.V", Array.from({ length: 8 }, (_, i) => ({ videoTime: Math.floor(i / 2) / 30, nowMs: t0 + i * 100, landmarks: lm })), "重复 videoTime 不计数：4 个不同帧不应 pass");
+writeSeq("syn-seq-v-dup", "GF0021.V", Array.from({ length: 8 }, (_, i) => ({ videoTime: Math.floor(i / 2) / 30, nowMs: t0 + i * 100, landmarks: lm })), "重复 videoTime 不计数：4 个不同帧、累计 700ms 不足 3 秒，不应 pass");
 // 时间倒退：fail closed
 writeSeq("syn-seq-v-backwards", "GF0021.V", [
   { videoTime: 0.0, nowMs: t0, landmarks: lm },
@@ -201,12 +201,12 @@ writeSeq("syn-seq-v-backwards", "GF0021.V", [
   { videoTime: 0.05, nowMs: t0 + 200, landmarks: lm },
   { videoTime: 0.2, nowMs: t0 + 300, landmarks: lm },
 ], "videoTime 倒退：应清零，不得 pass");
-// 序列里混入「没检测到手」的帧：合法观测，不该判成损坏；后面 6 帧仍应开放 pass
+// 序列里混入「没检测到手」的帧：合法观测，不该判成损坏；后面保持满 3 秒仍应开放 pass
 writeSeq("syn-seq-v-nohand-then-pass", "GF0021.V", [
   { videoTime: 0.0, nowMs: t0, landmarks: null },
   { videoTime: 0.033, nowMs: t0 + 100, landmarks: null },
-  ...Array.from({ length: 6 }, (_, i) => ({ videoTime: 0.066 + i / 30, nowMs: t0 + 200 + i * 100, landmarks: lm })),
-], "前两帧没有手（landmarks 缺失）：应记警告不记损坏，后 6 帧开放 pass");
+  ...Array.from({ length: 31 }, (_, i) => ({ videoTime: 0.066 + i / 30, nowMs: t0 + 200 + i * 100, landmarks: lm })),
+], "前两帧没有手（landmarks 缺失）：应记警告不记损坏，后续保持满 3 秒开放 pass");
 
 // --- 标签文件 ---
 /**
@@ -214,7 +214,7 @@ writeSeq("syn-seq-v-nohand-then-pass", "GF0021.V", [
  *   geometry : 手型是否符合该字母规则      == evaluate().pass
  *   quality  : 输入质量是否足够            == assessInputQuality().ok
  *   sequence : 保持门是否应开放 pass       == judge().decision === "pass"
- * 序列标签的期望来自 passState 当前 spec（PASS_FRAMES/MAX_GAP_MS 仍标 UNVERIFIED），
+ * 序列标签的期望来自 passState 当前 spec（PASS_MS/MAX_GAP_MS 仍标 UNVERIFIED），
  * 所以 truthOrigin 记 spec-derived-gate，既不是真人也不是测量结果。
  */
 const L = (sampleId, expectedVerdict, level, extra = {}) => ({
@@ -250,12 +250,12 @@ write("labels.json", {
     G("syn-b-pos", "correct"),
     G("syn-w-pos", "correct"),
     G("syn-i-pos", "correct"),
-    SEQ("syn-seq-v-pass", "correct", { note: "6 帧 100ms 间隔，门应开放" }),
-    SEQ("syn-seq-v-short", "incorrect", { note: "只有 5 帧，门不应开放" }),
+    SEQ("syn-seq-v-pass", "correct", { note: "31 帧 100ms 间隔，累计保持 3 秒，门应开放" }),
+    SEQ("syn-seq-v-short", "incorrect", { note: "只有 5 帧（400ms），不足 3 秒，门不应开放" }),
     SEQ("syn-seq-v-expired", "incorrect", { note: "间隔 401ms 超时清零，门不应开放" }),
     SEQ("syn-seq-v-dup", "incorrect", { note: "重复 videoTime 不计数，门不应开放" }),
     SEQ("syn-seq-v-backwards", "incorrect", { note: "videoTime 倒退清零，门不应开放" }),
-    SEQ("syn-seq-v-nohand-then-pass", "correct", { note: "前两帧没手不算损坏，后 6 帧应开放" }),
+    SEQ("syn-seq-v-nohand-then-pass", "correct", { note: "前两帧没手不算损坏，后续保持满 3 秒应开放" }),
   ],
 });
 

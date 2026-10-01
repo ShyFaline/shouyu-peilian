@@ -909,6 +909,6 @@
     "sourceType": "synthetic",
     "humanReviewed": false,
     "synthetic": true,
-    "intent": "重复 videoTime 不计数：4 个不同帧不应 pass"
+    "intent": "重复 videoTime 不计数：4 个不同帧、累计 700ms 不足 3 秒，不应 pass"
   }
 }

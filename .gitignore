@@ -23,3 +23,4 @@ blender/vendor/
 # 本机临时文件
 .~lock.*#
 _probe*.mjs
+临时folder-full/

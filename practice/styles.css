@@ -17,7 +17,7 @@ button.primary:hover:not(:disabled), .button.primary:hover { background: #254b3d
 .site-header, .site-footer, main { width: min(1160px, calc(100% - 64px)); margin: auto; }
 .site-header { display: flex; justify-content: space-between; align-items: center; gap: 28px; min-height: 108px; border-bottom: 1px solid var(--line); }
 .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; font-family: var(--serif); font-size: 24px; font-weight: 700; letter-spacing: .12em; flex-shrink: 0; }
-.brand-seal { display: grid; place-items: center; width: 42px; height: 46px; color: var(--accent); border: 1.5px solid var(--accent); border-radius: 4px 7px 3px 6px; font-size: 29px; font-weight: 400; }
+.brand-seal { display: grid; place-items: center; width: 42px; height: 46px; color: var(--accent); border: 1.5px solid #8fae8b; border-radius: 4px 7px 3px 6px; font-size: 29px; font-weight: 400; }
 .brand-seal img { width: 28px; height: 28px; object-fit: contain; }
 .brand small { display: block; font-family: "Microsoft YaHei", sans-serif; font-size: 10px; color: var(--muted); font-weight: 400; letter-spacing: .16em; }
 .site-header nav { display: flex; gap: 30px; }

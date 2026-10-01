@@ -529,8 +529,8 @@ def cmd_selfcheck(arm, mesh):
     find_nearest：若骨 a 的顶点落在骨 b 表面内侧（(v-p)·n < 0）即真实穿透，
     报告最大穿透深度（米）与穿透顶点数。相邻骨对/同骨跳过（关节处自然相连）。
 
-    输出 poc/selfcheck.json，改姿态表后重跑。胶囊门禁
-    （practice/src/pose-collision.test.js）是本检查的近似快版。"""
+    输出 blender/selfcheck.json（vendor 不入库故不放 poc/），改姿态表后重跑。
+    胶囊门禁（practice/src/pose-collision.test.js）是本检查的近似快版。"""
     from mathutils.bvhtree import BVHTree
 
     _c, palm_normal, finger_up = palm_frame(arm)
@@ -602,7 +602,7 @@ def cmd_selfcheck(arm, mesh):
         report[letter] = dict(sorted(hits.items(), key=lambda kv: -kv[1]["maxDepth"]))
         ev.to_mesh_clear()
         reset_pose(arm)
-    out = os.path.join(POC, "selfcheck.json")
+    out = os.path.join(ROOT, "selfcheck.json")
     with open(out, "w", encoding="utf-8") as f:
         json.dump({
             "source": "build_godot_hand_poc.py -- selfcheck；BVH 封闭网格穿透，深度单位米",

@@ -10,6 +10,7 @@
   - `node --experimental-vm-modules practice/src/reliability.test.js`
   - `node practice/src/pose-goldens.test.js`（合成 golden，只做规则回归，不等于国标或真实检测通过）
   - `node practice/src/motion.test.js`（动态判定合成序列回归，同上不等价声明）
+  - `node practice/src/pose-collision.test.js`（示范手模胶囊重合门禁；FK 锚点对齐 + 修复基线，修好基线字母后从 KNOWN_VIOLATIONS 移除）
 
 ## 项目速览
 

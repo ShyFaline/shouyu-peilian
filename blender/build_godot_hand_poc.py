@@ -426,6 +426,196 @@ def cmd_landmarks(arm, mesh):
         reset_pose(arm)
 
 
+def _point_seg_dist(p, a, b):
+    ab = b - a
+    denom = ab.dot(ab)
+    t = 0.0 if denom == 0 else max(0.0, min(1.0, (p - a).dot(ab) / denom))
+    return ((a + ab * t) - p).length
+
+
+def _percentile(vals, q):
+    s = sorted(vals)
+    if not s:
+        return 0.0
+    return s[min(len(s) - 1, max(0, int(round(q * (len(s) - 1)))))]
+
+
+def _vertex_owner(mesh):
+    """每顶点主导骨骼（权重最大的顶点组）。"""
+    groups = list(mesh.vertex_groups)
+    owner = {}
+    for v in mesh.data.vertices:
+        best = None
+        bw = 0.0
+        for gr in groups:
+            try:
+                w = gr.weight(v.index)
+            except RuntimeError:
+                continue
+            if w > bw:
+                bw = w
+                best = gr.name
+        owner[v.index] = best
+    return owner
+
+
+def _capsule_radii(arm, mesh):
+    """每骨骼胶囊半径：主导顶点（权重最大的组）到骨轴线段距离的 90 分位数（rest 姿态）。"""
+    world = mesh.matrix_world
+    owner = _vertex_owner(mesh)
+    dists = {b.name: [] for b in arm.data.bones}
+    for v in mesh.data.vertices:
+        best = owner.get(v.index)
+        if best is None or best not in dists:
+            continue
+        bone = arm.data.bones[best]
+        h = arm.matrix_world @ bone.head_local
+        t = arm.matrix_world @ bone.tail_local
+        dists[best].append(_point_seg_dist(world @ v.co, h, t))
+    radii = {}
+    for name, ds in dists.items():
+        radii[name] = round(_percentile(ds, 0.9), 6)
+    return radii
+
+
+def cmd_export_pose(arm, mesh):
+    """导出姿态表 + rest 骨骼 + 胶囊半径 + 各字母摆姿后骨骼世界坐标到 practice/src/pose-skeleton.json。
+
+    供 practice/src/pose-collision.test.js 在 Node 复现同一套 FK 并做胶囊重合门禁。
+    改姿态表后：重跑本模式 + node practice/src/pose-collision.test.js。"""
+    _c, palm_normal, finger_up = palm_frame(arm)
+    axis = flex_axis()
+    radii = _capsule_radii(arm, mesh)
+    bones = []
+    for b in arm.data.bones:
+        bones.append({
+            "name": b.name,
+            "parent": b.parent.name if b.parent else None,
+            "head": [round(v, 6) for v in (arm.matrix_world @ b.head_local)],
+            "tail": [round(v, 6) for v in (arm.matrix_world @ b.tail_local)],
+            "radius": radii.get(b.name, 0.0),
+        })
+    data = {
+        "source": "build_godot_hand_poc.py -- export-pose；rest 世界坐标 + 胶囊半径（90 分位）+ 摆姿校验锚点",
+        "axis": list(axis),
+        "palmNormal": [round(v, 6) for v in palm_normal],
+        "fingerUp": [round(v, 6) for v in finger_up],
+        "bones": bones,
+        "letters": LETTERS,
+        "splay": SPLAY,
+        "thumb": THUMB,
+        "posed": {},
+    }
+    for letter in LETTERS:
+        apply_pose(arm, letter, palm_normal, finger_up, axis)
+        posed = {}
+        for pb in arm.pose.bones:
+            posed[pb.name] = {
+                "head": [round(v, 6) for v in wpos(arm, pb)],
+                "tail": [round(v, 6) for v in (arm.matrix_world @ pb.tail)],
+            }
+        data["posed"][letter] = posed
+        reset_pose(arm)
+    out = os.path.join(ROOT, "..", "practice", "src", "pose-skeleton.json")
+    with open(out, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=1)
+    print("WROTE", out)
+
+
+def cmd_selfcheck(arm, mesh):
+    """BVH 精确自检：逐字母摆姿后对变形网格做封闭网格穿透检测。
+
+    按顶点主导骨分组建局部 BVH，对远骨对（不同且非父子相邻）互查
+    find_nearest：若骨 a 的顶点落在骨 b 表面内侧（(v-p)·n < 0）即真实穿透，
+    报告最大穿透深度（米）与穿透顶点数。相邻骨对/同骨跳过（关节处自然相连）。
+
+    输出 poc/selfcheck.json，改姿态表后重跑。胶囊门禁
+    （practice/src/pose-collision.test.js）是本检查的近似快版。"""
+    from mathutils.bvhtree import BVHTree
+
+    _c, palm_normal, finger_up = palm_frame(arm)
+    axis = flex_axis()
+    owner = _vertex_owner(mesh)
+    radii = _capsule_radii(arm, mesh)
+    parent = {b.name: (b.parent.name if b.parent else None) for b in arm.data.bones}
+    adjacent = set()
+    for name, p in parent.items():
+        if p:
+            adjacent.add(frozenset((name, p)))
+    by_bone = {}
+    for idx, bone in owner.items():
+        if bone:
+            by_bone.setdefault(bone, []).append(idx)
+    names = sorted(by_bone)
+
+    DEPTH_EPS = 0.0003  # 0.3mm 以下视为表面贴合噪声
+    DELTA = 0.008       # 穿透顶点贴近对方表面的距离上限 8mm，
+                        # 排除远处顶点落在非凸壳负法线侧的误报；
+                        # 经验线：双方向均有顶点且深度 >3mm 即视觉可见的穿模，
+                        # 单向 <3mm 的浅嵌多为软组织贴合（合法）
+
+    depsgraph = bpy.context.evaluated_depsgraph_get()
+    report = {}
+    for letter in LETTERS:
+        apply_pose(arm, letter, palm_normal, finger_up, axis)
+        ev = mesh.evaluated_get(depsgraph)
+        m = ev.to_mesh()
+        mw = ev.matrix_world
+        verts = [mw @ v.co for v in m.vertices]
+        tris = [tuple(tri.vertices) for tri in m.loop_triangles]
+        bvhs = {}
+        for bone, idxs in by_bone.items():
+            faces = [t for t in tris if all(owner.get(i) == bone for i in t)]
+            if faces:
+                bvhs[bone] = BVHTree.FromPolygons([verts[i] for i in idxs], [
+                    tuple(idxs.index(i) for i in f) for f in faces])
+        hits = {}
+        for i, a in enumerate(names):
+            if a not in bvhs:
+                continue
+            for b in names[i + 1:]:
+                if b not in bvhs or frozenset((a, b)) in adjacent:
+                    continue
+                # 只保留真正贴着对方表面（<3mm）且沿对方表面法线朝内
+                # 顶入的顶点：真实穿透两侧互穿至少 2×表面深度才报告
+                depth = 0.0
+                count = 0
+                both = 0
+                for src, dst in ((a, b), (b, a)):
+                    src_hit = False
+                    for vi in by_bone[src]:
+                        loc, norm, _face, dist = bvhs[dst].find_nearest(verts[vi])
+                        if loc is None or dist > DELTA:
+                            continue
+                        pen = (loc - verts[vi]).dot(norm)
+                        if pen > DEPTH_EPS:
+                            count += 1
+                            src_hit = True
+                            depth = max(depth, pen)
+                    both += 1 if src_hit else 0
+                if count:
+                    hits[f"{a}|{b}"] = {
+                        "maxDepth": round(depth, 6),
+                        "verts": count,
+                        "bothDirections": both == 2,
+                    }
+        report[letter] = dict(sorted(hits.items(), key=lambda kv: -kv[1]["maxDepth"]))
+        ev.to_mesh_clear()
+        reset_pose(arm)
+    out = os.path.join(POC, "selfcheck.json")
+    with open(out, "w", encoding="utf-8") as f:
+        json.dump({
+            "source": "build_godot_hand_poc.py -- selfcheck；BVH 封闭网格穿透，深度单位米",
+            "letters": report,
+        }, f, ensure_ascii=False, indent=1)
+    worst = sorted(
+        ((l, pair, h["maxDepth"]) for l, rep in report.items() for pair, h in rep.items()),
+        key=lambda x: -x[2])[:10]
+    print("WROTE", out)
+    for l, pair, d in worst:
+        print(f"WORST {l} {pair} {d * 1000:.2f}mm")
+
+
 def main():
     argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else ["inspect"]
     arm, mesh = import_hand()
@@ -433,6 +623,10 @@ def main():
         cmd_inspect(arm, mesh)
     elif argv[0] == "landmarks":
         cmd_landmarks(arm, mesh)
+    elif argv[0] == "export-pose":
+        cmd_export_pose(arm, mesh)
+    elif argv[0] == "selfcheck":
+        cmd_selfcheck(arm, mesh)
     else:
         cmd_letters(arm, mesh)
 

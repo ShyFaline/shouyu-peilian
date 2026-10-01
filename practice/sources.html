@@ -44,12 +44,6 @@
     <article>
       <h2>4. 标准手示范</h2>
       <p>全部 32 个字母（26 个拉丁字母 + zh / ch / sh / ng / ê / ü）的正面静图在 <code>content/demos/GF0021.{字母ID}_front.png</code>，逐张来源与核对备注见 <code>content/demos/manifest.json</code>。缺图时练习页回退字体，不报错。</p>
-      <figure class="sources-figures">
-        <img src="./content/demos/GF0021.A_front.png" alt="字母 A 标准手示范渲染图" loading="lazy" />
-        <img src="./content/demos/GF0021.V_front.png" alt="字母 V 标准手示范渲染图" loading="lazy" />
-        <img src="./content/demos/GF0021.Y_front.png" alt="字母 Y 标准手示范渲染图" loading="lazy" />
-        <figcaption>示范示例：字母 A、V、Y 的正面静图。</figcaption>
-      </figure>
       <p>2026-10-01 起，32 张正面图全部改用 Godot XR Tools 右手网格 <code>hand_r.gltf</code>，按 <code>blender/build_godot_hand_poc.py</code> 的逐字母姿态表离线渲染；同一套姿态由 <code>blender/build_godot_hand_turntable.py</code> 逐字母渲染 24 帧转盘（<code>content/demos/rot/</code>，32 个字母全有），供练习页左右拖动查看手型各个角度。网格许可 <strong>CC0 1.0 Universal</strong>，作者 DigitalN8m4r3 aka Miodrag Sejic（2022），许可全文见 <code>blender/vendor/godot-xr-hands/LICENSE.md</code>。此前 Blender Studio Human Base Meshes 渲染的 U 旧图已随全量重渲退役。</p>
       <p>姿态与判定规则由本队按 GF 0021—2019 条文整理；渲染图只给学习者对照，不送进识别循环。</p>
       <p>上游：<a href="https://github.com/GodotVR/godot-xr-tools">Godot XR Tools</a>。</p>

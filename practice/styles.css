@@ -48,7 +48,7 @@ h1, h2, h3 { font-family: var(--serif); font-weight: 600; }
 .learning-path { padding: 42px 0 64px; border-top: 1px solid var(--line); scroll-margin-top: 24px; }
 .section-heading h2 { font-size: 30px; margin-bottom: 8px; }
 .section-heading > p:last-child { font-size: 14px; color: var(--muted); margin-bottom: 30px; }
-.path-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+.path-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; }
 .path-card { display: block; padding: 26px; background: #fcfaf480; border: 1px solid var(--line); border-radius: 4px; text-decoration: none; transition: background .2s, transform .2s; }
 a.path-card:hover { background: var(--panel); transform: translateY(-4px); }
 .step-number { display: block; color: var(--accent); font-size: 11px; letter-spacing: .1em; margin-bottom: 25px; }

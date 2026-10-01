@@ -1,6 +1,15 @@
 # 手模重建与候选诊断进度（示范资产席）
 
-更新日期：2026-09-24。执行依据：《项目总控与多模型执行Prompt-2026-09-24.md》Prompt 4。未 commit。基准 HEAD 仍 `9f5dfc732ad6fe7b37ace3b7ae8a198da022ba05`。
+更新日期：2026-10-01。
+
+## 0c. 32 字母全量重渲（2026-10-01，本机执行）
+
+- **范围**：letters.json 全部 32 个字母（含 ZH/CH/SH/NG/EH/UE）在 `build_godot_hand_poc.py` 的角度表（LETTERS/SPLAY/THUMB/ORIENT）下定稿，逐字母对照官方描述（letters.json `how`）+ REF 三联图视觉核对。本机 Blender 为 **5.2.1 LTS**（winget 安装，替代原 vendor 4.5 便携版）。
+- **姿态要点**：J 勾手 = PIP 折 90°（中节指背向上）；NG 小指横伸（roll 270 系下 splay 用 +14）；Y 拇指 swing −5 斜向上展开（对齐判定器 pointing.up）；E 三指横伸系（F/G/Z/ZH/CH/NG/EH）全部 `("back", 270)`。
+- **拇指 tuck 与判定器对齐**：判定器 thumb 卷曲 = 二维 IP 内角 ≤100°。TUCK_* 的 dist 分量加深到 −95…−100（golden 实测 92.5–97.0），否则 golden 回归门报 `thumb.not_curled`。
+- **产物**：`poc/GF0021.*_{front,side}.png` ×32；turntable 脚本改从本脚本导入姿态（原 candidate 依赖已解除），32 字母 × 24 帧 webp → `blender/candidates/godot-xr-rot/`；golden 8 个重导至 `practice/src/pose-goldens/`。`node practice/src/pose-goldens.test.js` 及其余三套测试全绿。
+- **已接入前端**：`practice/content/demos/` 32 张 front + `rot/` 32 组旋转帧，manifest/index 同步。U 的旋转帧限制解除（姿态层无争议，词汇层 pending_review 不变）。
+- **遗留**：I 图文冲突（文字食指 vs 插图小指，按文字渲染）待领域复核人终裁；ü 实机验证未做。
 
 ---
 

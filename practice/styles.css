@@ -135,6 +135,21 @@ details.letter-group > summary { font-size: 14px; color: var(--ink); font-weight
 .records-confirm p { margin: 0 0 10px; font-size: 14px; }
 .records-confirm button { margin-right: 8px; }
 .persist-note { color: var(--idle); font-size: 13px; }
+.quest-panel { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 14px; }
+.quest-panel .library-title { margin-top: 0; }
+.quest-bar { height: 6px; background: #e9e7de; border-radius: 3px; overflow: hidden; margin: 4px 0 12px; }
+.quest-bar-fill { height: 100%; width: 0; background: var(--ok); border-radius: 3px; transition: width .5s ease; }
+.quest-btns { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.quest-letter { position: relative; min-width: 46px; padding: 7px 11px; font-size: 15px; }
+.quest-letter.is-passed { border-color: var(--ok); color: var(--ok); background: #edf3ee; }
+.quest-letter.is-current { border-color: var(--ok); box-shadow: 0 0 0 2px #345d4e33; }
+.quest-letter.is-locked { opacity: .38; cursor: not-allowed; }
+.quest-letter[aria-pressed="true"] { background: var(--ok); color: white; border-color: var(--ok); }
+.quest-letter.is-passed::after { content: ""; position: absolute; top: -4px; right: -4px; width: 9px; height: 9px; border-radius: 50%; background: var(--ok); }
+.confetti-layer { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 40; }
+.confetti-layer i { position: absolute; top: -14px; left: var(--x); width: 8px; height: 14px; border-radius: 2px; background: hsl(var(--hue) 45% 55%); opacity: 0; }
+.confetti-layer.is-burst i { animation: confetti-fall 1.5s cubic-bezier(.2,.6,.35,1) var(--delay) forwards; }
+@keyframes confetti-fall { 0% { opacity: 0; transform: translate3d(0, -14px, 0) rotate(0deg); } 8% { opacity: 1; } 100% { opacity: 0; transform: translate3d(var(--dx), 106vh, 0) rotate(var(--rot)); } }
 .toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
 .toolbar label { display: flex; align-items: center; gap: 5px; font-size: 13px; color: var(--muted); margin-left: auto; }
 input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--ok); }

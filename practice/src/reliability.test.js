@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { webcrypto, createHash } from 'node:crypto';
 import { groupLetters, groupIdForStatus, letterAriaLabel, capabilityNote, confusionCluster } from './letterLibrary.js';
 import { PROGRESS_KEY } from './progress.js';
+import { QUEST_KEY } from './quest.js';
 const practice = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const pack = JSON.parse(readFileSync(resolve(practice, 'content/letters.json'), 'utf8'));
 const V = pack.letters.find(x => x.id === 'GF0021.V');
@@ -24,7 +25,7 @@ function hand() {
   return lm;
 }
 class Target {
-  constructor(){this.events=new Map();this.dataset={};this.children=[];this.disabled=false;this.textContent='';this.hidden=false;this.open=false;this.inert=false;this._attrs=Object.create(null);}
+  constructor(){this.events=new Map();this.dataset={};this.children=[];this.disabled=false;this.textContent='';this.hidden=false;this.open=false;this.inert=false;this._attrs=Object.create(null);this.style={setProperty(){}};const classes=new Set();this.classList={add:(...c)=>c.forEach(x=>classes.add(x)),remove:(...c)=>c.forEach(x=>classes.delete(x)),contains:c=>classes.has(c)};}
   addEventListener(n,f){if(!this.events.has(n))this.events.set(n,[]);this.events.get(n).push(f);}
   removeEventListener(n,f){this.events.set(n,(this.events.get(n)||[]).filter(x=>x!==f));}
   async emit(n){for(const f of this.events.get(n)||[])await f({target:this});}
@@ -42,7 +43,7 @@ function recordCount(h,id,mode){
 }
 async function harness(opts={}){
   const h={now:1000,epoch:1700000000000,raf:new Map(),seq:0,downloads:[],detects:0,painted:false,hands:[hand()],logs:[],streams:[],gumCalls:0,store:opts.store||new Map(),storageClears:0};
-  const ids=['video','overlay','status','verdict','hint','how','demo-stage','demo-image','demo-glyph','demo-label','capability','letter-btns','atlas-btns','demo-btns','practice-group','review-group','demo-group','practice-count','review-count','demo-count','similar-hints','similar-hints-text','similar-hint-btns','start-btn','stop-btn','mirror-toggle','export-toggle','export-btn','stage','demo-panel','test-panel','test-letter','test-scope','test-retry','test-next','test-back','test-letter-btns','test-outcome','mode-learn','mode-test','learn-eyebrow','learn-title','live-title','pass-seal','pass-seal-text','records','records-list','records-empty','persist-note','records-clear','records-clear-confirm','records-clear-yes','records-clear-no'];
+  const ids=['video','overlay','status','verdict','hint','how','demo-stage','demo-image','demo-glyph','demo-label','capability','letter-btns','atlas-btns','demo-btns','practice-group','review-group','demo-group','practice-count','review-count','demo-count','similar-hints','similar-hints-text','similar-hint-btns','start-btn','stop-btn','mirror-toggle','export-toggle','export-btn','stage','demo-panel','test-panel','test-letter','test-scope','test-retry','test-next','test-back','test-letter-btns','test-outcome','mode-learn','mode-test','mode-quest','quest-panel','quest-btns','quest-progress-text','quest-bar-fill','letter-library','confetti-layer','learn-eyebrow','learn-title','live-title','pass-seal','pass-seal-text','records','records-list','records-empty','persist-note','records-clear','records-clear-confirm','records-clear-yes','records-clear-no'];
   h.els=Object.fromEntries(ids.map(id=>[id,new Target()]));
   h.els['similar-hints'].hidden=true;
   for(const id of ['test-panel','pass-seal','records-clear-confirm','test-outcome','persist-note']) h.els[id].hidden=true;
@@ -51,7 +52,7 @@ async function harness(opts={}){
   Object.assign(h.els.video,{readyState:4,currentTime:0,videoWidth:640,videoHeight:480,srcObject:null,play:()=>h.play? h.play():Promise.resolve()});
   const document=new Target(); document.hidden=false;document.visibilityState='visible';
   document.getElementById=id=>h.els[id];
-  document.querySelectorAll=()=>[...h.els['letter-btns'].children,...h.els['atlas-btns'].children,...h.els['demo-btns'].children,...h.els['similar-hint-btns'].children,...h.els['test-letter-btns'].children];
+  document.querySelectorAll=()=>[...h.els['letter-btns'].children,...h.els['atlas-btns'].children,...h.els['demo-btns'].children,...h.els['similar-hint-btns'].children,...h.els['test-letter-btns'].children,...h.els['quest-btns'].children];
   document.createElement=tag=>{const el=new Target();el.click=()=>{if(tag==='a')h.downloads.push(el);else return el.emit('click');};return el;};
   h.document=document;
   h.newStream=()=>{const track=new Target();track.muted=false;track.readyState='live';track.stops=0;track.stop=()=>{track.stops++;track.readyState='ended';};const s={track,getTracks:()=>[track],getVideoTracks:()=>[track]};h.streams.push(s);return s;};
@@ -459,6 +460,67 @@ test('canRecordPass rejects zero/negative/fractional hold and status mismatch; r
  assert.equal(s.canRecordPass({...base,letter:{...V,practiceStatus:'accepted_practice'}}),false);
  await h.pass();
  assert.equal(recordCount(h,'GF0021.V','learn'),1);
+});
+function aHand(){
+ const p=(x,y)=>({x,y,z:0});
+ const lm=Array.from({length:21},()=>p(.5,.5));
+ lm[0]=p(.5,.9);
+ lm[1]=p(.42,.80);lm[2]=p(.42,.70);lm[3]=p(.42,.46);lm[4]=p(.42,.34);
+ for(const [m,x] of [[5,.44],[9,.50],[13,.56],[17,.62]]){lm[m]=p(x,.58);lm[m+1]=p(x,.53);lm[m+2]=p(x+.015,.62);lm[m+3]=p(x+.02,.68);}
+ return lm;
+}
+test('quest mode unlocks sequentially, persists separately, and celebrates passes',async()=>{
+ const store=new Map();
+ const h=await harness({search:'?mode=quest',store});await h.boot();
+ assert.equal(h.gumCalls,0,'quest boot must not start camera');
+ assert.equal(h.els['quest-panel'].hidden,false);
+ assert.equal(h.els['letter-library'].hidden,true);
+ assert.equal(h.els['demo-panel'].hidden,false,'quest shows demo');
+ assert.equal(h.els['learn-eyebrow'].textContent,'闯关 · 一关一个手型');
+ const btns=h.els['quest-btns'].children;
+ assert.deepEqual(btns.map(b=>b.dataset.id),['GF0021.A','GF0021.B','GF0021.I','GF0021.J','GF0021.L','GF0021.V','GF0021.W','GF0021.Y','GF0021.Z']);
+ assert.match(h.els['quest-progress-text'].textContent,/第 1 关 · 共 9 关/);
+ assert.equal(btns[0].disabled,false);
+ assert.ok(btns[1].disabled,'second level locked before A passes');
+ assert.equal(btns.filter(b=>!b.disabled).length,1,'only the current level is unlocked');
+ assert.equal(h.els['demo-label'].textContent,'字母 A','quest boots into level 1 (A)');
+ await btns[1].emit('click');
+ assert.equal(h.els['demo-label'].textContent,'字母 A','locked level cannot be selected');
+ h.hands=[aHand()];
+ await h.start();for(let i=0;i<6;i++)await h.tick();
+ assert.equal(h.els.verdict.dataset.state,'ok','A hand passes level 1');
+ assert.equal(h.els['pass-seal'].hidden,false);
+ assert.equal(h.els['confetti-layer'].classList.contains('is-burst'),true,'pass triggers celebration');
+ assert.equal(h.els['confetti-layer'].children.length>0,true,'confetti pieces spawned');
+ const stored=JSON.parse(store.get(QUEST_KEY));
+ assert.deepEqual(stored.passed,['GF0021.A']);
+ assert.equal(store.has(PROGRESS_KEY),false,'quest pass does not write practice records');
+ const after=h.els['quest-btns'].children;
+ assert.equal(after[1].disabled,false,'level 2 unlocked after A');
+ assert.match(h.els['quest-progress-text'].textContent,/第 2 关 · 共 9 关/);
+ assert.match(h.els.status.textContent,/已解锁第 2 关/);
+ for(let i=0;i<4;i++)await h.tick();
+ assert.deepEqual(JSON.parse(store.get(QUEST_KEY)).passed,['GF0021.A'],'replay does not double-record');
+ const h2=await harness({search:'?mode=quest',store});await h2.boot();
+ assert.equal(h2.els['quest-btns'].children[1].disabled,false,'progress survives reload');
+ assert.equal(h2.els['demo-label'].textContent,'字母 B','boot lands on first unfinished level');
+});
+test('quest module sanitizes stored progress and refuses out-of-order passes',async()=>{
+ const h=await harness(),q=await h.core('quest');
+ const letters=pack.letters;
+ const empty=q.emptyQuest();
+ let status=q.questStatus(empty,letters);
+ assert.equal(status.total,9);assert.equal(status.unlockedIndex,0);assert.equal(status.current.id,'GF0021.A');
+ assert.equal(q.markQuestPassed(empty,'GF0021.B',letters),false,'cannot pass level 2 before level 1');
+ assert.equal(q.markQuestPassed(empty,'GF0021.A',letters),true);
+ assert.equal(q.markQuestPassed(empty,'GF0021.A',letters),false,'duplicate pass is a no-op');
+ assert.equal(q.isQuestUnlocked(empty,'GF0021.B',letters),true);
+ assert.equal(q.isQuestUnlocked(empty,'GF0021.I',letters),false);
+ for(const bad of [null,'','not json','{"schemaVersion":99,"passed":["GF0021.A"]}','{"schemaVersion":1,"passed":"nope"}','{"schemaVersion":1,"passed":["GF0021.U","GF0021.A","GF0021.A"]}']){
+  const parsed=q.parseQuest(bad,letters);
+  assert.ok(Array.isArray(parsed.passed));
+ }
+ assert.deepEqual([...q.parseQuest('{"schemaVersion":1,"passed":["GF0021.A","GF0021.B"]}',letters).passed],['GF0021.A','GF0021.B']);
 });
 let passed=0,failed=0;
 for(const [name,fn] of tests){try{await fn();passed++;console.log('ok -',name);}catch(e){failed++;console.error('not ok -',name);console.error(e.stack);}}

@@ -4,12 +4,16 @@ const QUALITY_HINT = "暂时无法判断";
 
 export const MODE_LEARN = "learn";
 export const MODE_TEST = "test";
+export const MODE_QUEST = "quest";
 
 export function parsePracticeMode(search) {
   try {
     const raw = String(search ?? "");
     const query = raw.startsWith("?") ? raw.slice(1) : raw;
-    return new URLSearchParams(query).get("mode") === MODE_TEST ? MODE_TEST : MODE_LEARN;
+    const mode = new URLSearchParams(query).get("mode");
+    if (mode === MODE_TEST) return MODE_TEST;
+    if (mode === MODE_QUEST) return MODE_QUEST;
+    return MODE_LEARN;
   } catch {
     return MODE_LEARN;
   }
@@ -74,7 +78,7 @@ export function canRecordPass({ judged, letter, mode, attempt } = {}) {
   if (!judged.quality?.ok) return false;
   if (!isPracticeable(letter)) return false;
   if (judged.practiceStatus !== letter.practiceStatus) return false;
-  if (mode !== MODE_LEARN && mode !== MODE_TEST) return false;
+  if (mode !== MODE_LEARN && mode !== MODE_TEST && mode !== MODE_QUEST) return false;
   if (!attempt || attempt.recorded) return false;
   if (attempt.mode !== mode || attempt.letterId !== letter.id) return false;
   const frames = judged.hold?.frames;

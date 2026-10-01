@@ -9,6 +9,7 @@ import { groupLetters, capabilityNote, letterAriaLabel, confusionCluster, isPrac
 import { attachRotator, parseRotIndex } from "./src/rotator.js";
 import {
   MODE_LEARN,
+  MODE_QUEST,
   MODE_TEST,
   parsePracticeMode,
   isRecordsHash,
@@ -18,6 +19,14 @@ import {
   presentTestJudge,
   canRecordPass,
 } from "./src/practiceSession.js";
+import {
+  emptyQuest,
+  isQuestUnlocked,
+  loadQuest,
+  markQuestPassed,
+  questStatus,
+  saveQuest,
+} from "./src/quest.js";
 import {
   readStorage,
   loadProgress,
@@ -79,6 +88,13 @@ const els = {
   testOutcome: document.getElementById("test-outcome"),
   modeLearn: document.getElementById("mode-learn"),
   modeTest: document.getElementById("mode-test"),
+  modeQuest: document.getElementById("mode-quest"),
+  questPanel: document.getElementById("quest-panel"),
+  questBtns: document.getElementById("quest-btns"),
+  questProgressText: document.getElementById("quest-progress-text"),
+  questBarFill: document.getElementById("quest-bar-fill"),
+  letterLibrary: document.getElementById("letter-library"),
+  confettiLayer: document.getElementById("confetti-layer"),
   learnEyebrow: document.getElementById("learn-eyebrow"),
   learnTitle: document.getElementById("learn-title"),
   liveTitle: document.getElementById("live-title"),
@@ -120,6 +136,7 @@ let mode = MODE_LEARN;
 let attempt = startAttempt(null, null);
 let testOutcome = null;
 let progress = emptyProgress();
+let quest = emptyQuest();
 let persisted = true;
 let storage = null;
 let rotIndex = new Map();
@@ -185,7 +202,7 @@ function clearDemoVisuals() {
 
 function updateRotHint() {
   if (!els.demoRotHint) return;
-  els.demoRotHint.hidden = !(mode === MODE_LEARN && rotIndex.has(current?.id));
+  els.demoRotHint.hidden = !(mode !== MODE_TEST && rotIndex.has(current?.id));
 }
 
 function applyDemoRotator(letter) {
@@ -216,7 +233,7 @@ function showDemo(letter) {
   const src = demoSrc(letter);
   const probe = new Image();
   probe.onload = () => {
-    if (current?.id !== letter.id || mode !== MODE_LEARN) return;
+    if (current?.id !== letter.id || mode === MODE_TEST) return;
     els.demoImage.src = src;
     els.demoImage.alt = `${letter.title}标准手示范图`;
     els.demoStage.dataset.mode = "image";
@@ -272,6 +289,67 @@ function hideTestOutcome() {
   }
 }
 
+function renderQuest() {
+  if (!els.questBtns) return;
+  const status = questStatus(quest, letters);
+  els.questBtns.replaceChildren();
+  status.sequence.forEach((letter, index) => {
+    const passed = status.passedSet.has(letter.id);
+    const unlocked = index <= status.unlockedIndex;
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.dataset.id = letter.id;
+    btn.className = passed
+      ? "quest-letter is-passed"
+      : index === status.unlockedIndex
+        ? "quest-letter is-current"
+        : unlocked
+          ? "quest-letter"
+          : "quest-letter is-locked";
+    btn.textContent = passed ? `${letter.label} ✓` : letter.label;
+    btn.disabled = !unlocked;
+    btn.setAttribute("aria-pressed", current?.id === letter.id ? "true" : "false");
+    btn.setAttribute(
+      "aria-label",
+      passed
+        ? `第 ${index + 1} 关，${letter.title}，已通过`
+        : unlocked
+          ? `第 ${index + 1} 关，${letter.title}`
+          : `第 ${index + 1} 关，未解锁`,
+    );
+    if (unlocked) btn.addEventListener("click", () => selectLetter(letter));
+    els.questBtns.appendChild(btn);
+  });
+  if (els.questProgressText) {
+    els.questProgressText.textContent = status.complete
+      ? `全部通过 · 共 ${status.total} 关`
+      : `第 ${status.unlockedIndex + 1} 关 · 共 ${status.total} 关`;
+  }
+  if (els.questBarFill) {
+    const pct = status.total ? Math.round((status.passedCount / status.total) * 100) : 0;
+    els.questBarFill.style.width = `${pct}%`;
+  }
+}
+
+function celebrateQuestPass(finalPass) {
+  if (!els.confettiLayer) return;
+  const layer = els.confettiLayer;
+  layer.replaceChildren();
+  const count = finalPass ? 48 : 24;
+  for (let i = 0; i < count; i += 1) {
+    const piece = document.createElement("i");
+    piece.style.setProperty("--x", `${Math.random() * 100}%`);
+    piece.style.setProperty("--dx", `${(Math.random() - 0.5) * 240}px`);
+    piece.style.setProperty("--rot", `${Math.random() * 720 - 360}deg`);
+    piece.style.setProperty("--delay", `${(Math.random() * 0.25).toFixed(2)}s`);
+    piece.style.setProperty("--hue", String(Math.floor(Math.random() * 360)));
+    layer.appendChild(piece);
+  }
+  layer.classList.remove("is-burst");
+  void layer.offsetWidth;
+  layer.classList.add("is-burst");
+}
+
 function showTestOutcome() {
   if (!els.testOutcome || !testOutcome) return;
   els.testOutcome.hidden = false;
@@ -302,7 +380,7 @@ function renderSimilarHints(letter) {
   els.similarHints.open = false;
   els.similarHintsText.textContent = "";
   els.similarHintBtns.replaceChildren();
-  if (mode === MODE_TEST) {
+  if (mode !== MODE_LEARN) {
     els.similarHints.hidden = true;
     return;
   }
@@ -322,6 +400,7 @@ function renderSimilarHints(letter) {
 
 function applyModeUi() {
   const testing = mode === MODE_TEST;
+  const questing = mode === MODE_QUEST;
   if (els.demoPanel) {
     els.demoPanel.hidden = testing;
     els.demoPanel.inert = testing;
@@ -330,15 +409,31 @@ function applyModeUi() {
   if (els.demoStage) els.demoStage.hidden = testing;
   if (els.how) els.how.hidden = testing;
   if (els.capability) els.capability.hidden = testing;
-  if (els.modeLearn) els.modeLearn.setAttribute("aria-pressed", testing ? "false" : "true");
-  if (els.modeTest) els.modeTest.setAttribute("aria-pressed", testing ? "true" : "false");
-  if (els.learnEyebrow) els.learnEyebrow.textContent = testing ? "自测 · 只核静态手型" : "跟着练 · 一次一个手型";
-  if (els.learnTitle) els.learnTitle.textContent = testing ? "不看示范，自己试试。" : "看清楚，再试一试。";
+  if (els.letterLibrary) els.letterLibrary.hidden = questing;
+  if (els.questPanel) els.questPanel.hidden = !questing;
+  if (els.modeLearn) els.modeLearn.setAttribute("aria-pressed", String(mode === MODE_LEARN));
+  if (els.modeTest) els.modeTest.setAttribute("aria-pressed", String(testing));
+  if (els.modeQuest) els.modeQuest.setAttribute("aria-pressed", String(questing));
+  if (els.learnEyebrow) {
+    els.learnEyebrow.textContent = testing
+      ? "自测 · 只核静态手型"
+      : questing
+        ? "闯关 · 一关一个手型"
+        : "跟着练 · 一次一个手型";
+  }
+  if (els.learnTitle) {
+    els.learnTitle.textContent = testing
+      ? "不看示范，自己试试。"
+      : questing
+        ? "按顺序闯关，过了这关开下关。"
+        : "看清楚，再试一试。";
+  }
   if (els.liveTitle) els.liveTitle.textContent = testing ? "02 / 自己摆手" : "02 / 动手试试";
   if (testing) {
     clearDemoVisuals();
     if (els.similarHints) els.similarHints.hidden = true;
   }
+  if (questing) renderQuest();
 }
 
 function practiceableLetters() {
@@ -357,6 +452,7 @@ function beginAttemptFor(letter) {
 function selectLetter(letter) {
   if (!letter) return;
   if (mode === MODE_TEST && !isPracticeable(letter)) return;
+  if (mode === MODE_QUEST && !isQuestUnlocked(quest, letter.id, letters)) return;
   if (letter.id === current?.id) {
     syncLetterButtons(letter.id);
     return;
@@ -367,8 +463,8 @@ function selectLetter(letter) {
   beginAttemptFor(letter);
   invalidateFrame("target_changed");
   lastSnapshot = null;
-  if (mode === MODE_LEARN) showDemo(letter);
-  else clearDemoVisuals();
+  if (mode === MODE_TEST) clearDemoVisuals();
+  else showDemo(letter);
   els.demoLabel.textContent = letter.title;
   els.capability.textContent = capabilityNote(letter);
   els.how.textContent = letter.how;
@@ -391,7 +487,7 @@ function addLetterButton(letter, parent) {
 }
 
 function setMode(next) {
-  if (next !== MODE_LEARN && next !== MODE_TEST) return;
+  if (next !== MODE_LEARN && next !== MODE_TEST && next !== MODE_QUEST) return;
   if (next === mode) return;
   stopLive();
   mode = next;
@@ -408,16 +504,29 @@ function setMode(next) {
       attempt = startAttempt(mode, current?.id || null);
       presentLetterIdle(current);
     }
+  } else if (mode === MODE_QUEST && !isQuestUnlocked(quest, current?.id, letters)) {
+    const nextLetter = questStatus(quest, letters).current;
+    if (nextLetter) selectLetter(nextLetter);
+    else {
+      attempt = startAttempt(mode, current?.id || null);
+      presentLetterIdle(current);
+    }
   } else if (current) {
     attempt = startAttempt(mode, current.id);
-    if (mode === MODE_LEARN) showDemo(current);
-    else clearDemoVisuals();
+    if (mode === MODE_TEST) clearDemoVisuals();
+    else showDemo(current);
     updateTestPrompt(current);
     presentLetterIdle(current);
     renderSimilarHints(current);
     syncLetterButtons(current.id);
   }
-  setStatus(mode === MODE_TEST ? "自测不看示范。准备好后再打开摄像头。" : "先看示范，准备好后再打开摄像头。");
+  setStatus(
+    mode === MODE_TEST
+      ? "自测不看示范。准备好后再打开摄像头。"
+      : mode === MODE_QUEST
+        ? "闯关按顺序来。通过当前关，下一关才会解锁。"
+        : "先看示范，准备好后再打开摄像头。",
+  );
 }
 
 function retryCurrent() {
@@ -475,6 +584,23 @@ function renderRecords() {
 function notePass(judged) {
   if (!canRecordPass({ judged, letter: current, mode, attempt })) return;
   attempt.recorded = true;
+  if (mode === MODE_QUEST) {
+    if (!markQuestPassed(quest, current.id, letters)) return;
+    attempt.recorded = false;
+    const status = questStatus(quest, letters);
+    persisted = saveQuest(storage, quest);
+    showPassSeal(judged);
+    renderQuest();
+    celebrateQuestPass(status.complete);
+    setStatus(
+      status.complete
+        ? "全部关卡通过，厉害！"
+        : `过关！已解锁第 ${status.unlockedIndex + 1} 关：${status.current.title}`,
+      "ok",
+    );
+    renderRecords();
+    return;
+  }
   progress = recordPass(progress, {
     letterId: current.id,
     mode,
@@ -612,6 +738,12 @@ async function loop() {
     }
     applyJudge(judged);
     if (judged.decision === "pass" && judged.quality.ok) notePass(judged);
+    if (mode === MODE_QUEST && judged.decision === "pass" && judged.quality.ok) {
+      applyJudge({
+        ...judged,
+        speech: { title: "过关！", hint: "这一关记为通过，下一关已解锁。" },
+      });
+    }
   } catch (err) {
     console.warn("detect loop", err);
     invalidateFrame("exception");
@@ -785,7 +917,7 @@ async function main() {
     .then((r) => (r && r.ok ? r.json() : null))
     .then((raw) => {
       rotIndex = parseRotIndex(raw);
-      if (mode === MODE_LEARN && rotIndex.has(demoLetterId)) applyDemoRotator(demoLetterId ? byId.get(demoLetterId) : null);
+      if (mode !== MODE_TEST && rotIndex.has(demoLetterId)) applyDemoRotator(demoLetterId ? byId.get(demoLetterId) : null);
       updateRotHint();
     })
     .catch(() => { /* 无旋转帧时示范区保持静态图 */ });
@@ -799,6 +931,7 @@ async function main() {
   const loaded = loadProgress(storage, letters);
   progress = loaded.progress;
   persisted = loaded.persisted;
+  quest = loadQuest(storage, letters);
 
   const byId = new Map(letters.map((letter) => [letter.id, letter]));
   const grouped = groupLetters(letters);
@@ -821,9 +954,17 @@ async function main() {
   hideTestOutcome();
   const initial = mode === MODE_TEST
     ? (byId.get("GF0021.A") && isPracticeable(byId.get("GF0021.A")) ? byId.get("GF0021.A") : grouped.practice[0])
-    : (byId.get("GF0021.A") || letters[0]);
+    : mode === MODE_QUEST
+      ? (questStatus(quest, letters).current || questStatus(quest, letters).sequence[0])
+      : (byId.get("GF0021.A") || letters[0]);
   if (initial) selectLetter(initial);
-  setStatus(mode === MODE_TEST ? "自测不看示范。准备好后再打开摄像头。" : "先看示范，准备好后再打开摄像头。");
+  setStatus(
+    mode === MODE_TEST
+      ? "自测不看示范。准备好后再打开摄像头。"
+      : mode === MODE_QUEST
+        ? "闯关按顺序来。通过当前关，下一关才会解锁。"
+        : "先看示范，准备好后再打开摄像头。",
+  );
   applyMirror();
   setLiveButtons(false);
   renderRecords();
@@ -870,6 +1011,7 @@ async function main() {
   if (els.stopBtn) els.stopBtn.addEventListener("click", stopLive);
   if (els.modeLearn) els.modeLearn.addEventListener("click", () => setMode(MODE_LEARN));
   if (els.modeTest) els.modeTest.addEventListener("click", () => setMode(MODE_TEST));
+  if (els.modeQuest) els.modeQuest.addEventListener("click", () => setMode(MODE_QUEST));
   if (els.testBack) els.testBack.addEventListener("click", () => setMode(MODE_LEARN));
   if (els.testRetry) els.testRetry.addEventListener("click", retryCurrent);
   if (els.testNext) els.testNext.addEventListener("click", selectNextPracticeable);

@@ -22,6 +22,7 @@
         <div class="mode-switch" role="group" aria-label="练习模式">
           <button type="button" id="mode-learn" aria-pressed="true">跟练</button>
           <button type="button" id="mode-test" aria-pressed="false">自测</button>
+          <button type="button" id="mode-quest" aria-pressed="false">闯关</button>
         </div>
       </div>
       <p id="status" class="status" role="status">先看示范，准备好后再打开摄像头。</p>
@@ -34,6 +35,13 @@
         <h2 id="demo-label" class="demo-label">正在准备字母…</h2>
         <p id="capability" class="capability-note"></p>
         <p id="how" class="how"></p>
+        <section id="quest-panel" class="quest-panel" hidden>
+          <h3 class="library-title">闯关路线</h3>
+          <p id="quest-progress-text" class="letter-group-note">第 1 关 · 共 9 关</p>
+          <div class="quest-bar" aria-hidden="true"><div id="quest-bar-fill" class="quest-bar-fill"></div></div>
+          <div id="quest-btns" class="letter-btns quest-btns"></div>
+          <p class="letter-group-note">按顺序一个个来，通过当前关才会解锁下一关。通关会有小庆祝。</p>
+        </section>
         <section id="letter-library" aria-labelledby="library-title">
           <h3 id="library-title" class="library-title">选一个字母</h3>
           <section id="practice-group" class="letter-group" aria-labelledby="practice-group-title">
@@ -97,6 +105,7 @@
     </section>
     <noscript><p class="panel">学习页面需要启用 JavaScript 才能加载字母与练习提示。<a href="./index.html">返回首页</a></p></noscript>
   </main>
+  <div id="confetti-layer" class="confetti-layer" aria-hidden="true"></div>
   <footer class="site-footer"><span>一步一步，慢慢来。</span><a href="./sources.html">关于、隐私与来源</a></footer>
   <script type="module" src="./app.js"></script>
 </body>

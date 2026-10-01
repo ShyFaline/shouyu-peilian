@@ -1,6 +1,6 @@
 """GF0021 手模转盘帧（练习页拖动旋转用）。
 
-复用 build_godot_hand_candidate.py 的姿态与机位定义（该文件有 __main__ guard）。
+复用 build_godot_hand_poc.py 的姿态与机位定义（该文件有 __main__ guard）。
 输出候选：blender/candidates/godot-xr-rot/{letterId}/{NN}.webp + metadata.json。
 不写 practice/content/demos：目检通过后由主代理复制接入。
 
@@ -28,18 +28,19 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, ROOT)
 
 _SPEC = importlib.util.spec_from_file_location(
-    "godot_hand_candidate", os.path.join(ROOT, "build_godot_hand_candidate.py")
+    "godot_hand_poc", os.path.join(ROOT, "build_godot_hand_poc.py")
 )
-cand = importlib.util.module_from_spec(_SPEC)
-_SPEC.loader.exec_module(cand)
-poc = cand.poc
+poc = importlib.util.module_from_spec(_SPEC)
+_SPEC.loader.exec_module(poc)
 
 OUT = os.path.join(ROOT, "candidates", "godot-xr-rot")
 FRAMES = 24
 SIZE = 384
 WEBP_QUALITY = 80
-# U 内容争议未核定、仍是旧模图，不生成旋转帧；J/Z 无模型（界面走字形回退）。
-LETTERS = ("A", "B", "I", "L", "V", "W", "Y")
+# 32 字母全量（对齐 practice/content/letters.json 的 id 顺序）。
+LETTERS = ("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
+           "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
+           "ZH", "CH", "SH", "NG", "EH", "UE")
 
 
 def check_webp(path):
@@ -55,18 +56,17 @@ def check_webp(path):
     return nbytes
 
 
-def render_turntable(sc, arm, mesh, letter, ax, outdir):
+def render_turntable(sc, arm, mesh, letter, palm_normal, finger_up, axis, outdir):
     os.makedirs(outdir, exist_ok=True)
-    cand.apply_pose(arm, letter, ax)
-    cand.check_bones_reasonable(arm, letter)
+    poc.apply_pose(arm, letter, palm_normal, finger_up, axis)
     lo, hi = poc.world_bbox(mesh)
     span = (hi - lo).length
     if not math.isfinite(span) or span < 0.05 or span > 0.8:
         raise RuntimeError(f"{letter} bbox span unreasonable: {span}")
     center = (lo + hi) / 2
     dist = span * 1.35
-    front = cand.front_view_dir(letter, ax)
-    up = ax["finger_up"]
+    front = poc.front_view_dir(letter, palm_normal, finger_up)
+    up = poc.view_up(letter, front, finger_up)
     total = 0
     for k in range(FRAMES):
         direction = Matrix.Rotation(math.radians(-k * 360.0 / FRAMES), 3, up) @ front
@@ -82,27 +82,30 @@ def render_turntable(sc, arm, mesh, letter, ax, outdir):
 
 def main():
     os.makedirs(OUT, exist_ok=True)
-    if not os.path.isfile(cand.GLTF):
-        raise SystemExit(f"missing input glTF: {cand.GLTF}")
+    gltf = os.path.join(poc.VENDOR, "hand_r.gltf")
+    if not os.path.isfile(gltf):
+        raise SystemExit(f"missing input glTF: {gltf}")
     arm, mesh = poc.import_hand()
     for mod in mesh.modifiers:
         if mod.type == "ARMATURE" and hasattr(mod, "use_preserve_volume"):
             mod.use_preserve_volume = True
-    ax = cand.axes(arm)
+    _center, palm_normal, finger_up = poc.palm_frame(arm)
+    axis = poc.flex_axis()
     sc = poc.setup_render(size=SIZE)
     sc.render.image_settings.file_format = "WEBP"
     sc.render.image_settings.quality = WEBP_QUALITY
     sizes = {}
     for letter in LETTERS:
         outdir = os.path.join(OUT, f"GF0021.{letter}")
-        sizes[f"GF0021.{letter}"] = render_turntable(sc, arm, mesh, letter, ax, outdir)
+        sizes[f"GF0021.{letter}"] = render_turntable(
+            sc, arm, mesh, letter, palm_normal, finger_up, axis, outdir)
         print(f"OK GF0021.{letter} {FRAMES} frames {sizes[f'GF0021.{letter}']} B total")
     meta = {
         "id": "godot-xr-rot",
         "generated_on": str(date.today()),
         "purpose": "练习页拖动旋转帧候选；目检通过后才复制进 practice/content/demos/rot/",
         "generator": "blender/build_godot_hand_turntable.py",
-        "posesFrom": "blender/build_godot_hand_candidate.py",
+        "posesFrom": "blender/build_godot_hand_poc.py",
         "source": {
             "mesh": "blender/vendor/godot-xr-hands/hand_r.gltf",
             "license": "CC0 1.0 Universal",
@@ -119,7 +122,6 @@ def main():
         "letters": {lid: FRAMES for lid in sizes},
         "bytes": sizes,
         "known_limits": [
-            "U 内容争议未核定，仍用旧模正面图，无旋转帧。",
             "V/W 拇指与远节近似接触、非精确贴面（继承 godot-xr-v2 结论）。",
             "Workbench 预览材质，不是最终片场灯光。",
         ],

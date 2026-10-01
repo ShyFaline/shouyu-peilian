@@ -112,7 +112,7 @@
       "sourcePng": "blender/vendor/godot-xr-hands/poc/GF0021.A_front.png",
       "license": "CC0 1.0 Universal",
       "inspection": "pass",
-      "notes": "新姿态表全量重渲，正侧均自然，与 letters.json 描述一致。2026-10-01 穿模修复：原姿态四指 FIST 全握 + 拇指 (-80,-10,0,0) 在旋转视角下拇指埋入拳心（胶囊 overlap 0.94、BVH 双向穿透 8mm）；改为 Index/Middle(30,88,88,65) Ring(28,92,85,45) Little(25,92,85,60) + 拇指 (-2,0,15,0)，判定器 2D 投影角四指 ≤135（<142 阈值）通过 golden 恒等矩阵，胶囊门禁清零；残留 Ring 远节↔小指掌骨 7.5mm 双向穿透为全局性问题，列入后续修复（见 blender/selfcheck.json）。"
+      "notes": "新姿态表全量重渲，正侧均自然，与 letters.json 描述一致。2026-10-01 穿模修复：原姿态四指 FIST 全握 + 拇指 (-80,-10,0,0) 在旋转视角下拇指埋入拳心（胶囊 overlap 0.94、BVH 双向穿透 8mm）；改为 Index/Middle(30,88,88,65) Ring(28,92,85,45) Little(25,92,85,60) + 拇指 (-2,0,15,0)，判定器 2D 投影角四指 ≤135（<142 阈值）通过 golden 恒等矩阵，胶囊门禁清零；残留 Ring 远节↔小指掌骨 7.5mm 双向穿透为全局性问题，列入后续修复（见 blender/selfcheck.json）。2026-10-01 二次调整：pointing 容差收窄至 ±30° 前发现旧拇指投影偏正上 49°，改为拇指 (-20,0,-15,0)（swing 外摆 20° + 近节回勾 15°），投影倾角降至 0.4°，胶囊门禁仍清零，转盘帧同步重渲。"
     },
     "GF0021.B": {
       "file": "GF0021.B_front.png",

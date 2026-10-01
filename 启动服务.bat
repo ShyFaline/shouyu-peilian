@@ -12,17 +12,19 @@ echo ============================================
 echo.
 
 rem Open the browser 1 second later, after the server is up.
-start "" cmd /c "timeout /t 1 >nul && start http://localhost:%PORT%/"
+start "" cmd /c "timeout /t 1 >/dev/null && start http://localhost:%PORT%/"
 
-where python >nul 2>nul && (
-  python -m http.server %PORT%
+rem serve.py disables browser caching; plain http.server lets browsers
+rem mix old/new JS module files after updates and the page breaks.
+where python >/dev/null 2>/dev/null && (
+  python serve.py %PORT%
   goto :eof
 )
-where py >nul 2>nul && (
-  py -m http.server %PORT%
+where py >/dev/null 2>/dev/null && (
+  py serve.py %PORT%
   goto :eof
 )
-where npx >nul 2>nul && (
+where npx >/dev/null 2>/dev/null && (
   npx --yes http-server -p %PORT% -c-1
   goto :eof
 )

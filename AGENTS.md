@@ -21,4 +21,4 @@
 
 ## 本地运行
 
-双击根目录 `启动服务.bat`（或 `cd practice && python -m http.server 8000`），访问 <http://localhost:8000/>。
+双击根目录 `启动服务.bat`，访问 <http://localhost:8000/>。脚本走 `practice/serve.py`（等价 `python -m http.server`，但响应带 `Cache-Control: no-cache`，避免浏览器混用新旧 JS 模块导致页面卡死）。

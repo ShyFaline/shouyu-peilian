@@ -11,7 +11,7 @@ export const EXTENDED_DEG = 142;
 export const CURLED_DEG = 100;
 export const TOGETHER_DEG = 22;
 export const APART_DEG = 24;
-export const WIDE_SIDE_RATIO = 1.9; // |dx| > |dy|*1.9 才算侧向；斜上/斜下仍算朝上/朝下
+export const WIDE_SIDE_RATIO = 0.577; // tan(30°)：|dx| > |dy|*0.577 即偏出正上/正下 ±30° 锥，算侧向
 
 export const SPREAD_PAIRS = [
   ["index", "middle"],

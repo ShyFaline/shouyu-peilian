@@ -127,8 +127,6 @@ details.letter-group > summary { font-size: 14px; color: var(--ink); font-weight
 .pass-seal-mark { display: grid; place-items: center; width: 46px; height: 46px; flex-shrink: 0; border: 2px solid var(--accent); border-radius: 50%; color: var(--accent); font-size: 15px; font-weight: 600; letter-spacing: .08em; text-indent: .08em; line-height: 1; transform: rotate(-10deg); box-shadow: inset 0 0 0 2px #edf3ee, inset 0 0 0 3.5px #a9513c99; }
 .pass-seal[data-animate="true"] .pass-seal-mark { animation: seal-in .42s ease-out; }
 @keyframes seal-in { from { transform: scale(1.5) rotate(-18deg); opacity: 0; } to { transform: scale(1) rotate(-10deg); opacity: 1; } }
-.test-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 12px; }
-.test-outcome { margin: 16px 0 0; padding: 10px 12px; border: 1px dashed var(--ok); color: var(--ok); font-size: 14px; }
 .records { margin: 0 0 48px; }
 .records-list { display: grid; gap: 8px; }
 .records-list div { padding: 10px 12px; background: #f4f1e6; font-size: 14px; }

@@ -10,13 +10,10 @@ import { attachRotator, parseRotIndex } from "./src/rotator.js";
 import {
   MODE_LEARN,
   MODE_QUEST,
-  MODE_TEST,
   parsePracticeMode,
   isRecordsHash,
   startAttempt,
   isSameAttempt,
-  testScopeText,
-  presentTestJudge,
   canRecordPass,
 } from "./src/practiceSession.js";
 import {
@@ -78,16 +75,7 @@ const els = {
   exportBtn: document.getElementById("export-btn"),
   stage: document.getElementById("stage"),
   demoPanel: document.getElementById("demo-panel"),
-  testPanel: document.getElementById("test-panel"),
-  testLetter: document.getElementById("test-letter"),
-  testScope: document.getElementById("test-scope"),
-  testRetry: document.getElementById("test-retry"),
-  testNext: document.getElementById("test-next"),
-  testBack: document.getElementById("test-back"),
-  testLetterBtns: document.getElementById("test-letter-btns"),
-  testOutcome: document.getElementById("test-outcome"),
   modeLearn: document.getElementById("mode-learn"),
-  modeTest: document.getElementById("mode-test"),
   modeQuest: document.getElementById("mode-quest"),
   questPanel: document.getElementById("quest-panel"),
   questBtns: document.getElementById("quest-btns"),
@@ -97,7 +85,6 @@ const els = {
   confettiLayer: document.getElementById("confetti-layer"),
   learnEyebrow: document.getElementById("learn-eyebrow"),
   learnTitle: document.getElementById("learn-title"),
-  liveTitle: document.getElementById("live-title"),
   passSeal: document.getElementById("pass-seal"),
   passSealText: document.getElementById("pass-seal-text"),
   records: document.getElementById("records"),
@@ -134,7 +121,6 @@ let modelPromise = null;
 let trackCleanup = [];
 let mode = MODE_LEARN;
 let attempt = startAttempt(null, null);
-let testOutcome = null;
 let progress = emptyProgress();
 let quest = emptyQuest();
 let persisted = true;
@@ -175,14 +161,10 @@ function setStatus(text, kind) {
   els.status.dataset.kind = kind || "";
 }
 
-function presentForMode(judged) {
-  return mode === MODE_TEST ? presentTestJudge(judged) : presentJudge(judged);
-}
-
 function setVerdict(decision, issues, extra) {
   const presented = extra && extra.title
     ? extra
-    : presentForMode({ decision, issues, practiceStatus: current?.practiceStatus });
+    : presentJudge({ decision, issues, practiceStatus: current?.practiceStatus });
   els.verdict.textContent = presented.title;
   els.verdict.dataset.state = presented.state || "idle";
   els.hint.textContent = presented.hint || "";
@@ -192,17 +174,9 @@ function demoSrc(letter) {
   return `./content/demos/${letter.id}_front.png`;
 }
 
-function clearDemoVisuals() {
-  applyDemoRotator(null);
-  els.demoGlyph.textContent = "";
-  els.demoStage.dataset.mode = "font";
-  els.demoImage.removeAttribute("src");
-  els.demoImage.alt = "";
-}
-
 function updateRotHint() {
   if (!els.demoRotHint) return;
-  els.demoRotHint.hidden = !(mode !== MODE_TEST && rotIndex.has(current?.id));
+  els.demoRotHint.hidden = !rotIndex.has(current?.id);
 }
 
 function applyDemoRotator(letter) {
@@ -233,7 +207,7 @@ function showDemo(letter) {
   const src = demoSrc(letter);
   const probe = new Image();
   probe.onload = () => {
-    if (current?.id !== letter.id || mode === MODE_TEST) return;
+    if (current?.id !== letter.id) return;
     els.demoImage.src = src;
     els.demoImage.alt = `${letter.title}标准手示范图`;
     els.demoStage.dataset.mode = "image";
@@ -253,14 +227,6 @@ function presentLetterIdle(letter) {
     setVerdict("blocked", [], { title: "暂不判定", state: "idle", hint: "" });
     return;
   }
-  if (mode === MODE_TEST) {
-    setVerdict("fail", [], {
-      title: "比出这个手型",
-      state: "idle",
-      hint: "只核静态手型。准备好后再打开摄像头。",
-    });
-    return;
-  }
   const idle = presentJudge({
     decision: "blocked",
     practiceStatus: letter.practiceStatus,
@@ -278,14 +244,6 @@ function syncLetterButtons(letterId) {
     const on = btn.dataset.id === letterId;
     btn.dataset.active = on ? "true" : "false";
     btn.setAttribute("aria-pressed", on ? "true" : "false");
-  }
-}
-
-function hideTestOutcome() {
-  testOutcome = null;
-  if (els.testOutcome) {
-    els.testOutcome.hidden = true;
-    els.testOutcome.textContent = "";
   }
 }
 
@@ -350,12 +308,6 @@ function celebrateQuestPass(finalPass) {
   layer.classList.add("is-burst");
 }
 
-function showTestOutcome() {
-  if (!els.testOutcome || !testOutcome) return;
-  els.testOutcome.hidden = false;
-  els.testOutcome.textContent = "本题已通过静态手型。可重试或选下一题。";
-}
-
 function hidePassSeal() {
   if (!els.passSeal) return;
   els.passSeal.hidden = true;
@@ -369,11 +321,6 @@ function showPassSeal(judged) {
   els.passSeal.hidden = false;
   els.passSeal.dataset.animate = "true";
   els.passSealText.textContent = judged?.motion ? "记下一次手型与动作通过" : "记下一次静态通过";
-}
-
-function updateTestPrompt(letter) {
-  if (els.testLetter) els.testLetter.textContent = letter?.title || "字母";
-  if (els.testScope) els.testScope.textContent = testScopeText(letter);
 }
 
 function renderSimilarHints(letter) {
@@ -399,45 +346,22 @@ function renderSimilarHints(letter) {
 }
 
 function applyModeUi() {
-  const testing = mode === MODE_TEST;
   const questing = mode === MODE_QUEST;
-  if (els.demoPanel) {
-    els.demoPanel.hidden = testing;
-    els.demoPanel.inert = testing;
-  }
-  if (els.testPanel) els.testPanel.hidden = !testing;
-  if (els.demoStage) els.demoStage.hidden = testing;
-  if (els.how) els.how.hidden = testing;
-  if (els.capability) els.capability.hidden = testing;
   if (els.letterLibrary) els.letterLibrary.hidden = questing;
   if (els.questPanel) els.questPanel.hidden = !questing;
   if (els.modeLearn) els.modeLearn.setAttribute("aria-pressed", String(mode === MODE_LEARN));
-  if (els.modeTest) els.modeTest.setAttribute("aria-pressed", String(testing));
   if (els.modeQuest) els.modeQuest.setAttribute("aria-pressed", String(questing));
   if (els.learnEyebrow) {
-    els.learnEyebrow.textContent = testing
-      ? "自测 · 只核静态手型"
-      : questing
-        ? "闯关 · 一关一个手型"
-        : "跟着练 · 一次一个手型";
+    els.learnEyebrow.textContent = questing
+      ? "闯关 · 一关一个手型"
+      : "跟着练 · 一次一个手型";
   }
   if (els.learnTitle) {
-    els.learnTitle.textContent = testing
-      ? "不看示范，自己试试。"
-      : questing
-        ? "按顺序闯关，过了这关开下关。"
-        : "看清楚，再试一试。";
-  }
-  if (els.liveTitle) els.liveTitle.textContent = testing ? "02 / 自己摆手" : "02 / 动手试试";
-  if (testing) {
-    clearDemoVisuals();
-    if (els.similarHints) els.similarHints.hidden = true;
+    els.learnTitle.textContent = questing
+      ? "按顺序闯关，过了这关开下关。"
+      : "看清楚，再试一试。";
   }
   if (questing) renderQuest();
-}
-
-function practiceableLetters() {
-  return letters.filter(isPracticeable);
 }
 
 function beginAttemptFor(letter) {
@@ -451,24 +375,20 @@ function beginAttemptFor(letter) {
 
 function selectLetter(letter) {
   if (!letter) return;
-  if (mode === MODE_TEST && !isPracticeable(letter)) return;
   if (mode === MODE_QUEST && !isQuestUnlocked(quest, letter.id, letters)) return;
   if (letter.id === current?.id) {
     syncLetterButtons(letter.id);
     return;
   }
   current = letter;
-  hideTestOutcome();
   hidePassSeal();
   beginAttemptFor(letter);
   invalidateFrame("target_changed");
   lastSnapshot = null;
-  if (mode === MODE_TEST) clearDemoVisuals();
-  else showDemo(letter);
+  showDemo(letter);
   els.demoLabel.textContent = letter.title;
   els.capability.textContent = capabilityNote(letter);
   els.how.textContent = letter.how;
-  updateTestPrompt(letter);
   presentLetterIdle(letter);
   renderSimilarHints(letter);
   syncLetterButtons(letter.id);
@@ -487,24 +407,16 @@ function addLetterButton(letter, parent) {
 }
 
 function setMode(next) {
-  if (next !== MODE_LEARN && next !== MODE_TEST && next !== MODE_QUEST) return;
+  if (next !== MODE_LEARN && next !== MODE_QUEST) return;
   if (next === mode) return;
   stopLive();
   mode = next;
-  hideTestOutcome();
   hidePassSeal();
   lastSnapshot = null;
   resetHold(hold);
   resetMotion(motion);
   applyModeUi();
-  if (mode === MODE_TEST && !isPracticeable(current)) {
-    const nextLetter = practiceableLetters()[0];
-    if (nextLetter) selectLetter(nextLetter);
-    else {
-      attempt = startAttempt(mode, current?.id || null);
-      presentLetterIdle(current);
-    }
-  } else if (mode === MODE_QUEST && !isQuestUnlocked(quest, current?.id, letters)) {
+  if (mode === MODE_QUEST && !isQuestUnlocked(quest, current?.id, letters)) {
     const nextLetter = questStatus(quest, letters).current;
     if (nextLetter) selectLetter(nextLetter);
     else {
@@ -513,39 +425,16 @@ function setMode(next) {
     }
   } else if (current) {
     attempt = startAttempt(mode, current.id);
-    if (mode === MODE_TEST) clearDemoVisuals();
-    else showDemo(current);
-    updateTestPrompt(current);
+    showDemo(current);
     presentLetterIdle(current);
     renderSimilarHints(current);
     syncLetterButtons(current.id);
   }
   setStatus(
-    mode === MODE_TEST
-      ? "自测不看示范。准备好后再打开摄像头。"
-      : mode === MODE_QUEST
-        ? "闯关按顺序来。通过当前关，下一关才会解锁。"
-        : "先看示范，准备好后再打开摄像头。",
+    mode === MODE_QUEST
+      ? "闯关按顺序来。通过当前关，下一关才会解锁。"
+      : "先看示范，准备好后再打开摄像头。",
   );
-}
-
-function retryCurrent() {
-  if (!current) return;
-  hideTestOutcome();
-  hidePassSeal();
-  attempt = startAttempt(mode, current.id);
-  resetHold(hold);
-  lastSnapshot = null;
-  invalidateFrame("retry");
-  presentLetterIdle(current);
-}
-
-function selectNextPracticeable() {
-  const list = practiceableLetters();
-  if (!list.length) return;
-  const index = list.findIndex((item) => item.id === current?.id);
-  const next = list[(index + 1) % list.length];
-  if (next) selectLetter(next);
 }
 
 function formatRecordTime(iso) {
@@ -569,7 +458,7 @@ function renderRecords() {
     item.dataset.letterId = row.letterId;
     item.dataset.mode = row.mode;
     item.dataset.count = String(row.count);
-    const modeLabel = row.mode === MODE_TEST ? "自测" : "跟练";
+    const modeLabel = row.mode === "test" ? "自测" : "跟练";
     const name = letter?.title || row.letterId;
     const when = formatRecordTime(row.lastAt);
     item.textContent = when ? `${modeLabel} · ${name} · ${row.count} 次 · ${when}` : `${modeLabel} · ${name} · ${row.count} 次`;
@@ -609,10 +498,6 @@ function notePass(judged) {
   });
   const saved = saveProgress(storage, progress);
   persisted = saved.persisted;
-  if (mode === MODE_TEST) {
-    testOutcome = { letterId: current.id };
-    showTestOutcome();
-  }
   showPassSeal(judged);
   renderRecords();
 }
@@ -679,7 +564,7 @@ function rememberSnapshot(lm, handedness, w, h, capturedAt) {
 }
 
 function applyJudge(judged) {
-  const presented = presentForMode(judged);
+  const presented = presentJudge(judged);
   setVerdict(judged.decision, judged.issues, presented);
 }
 
@@ -917,7 +802,7 @@ async function main() {
     .then((r) => (r && r.ok ? r.json() : null))
     .then((raw) => {
       rotIndex = parseRotIndex(raw);
-      if (mode !== MODE_TEST && rotIndex.has(demoLetterId)) applyDemoRotator(demoLetterId ? byId.get(demoLetterId) : null);
+      if (rotIndex.has(demoLetterId)) applyDemoRotator(demoLetterId ? byId.get(demoLetterId) : null);
       updateRotHint();
     })
     .catch(() => { /* 无旋转帧时示范区保持静态图 */ });
@@ -938,9 +823,6 @@ async function main() {
   for (const letter of grouped.practice) addLetterButton(letter, els.letterBtns);
   for (const letter of grouped.review) addLetterButton(letter, els.atlasBtns);
   for (const letter of grouped.demo) addLetterButton(letter, els.demoBtns);
-  if (els.testLetterBtns) {
-    for (const letter of grouped.practice) addLetterButton(letter, els.testLetterBtns);
-  }
   const showGroup = (section, countEl, n) => {
     if (countEl) countEl.textContent = String(n);
     if (section) section.hidden = n === 0;
@@ -951,19 +833,14 @@ async function main() {
 
   applyModeUi();
   hidePassSeal();
-  hideTestOutcome();
-  const initial = mode === MODE_TEST
-    ? (byId.get("GF0021.A") && isPracticeable(byId.get("GF0021.A")) ? byId.get("GF0021.A") : grouped.practice[0])
-    : mode === MODE_QUEST
-      ? (questStatus(quest, letters).current || questStatus(quest, letters).sequence[0])
-      : (byId.get("GF0021.A") || letters[0]);
+  const initial = mode === MODE_QUEST
+    ? (questStatus(quest, letters).current || questStatus(quest, letters).sequence[0])
+    : (byId.get("GF0021.A") || letters[0]);
   if (initial) selectLetter(initial);
   setStatus(
-    mode === MODE_TEST
-      ? "自测不看示范。准备好后再打开摄像头。"
-      : mode === MODE_QUEST
-        ? "闯关按顺序来。通过当前关，下一关才会解锁。"
-        : "先看示范，准备好后再打开摄像头。",
+    mode === MODE_QUEST
+      ? "闯关按顺序来。通过当前关，下一关才会解锁。"
+      : "先看示范，准备好后再打开摄像头。",
   );
   applyMirror();
   setLiveButtons(false);
@@ -1003,18 +880,14 @@ async function main() {
       if (generation !== startGeneration) return;
       console.error(err);
       stopLive();
-      setStatus(mode === MODE_TEST ? "摄像头或模型失败，可先回到跟练看示范" : "摄像头或模型失败，可先看左边示范", "bad");
+      setStatus("摄像头或模型失败，可先看左边示范", "bad");
     } finally {
       if (generation === startGeneration) starting = false;
     }
   });
   if (els.stopBtn) els.stopBtn.addEventListener("click", stopLive);
   if (els.modeLearn) els.modeLearn.addEventListener("click", () => setMode(MODE_LEARN));
-  if (els.modeTest) els.modeTest.addEventListener("click", () => setMode(MODE_TEST));
   if (els.modeQuest) els.modeQuest.addEventListener("click", () => setMode(MODE_QUEST));
-  if (els.testBack) els.testBack.addEventListener("click", () => setMode(MODE_LEARN));
-  if (els.testRetry) els.testRetry.addEventListener("click", retryCurrent);
-  if (els.testNext) els.testNext.addEventListener("click", selectNextPracticeable);
   if (els.recordsClear) els.recordsClear.addEventListener("click", () => showClearConfirm(true));
   if (els.recordsClearNo) els.recordsClearNo.addEventListener("click", () => showClearConfirm(false));
   if (els.recordsClearYes) {

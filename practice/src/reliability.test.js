@@ -43,16 +43,16 @@ function recordCount(h,id,mode){
 }
 async function harness(opts={}){
   const h={now:1000,epoch:1700000000000,raf:new Map(),seq:0,downloads:[],detects:0,painted:false,hands:[hand()],logs:[],streams:[],gumCalls:0,store:opts.store||new Map(),storageClears:0};
-  const ids=['video','overlay','status','verdict','hint','how','demo-stage','demo-image','demo-glyph','demo-label','capability','letter-btns','atlas-btns','demo-btns','practice-group','review-group','demo-group','practice-count','review-count','demo-count','similar-hints','similar-hints-text','similar-hint-btns','start-btn','stop-btn','mirror-toggle','export-toggle','export-btn','stage','demo-panel','test-panel','test-letter','test-scope','test-retry','test-next','test-back','test-letter-btns','test-outcome','mode-learn','mode-test','mode-quest','quest-panel','quest-btns','quest-progress-text','quest-bar-fill','letter-library','confetti-layer','learn-eyebrow','learn-title','live-title','pass-seal','pass-seal-text','records','records-list','records-empty','persist-note','records-clear','records-clear-confirm','records-clear-yes','records-clear-no'];
+  const ids=['video','overlay','status','verdict','hint','how','demo-stage','demo-image','demo-glyph','demo-label','capability','letter-btns','atlas-btns','demo-btns','practice-group','review-group','demo-group','practice-count','review-count','demo-count','similar-hints','similar-hints-text','similar-hint-btns','start-btn','stop-btn','mirror-toggle','export-toggle','export-btn','stage','demo-panel','mode-learn','mode-quest','quest-panel','quest-btns','quest-progress-text','quest-bar-fill','letter-library','confetti-layer','learn-eyebrow','learn-title','live-title','pass-seal','pass-seal-text','records','records-list','records-empty','persist-note','records-clear','records-clear-confirm','records-clear-yes','records-clear-no'];
   h.els=Object.fromEntries(ids.map(id=>[id,new Target()]));
   h.els['similar-hints'].hidden=true;
-  for(const id of ['test-panel','pass-seal','records-clear-confirm','test-outcome','persist-note']) h.els[id].hidden=true;
+  for(const id of ['pass-seal','records-clear-confirm','persist-note']) h.els[id].hidden=true;
   const canvas=h.els.overlay;
   canvas.getContext=()=>({clearRect(){h.painted=false;},beginPath(){},moveTo(){},lineTo(){},stroke(){h.painted=true;},arc(){},fill(){h.painted=true;}});
   Object.assign(h.els.video,{readyState:4,currentTime:0,videoWidth:640,videoHeight:480,srcObject:null,play:()=>h.play? h.play():Promise.resolve()});
   const document=new Target(); document.hidden=false;document.visibilityState='visible';
   document.getElementById=id=>h.els[id];
-  document.querySelectorAll=()=>[...h.els['letter-btns'].children,...h.els['atlas-btns'].children,...h.els['demo-btns'].children,...h.els['similar-hint-btns'].children,...h.els['test-letter-btns'].children,...h.els['quest-btns'].children];
+  document.querySelectorAll=()=>[...h.els['letter-btns'].children,...h.els['atlas-btns'].children,...h.els['demo-btns'].children,...h.els['similar-hint-btns'].children,...h.els['quest-btns'].children];
   document.createElement=tag=>{const el=new Target();el.click=()=>{if(tag==='a')h.downloads.push(el);else return el.emit('click');};return el;};
   h.document=document;
   h.newStream=()=>{const track=new Target();track.muted=false;track.readyState='live';track.stops=0;track.stop=()=>{track.stops++;track.readyState='ended';};const s={track,getTracks:()=>[track],getVideoTracks:()=>[track]};h.streams.push(s);return s;};
@@ -266,33 +266,21 @@ test('initialization does not request camera',async()=>{
 });
 test('mode switch stops camera, cancels late gum, and clears hold snapshot',async()=>{
  const h=await harness();await h.pass();
- await h.els['mode-test'].emit('click');
+ await h.els['mode-quest'].emit('click');
  await h.invalid();
  assert.equal(h.raf.size,0);
  assert.equal(h.streams[0].track.stops,1);
  assert.equal(h.els.video.srcObject,null);
  const late=await harness();await late.boot();const d=deferred();late.gum=()=>d.promise;const first=late.start();await new Promise(r=>setTimeout(r,0));
- await late.els['mode-test'].emit('click');late.gum=null;const incoming=late.newStream();d.resolve(incoming);await first;
+ await late.els['mode-quest'].emit('click');late.gum=null;const incoming=late.newStream();d.resolve(incoming);await first;
  assert.equal(incoming.track.stops,1);assert.equal(late.els.video.srcObject,null);assert.equal(late.raf.size,0);
 });
-test('test mode hides demo/hints, rejects pending U, and does not auto-start camera',async()=>{
- const h=await harness({search:'?mode=test'});await h.boot();
- await new Promise(r=>setTimeout(r,20));
- assert.equal(h.gumCalls,0);assert.equal(h.raf.size,0);assert.equal(h.streams.length,0);
- assert.equal(h.els['demo-panel'].hidden,true);assert.equal(h.els['demo-stage'].hidden,true);
- assert.equal(h.els.how.hidden,true);assert.equal(h.els.capability.hidden,true);
- assert.equal(h.els['similar-hints'].hidden,true);assert.equal(h.els['test-panel'].hidden,false);
- assert.equal(h.els['demo-image'].getAttribute('src'),null);
- assert.ok(!h.els['test-letter-btns'].children.some(b=>b.dataset.id==='GF0021.U'));
- const before=h.els['test-letter'].textContent;
- await h.select('GF0021.U');
- assert.equal(h.els['test-letter'].textContent,before);
- assert.doesNotMatch(h.els.hint.textContent,/对照左边/);
- assert.doesNotMatch(h.els.how.textContent,/对照左边/);
-});
-test('unknown mode query stays learn; records hash and test query do not start camera',async()=>{
+test('unknown or removed mode query stays learn; records hash does not start camera',async()=>{
  const learn=await harness({search:'?mode=exam'});await learn.boot();
  assert.equal(learn.els['demo-panel'].hidden,false);assert.equal(learn.gumCalls,0);
+ const legacy=await harness({search:'?mode=test'});await legacy.boot();
+ assert.equal(legacy.els['demo-panel'].hidden,false);assert.equal(legacy.els['quest-panel'].hidden,true);
+ assert.equal(legacy.els['demo-label'].textContent,'字母 A');assert.equal(legacy.gumCalls,0);
  const rec=await harness({hash:'#records'});await rec.boot();
  assert.equal(rec.gumCalls,0);assert.equal(rec.raf.size,0);assert.ok(rec.els.records);
 });
@@ -325,18 +313,15 @@ test('real V pass records once; later frames and recovery do not re-record',asyn
  await same.emit('click');
  await h.tick();assert.equal(recordCount(h,'GF0021.V','learn'),1);
 });
-test('retry and mode change allow a new record; switching letter also does',async()=>{
- const h=await harness({search:'?mode=test'});await h.pass();
- assert.equal(recordCount(h,'GF0021.V','test'),1);
- await h.els['test-retry'].emit('click');
- await h.recover();
- assert.equal(recordCount(h,'GF0021.V','test'),2);
- await h.els['mode-learn'].emit('click');
- await h.start();await h.recover();
+test('mode change and switching letter allow a new record',async()=>{
+ const h=await harness();await h.pass();
  assert.equal(recordCount(h,'GF0021.V','learn'),1);
- assert.equal(recordCount(h,'GF0021.V','test'),2);
- await h.select('GF0021.A');await h.select('GF0021.V');await h.recover();
+ await h.els['mode-quest'].emit('click');
+ await h.els['mode-learn'].emit('click');
+ await h.select('GF0021.V');await h.start();await h.recover();
  assert.equal(recordCount(h,'GF0021.V','learn'),2);
+ await h.select('GF0021.A');await h.select('GF0021.V');await h.recover();
+ assert.equal(recordCount(h,'GF0021.V','learn'),3);
 });
 test('refresh reads sanitized records; unknown schema and illegal rows are dropped',async()=>{
  const store=new Map();
@@ -404,20 +389,6 @@ test('success seal is only shown on a recorded pass',async()=>{
  const text=h.els['pass-seal-text'].textContent;
  await h.tick();
  assert.equal(h.els['pass-seal-text'].textContent,text);
-});
-test('test fail feedback stays generic and frozen outcome survives empty frames',async()=>{
- const h=await harness({search:'?mode=test'});await h.boot();await h.select('GF0021.A');await h.start();
- for(let i=0;i<6;i++)await h.tick();
- assert.notEqual(h.els.verdict.dataset.state,'ok');
- assert.doesNotMatch(`${h.els.verdict.textContent}${h.els.hint.textContent}`,/对照左边/);
- assert.equal(recordCount(h,'GF0021.A','test'),0);
- await h.select('GF0021.V');
- for(let i=0;i<31;i++)await h.tick({ms:100});
- assert.equal(recordCount(h,'GF0021.V','test'),1);
- assert.equal(h.els['test-outcome'].hidden,false);
- h.hands=[];await h.tick();
- assert.equal(h.els['test-outcome'].hidden,false);
- assert.match(h.els['test-outcome'].textContent,/本题已通过/);
 });
 test('recordPass and parseProgress keep canonical ISO and drop out-of-range or overflow dates',async()=>{
  const h=await harness(),p=await h.core('progress');

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-01T15:28:36.710Z",
+  "generatedAt": "2026-10-01T15:43:55.064Z",
   "metricDefinitions": {
     "falseAcceptAll": "全体口径：误放行 / 全部有独立标签的错误样本（含被阻断的）。",
     "falseRejectAll": "全体口径：明确失败 / 全部有独立标签的正确样本（含被阻断的）。",
@@ -12,15 +12,15 @@
   "coreFingerprint": {
     "files": {
       "practice/src/coords.js": "09d074af0f2b964e",
-      "practice/src/evaluate.js": "cf551d8b72a8388b",
-      "practice/src/inputQuality.js": "13c9e5a31b8db269",
+      "practice/src/evaluate.js": "1e16abe6478df0b8",
+      "practice/src/inputQuality.js": "eec7a6152c5d1fd5",
       "practice/src/passState.js": "c3c39a06713ebe31",
-      "practice/src/judge.js": "1eec355e124ad0fa",
+      "practice/src/judge.js": "2f0049eed85a3c5c",
       "practice/src/snapshot.js": "a06ef1d37f7c4b86",
       "practice/src/types.js": "35b1f9627f4ae428",
       "practice/content/letters.json": "2198208c85ca3949"
     },
-    "digest": "81d76adb580e7d7f"
+    "digest": "43f91f3fb508a5f1"
   },
   "labelInfo": {
     "provided": true,
@@ -966,7 +966,8 @@
       "failureClass": "action_error",
       "issueCodes": [
         "index.not_extended",
-        "pinky.not_curled"
+        "pinky.not_curled",
+        "pointing.up"
       ],
       "productDecision": "fail",
       "hold": null,

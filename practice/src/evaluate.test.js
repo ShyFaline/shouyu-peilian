@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { angleDeg, APART_DEG, evaluate, isReadyToScore, spreadBetween, vecAngle } from "./evaluate.js";
 import { judge, presentJudge, createHold } from "./judge.js";
 import { createMotionState } from "./motion.js";
-import { QUALITY_HINT } from "./inputQuality.js";
+import { QUALITY_HINT, assessInputQuality, HAND_TOO_SMALL_HINT } from "./inputQuality.js";
 import { createHold as makeHold, holdReady, observePass, resetHold } from "./passState.js";
 import { canExportSnapshot, createSnapshot, serializeSnapshot } from "./snapshot.js";
 import { stopCamera } from "./camera.js";
@@ -501,6 +501,31 @@ test("A03 全0/NaN/指尖出框掌心在框/零骨段 → undetermined，hint �
     assert.ok(judged.quality.ok === false);
   }
   assert.equal(QUALITY_HINT, "暂时无法判断");
+});
+
+test("A10 手太小（如凑到下巴边）→ undetermined / hand_too_small，不得进入规则判定", () => {
+  // 归一化坐标向腕点收缩 0.25：腕-掌距离缩到画面短边的约 0.08 倍，低于 0.1 门限
+  const geom = { width: 640, height: 480, coordSpace: "image_normalized" };
+  const tiny = vApartHand();
+  const wrist = tiny[0];
+  const small = tiny.map((p) => pt(wrist.x + (p.x - wrist.x) * 0.25, wrist.y + (p.y - wrist.y) * 0.25, p.z));
+
+  const direct = assessInputQuality({ hands: [small], geom, letter: letterV });
+  assert.equal(direct.ok, false);
+  assert.equal(direct.reason, "hand_too_small");
+
+  const judged = judge(
+    { letter: letterV, lm: small, hands: [small], geom, videoTime: 0, nowMs: 0 },
+    createHold(),
+  );
+  assert.equal(judged.decision, "undetermined");
+  assert.equal(judged.quality.reason, "hand_too_small");
+  assert.equal(judged.issues[0].hint, HAND_TOO_SMALL_HINT);
+  assert.equal(presentJudge(judged).title, "手太小了");
+
+  // 同一只手不缩放：腕-掌距离约为画面短边的 0.32 倍，照常进入判定
+  const normal = assessInputQuality({ hands: [vApartHand()], geom, letter: letterV });
+  assert.equal(normal.ok, true, JSON.stringify(normal));
 });
 
 test("A04 U/V 拇指伸直负例不得 geometry pass", () => {

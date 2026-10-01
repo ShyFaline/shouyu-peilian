@@ -49,6 +49,9 @@ export function presentJudge(judged) {
   const issues = judged?.issues || [];
   const blob = issues.map((x) => x.hint).filter(Boolean).join("；");
   if (judged?.decision === "undetermined") {
+    if (issues.some((x) => x.code === "hand_too_small")) {
+      return { title: "手太小了", hint: blob || QUALITY_HINT, state: "idle" };
+    }
     return { title: "暂时无法判断", hint: QUALITY_HINT, state: "idle" };
   }
   if (judged?.decision === "blocked") {
@@ -233,7 +236,7 @@ export function judge(input = {}, hold, motion = null) {
       return result({
         decision: "undetermined",
         practiceStatus,
-        issues: [{ code: quality.reason, hint: QUALITY_HINT }],
+        issues: [{ code: quality.reason, hint: quality.hint || QUALITY_HINT }],
         quality,
         hold: holdState,
       });

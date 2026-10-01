@@ -1,11 +1,14 @@
 /** 输入质量门。不读 handedness.score，不补 conf=1。 */
 
-import { geometryError, toGeometryPoints } from "./coords.js";
+import { geometryError, geometrySize, toGeometryPoints } from "./coords.js";
 
 const FINGER_TIPS = { thumb: 4, index: 8, middle: 12, ring: 16, pinky: 20 };
 
 export const QUALITY_HINT = "暂时无法判断";
 export const DEGENERATE_EPS = 1e-6;
+// 手在画面里太小时规则判断不可信（如把手凑到下巴边）。相对画面短边的最小腕-掌距离。
+export const MIN_HAND_SCALE_RATIO = 0.1; // UNVERIFIED 待验证
+export const HAND_TOO_SMALL_HINT = "手太小了，把手举近摄像头再试";
 
 const BONES = [
   [0, 9],
@@ -16,8 +19,8 @@ const BONES = [
   [17, 18], [18, 19], [19, 20],
 ];
 
-function fail(reason) {
-  return { ok: false, reason, hint: QUALITY_HINT };
+function fail(reason, hint = QUALITY_HINT) {
+  return { ok: false, reason, hint };
 }
 
 function isFiniteNum(n) {
@@ -85,6 +88,16 @@ export function assessInputQuality(input = {}) {
   for (const [ia, ib] of BONES) {
     if (boneLen(pts[ia], pts[ib]) < DEGENERATE_EPS) {
       return fail("degenerate_bone");
+    }
+  }
+
+  // 尺寸门：腕(0)→中指根(9) 的像素距离低于画面短边 × MIN_HAND_SCALE_RATIO 视为手太小
+  // 参考边取短边：x 乘宽、y 乘高是各向异性的，短边对竖向的腕-掌距离不失真
+  const size = geometrySize(input.geom);
+  if (size && isFiniteNum(size.width) && isFiniteNum(size.height) && size.width > 0 && size.height > 0) {
+    const handPx = boneLen(pts[0], pts[9]);
+    if (!(handPx >= Math.min(size.width, size.height) * MIN_HAND_SCALE_RATIO)) {
+      return fail("hand_too_small", HAND_TOO_SMALL_HINT);
     }
   }
 

@@ -291,7 +291,9 @@ export function evaluate(letter, lm, geom) {
   }
 
   if (rules.pointing) {
-    const probe = (rules.extended || []).includes("index") ? "index" : (rules.extended || ["index"])[0];
+    // 多指伸直时以中指为朝向基准（手的轴线），食指/无名指在张开手型里天然外斜
+    const ext = rules.extended || [];
+    const probe = ext.includes("middle") ? "middle" : ext.includes("index") ? "index" : (ext[0] || "index");
     const got = pointingOf(pts, probe);
     if (got !== rules.pointing) {
       const hint =

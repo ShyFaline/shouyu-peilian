@@ -85,6 +85,8 @@ def main():
     gltf = os.path.join(poc.VENDOR, "hand_r.gltf")
     if not os.path.isfile(gltf):
         raise SystemExit(f"missing input glTF: {gltf}")
+    # 可选：-- A B ... 只渲指定字母（修复重渲用）；metadata 与已有记录合并
+    only = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
     arm, mesh = poc.import_hand()
     for mod in mesh.modifiers:
         if mod.type == "ARMATURE" and hasattr(mod, "use_preserve_volume"):
@@ -95,11 +97,18 @@ def main():
     sc.render.image_settings.file_format = "WEBP"
     sc.render.image_settings.quality = WEBP_QUALITY
     sizes = {}
-    for letter in LETTERS:
+    for letter in (only or LETTERS):
         outdir = os.path.join(OUT, f"GF0021.{letter}")
         sizes[f"GF0021.{letter}"] = render_turntable(
             sc, arm, mesh, letter, palm_normal, finger_up, axis, outdir)
         print(f"OK GF0021.{letter} {FRAMES} frames {sizes[f'GF0021.{letter}']} B total")
+    meta_path = os.path.join(OUT, "metadata.json")
+    if only and os.path.isfile(meta_path):
+        with open(meta_path, encoding="utf-8") as f:
+            prev = json.load(f)
+        prev_sizes = prev.get("bytes", {})
+        for k in prev_sizes:
+            sizes.setdefault(k, prev_sizes[k])
     meta = {
         "id": "godot-xr-rot",
         "generated_on": str(date.today()),

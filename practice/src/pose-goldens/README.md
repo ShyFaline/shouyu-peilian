@@ -12,7 +12,7 @@
 ## 重新生成
 
 ```bat
-blender\vendor\blender-4.5.14-windows-x64\blender.exe -b --python blender\build_godot_hand_poc.py -- landmarks
+"C:\Program Files\Blender Foundation\Blender 5.2\blender.exe" -b --python blender\build_godot_hand_poc.py -- landmarks
 node practice\src\pose-goldens.test.js
 ```
 

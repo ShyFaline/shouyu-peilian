@@ -58,7 +58,7 @@
     ],
     "passWithLimits": [],
     "rejected": [],
-    "notes": "J 勾手（PIP 折 90°）、NG 小指横伸已修；Y 拇指改斜向上以与判定器 pointing.up 对齐；V/W/X 拇指与远节为近似接触。"
+    "notes": "J 勾手（PIP 折 90°）、NG 小指横伸已修；Y 拇指改斜向上以与判定器 pointing.up 对齐；V/W/X 拇指与远节为近似接触。2026-10-01 更正：本记录只覆盖正/侧静态目检，A 当时误标 pass——旋转视角下穿模（拇指埋入拳心）未被抓到；已由 pose-collision（胶囊）与 selfcheck（BVH）双层门禁重测并修复，后续字母穿模修复以门禁为准。"
   },
   "rotFrames": {
     "addedOn": "2026-10-01",
@@ -112,7 +112,7 @@
       "sourcePng": "blender/vendor/godot-xr-hands/poc/GF0021.A_front.png",
       "license": "CC0 1.0 Universal",
       "inspection": "pass",
-      "notes": "新姿态表全量重渲，正侧均自然，与 letters.json 描述一致。"
+      "notes": "新姿态表全量重渲，正侧均自然，与 letters.json 描述一致。2026-10-01 穿模修复：原姿态四指 FIST 全握 + 拇指 (-80,-10,0,0) 在旋转视角下拇指埋入拳心（胶囊 overlap 0.94、BVH 双向穿透 8mm）；改为 Index/Middle(30,88,88,65) Ring(28,92,85,45) Little(25,92,85,60) + 拇指 (-2,0,15,0)，判定器 2D 投影角四指 ≤135（<142 阈值）通过 golden 恒等矩阵，胶囊门禁清零；残留 Ring 远节↔小指掌骨 7.5mm 双向穿透为全局性问题，列入后续修复（见 blender/selfcheck.json）。"
     },
     "GF0021.B": {
       "file": "GF0021.B_front.png",

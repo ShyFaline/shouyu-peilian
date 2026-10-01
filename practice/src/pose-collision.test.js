@@ -54,6 +54,14 @@ function xformPoint(m, [x, y, z]) {
     m[8] * x + m[9] * y + m[10] * z + m[11],
   ];
 }
+// 向量 v 绕单位轴 k 旋转 deg（罗德里格公式，与 Matrix.Rotation(deg,4,k) @ v 一致）
+function rotateVec(v, k, deg) {
+  const c = Math.cos(deg * DEG), s = Math.sin(deg * DEG);
+  const [x, y, z] = v, [kx, ky, kz] = k;
+  const dot = kx * x + ky * y + kz * z;
+  const cx = ky * z - kz * y, cy = kz * x - kx * z, cz = kx * y - ky * x;
+  return [x * c + cx * s + kx * dot * (1 - c), y * c + cy * s + ky * dot * (1 - c), z * c + cz * s + kz * dot * (1 - c)];
+}
 
 // ---------- 骨架与 FK（复现 curl()/apply_pose()） ----------
 const SEGMENTS = ["Metacarpal", "Proximal", "Intermediate", "Distal"];
@@ -83,8 +91,12 @@ function applyPose(letter) {
   }
   const [swing, tmeta, tprox, tdist] = data.thumb[letter];
   curl(acc, "Thumb_Metacarpal_R", swing, pn);
+  const bias = (data.axisBias ?? {})[letter] ?? {};
   for (const [finger, angles] of Object.entries(data.letters[letter])) {
-    for (let i = 0; i < SEGMENTS.length; i++) curl(acc, `${finger}_${SEGMENTS[i]}_R`, angles[i], axis);
+    // 与 pose_letter() 的 axis_bias 同步：该指屈曲轴先绕掌法线偏置
+    const b = bias[finger];
+    const fax = b ? rotateVec(axis, pn, b) : axis;
+    for (let i = 0; i < SEGMENTS.length; i++) curl(acc, `${finger}_${SEGMENTS[i]}_R`, angles[i], fax);
   }
   curl(acc, "Thumb_Metacarpal_R", tmeta, fu);
   curl(acc, "Thumb_Proximal_R", tprox, pn);
@@ -175,6 +187,9 @@ const REL_MARGIN = 0.20;
 
 // 标准动作要求穿过/贴合的特定字母-骨骼对，豁免：
 // T：拇指从食中指缝间穿出，与两侧指节必然高重合
+// A 的 Ring_Distal×Little_Metacarpal：全局性问题（20+ 字母共有的
+// 无名指远节↔小指掌骨嵌入，见 blender/selfcheck.json），A 修复仅豁免本对，
+// 全局修复落地后移除此行
 const ALLOWED = new Set([
   "T|Thumb_Proximal_R|Middle_Distal_R",
   "T|Thumb_Proximal_R|Middle_Intermediate_R",
@@ -182,12 +197,13 @@ const ALLOWED = new Set([
   "T|Thumb_Distal_R|Middle_Intermediate_R",
   "T|Thumb_Distal_R|Ring_Distal_R",
   "T|Thumb_Distal_R|Ring_Intermediate_R",
+  "A|Ring_Distal_R|Little_Metacarpal_R",
 ]);
 
 // 修复基线：当前已知存在胶囊级深穿的字母（blender selfcheck.json 同步佐证）。
 // 修好一个删一行；出现基线外的违规字母直接失败。
 const KNOWN_VIOLATIONS = new Set([
-  "A", "C", "D", "F", "G", "H", "I", "J", "K", "L", "M", "N",
+  "C", "D", "F", "G", "H", "I", "J", "K", "L", "M", "N",
   "Q", "R", "S", "V", "X", "Y", "Z", "SH", "NG", "UE",
 ]);
 

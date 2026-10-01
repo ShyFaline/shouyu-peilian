@@ -3,174 +3,104 @@
  "letters": {
   "A": {
    "Little_Metacarpal_R|Ring_Distal_R": {
-    "maxDepth": 0.007983,
-    "verts": 56,
-    "bothDirections": true
-   },
-   "Ring_Metacarpal_R|Thumb_Proximal_R": {
-    "maxDepth": 0.007927,
-    "verts": 21,
-    "bothDirections": true
-   },
-   "Little_Metacarpal_R|Thumb_Proximal_R": {
-    "maxDepth": 0.007633,
-    "verts": 23,
-    "bothDirections": true
-   },
-   "Little_Proximal_R|Thumb_Distal_R": {
-    "maxDepth": 0.007549,
-    "verts": 21,
-    "bothDirections": true
-   },
-   "Ring_Proximal_R|Thumb_Proximal_R": {
-    "maxDepth": 0.007511,
-    "verts": 35,
-    "bothDirections": true
-   },
-   "Middle_Distal_R|Thumb_Proximal_R": {
-    "maxDepth": 0.007373,
-    "verts": 51,
+    "maxDepth": 0.007542,
+    "verts": 41,
     "bothDirections": true
    },
    "Middle_Distal_R|Middle_Metacarpal_R": {
-    "maxDepth": 0.007269,
-    "verts": 19,
-    "bothDirections": true
-   },
-   "Index_Metacarpal_R|Middle_Distal_R": {
-    "maxDepth": 0.007258,
+    "maxDepth": 0.007062,
     "verts": 11,
     "bothDirections": false
    },
    "Middle_Distal_R|Ring_Metacarpal_R": {
-    "maxDepth": 0.007244,
-    "verts": 18,
+    "maxDepth": 0.007014,
+    "verts": 11,
     "bothDirections": false
-   },
-   "Middle_Distal_R|Thumb_Metacarpal_R": {
-    "maxDepth": 0.006379,
-    "verts": 18,
-    "bothDirections": false
-   },
-   "Little_Proximal_R|Thumb_Proximal_R": {
-    "maxDepth": 0.005188,
-    "verts": 9,
-    "bothDirections": true
-   },
-   "Middle_Metacarpal_R|Thumb_Proximal_R": {
-    "maxDepth": 0.005019,
-    "verts": 2,
-    "bothDirections": false
-   },
-   "Middle_Intermediate_R|Thumb_Metacarpal_R": {
-    "maxDepth": 0.004946,
-    "verts": 1,
-    "bothDirections": false
-   },
-   "Middle_Metacarpal_R|Thumb_Metacarpal_R": {
-    "maxDepth": 0.004936,
-    "verts": 2,
-    "bothDirections": true
-   },
-   "Ring_Metacarpal_R|Thumb_Metacarpal_R": {
-    "maxDepth": 0.00491,
-    "verts": 5,
-    "bothDirections": true
-   },
-   "Ring_Distal_R|Thumb_Proximal_R": {
-    "maxDepth": 0.00415,
-    "verts": 19,
-    "bothDirections": true
-   },
-   "Index_Metacarpal_R|Middle_Proximal_R": {
-    "maxDepth": 0.004055,
-    "verts": 4,
-    "bothDirections": true
-   },
-   "Index_Metacarpal_R|Middle_Metacarpal_R": {
-    "maxDepth": 0.003979,
-    "verts": 2,
-    "bothDirections": false
-   },
-   "Little_Intermediate_R|Ring_Intermediate_R": {
-    "maxDepth": 0.003894,
-    "verts": 3,
-    "bothDirections": false
-   },
-   "Middle_Proximal_R|Ring_Metacarpal_R": {
-    "maxDepth": 0.003683,
-    "verts": 2,
-    "bothDirections": false
-   },
-   "Ring_Distal_R|Ring_Metacarpal_R": {
-    "maxDepth": 0.003637,
-    "verts": 2,
-    "bothDirections": false
-   },
-   "Index_Metacarpal_R|Thumb_Metacarpal_R": {
-    "maxDepth": 0.0035,
-    "verts": 5,
-    "bothDirections": true
-   },
-   "Little_Metacarpal_R|Ring_Proximal_R": {
-    "maxDepth": 0.00336,
-    "verts": 5,
-    "bothDirections": true
    },
    "Little_Metacarpal_R|Ring_Intermediate_R": {
-    "maxDepth": 0.003328,
+    "maxDepth": 0.002807,
+    "verts": 1,
+    "bothDirections": false
+   },
+   "Index_Metacarpal_R|Middle_Proximal_R": {
+    "maxDepth": 0.002751,
     "verts": 4,
     "bothDirections": true
    },
-   "Little_Proximal_R|Ring_Intermediate_R": {
-    "maxDepth": 0.002931,
-    "verts": 17,
-    "bothDirections": true
+   "Little_Intermediate_R|Ring_Intermediate_R": {
+    "maxDepth": 0.002639,
+    "verts": 6,
+    "bothDirections": false
+   },
+   "Index_Metacarpal_R|Middle_Metacarpal_R": {
+    "maxDepth": 0.002565,
+    "verts": 1,
+    "bothDirections": false
    },
    "Little_Metacarpal_R|Ring_Metacarpal_R": {
-    "maxDepth": 0.001831,
-    "verts": 7,
+    "maxDepth": 0.002428,
+    "verts": 8,
     "bothDirections": true
    },
-   "Little_Metacarpal_R|Thumb_Distal_R": {
-    "maxDepth": 0.001803,
-    "verts": 3,
+   "Index_Metacarpal_R|Thumb_Metacarpal_R": {
+    "maxDepth": 0.002314,
+    "verts": 2,
+    "bothDirections": false
+   },
+   "Index_Metacarpal_R|Middle_Distal_R": {
+    "maxDepth": 0.002189,
+    "verts": 2,
+    "bothDirections": false
+   },
+   "Index_Distal_R|Thumb_Metacarpal_R": {
+    "maxDepth": 0.002173,
+    "verts": 6,
+    "bothDirections": false
+   },
+   "Little_Metacarpal_R|Ring_Proximal_R": {
+    "maxDepth": 0.001826,
+    "verts": 5,
     "bothDirections": true
    },
-   "Little_Proximal_R|Ring_Metacarpal_R": {
-    "maxDepth": 0.001606,
-    "verts": 1,
-    "bothDirections": false
-   },
-   "Ring_Proximal_R|Thumb_Distal_R": {
-    "maxDepth": 0.001579,
-    "verts": 3,
-    "bothDirections": false
-   },
-   "Middle_Proximal_R|Ring_Proximal_R": {
-    "maxDepth": 0.001446,
-    "verts": 1,
-    "bothDirections": false
-   },
-   "Middle_Metacarpal_R|Ring_Metacarpal_R": {
-    "maxDepth": 0.001267,
+   "Index_Distal_R|Index_Metacarpal_R": {
+    "maxDepth": 0.00169,
     "verts": 10,
     "bothDirections": true
    },
-   "Middle_Intermediate_R|Thumb_Proximal_R": {
-    "maxDepth": 0.001196,
+   "Middle_Metacarpal_R|Ring_Metacarpal_R": {
+    "maxDepth": 0.001348,
+    "verts": 7,
+    "bothDirections": true
+   },
+   "Little_Intermediate_R|Ring_Proximal_R": {
+    "maxDepth": 0.001021,
     "verts": 2,
     "bothDirections": false
    },
-   "Index_Distal_R|Index_Metacarpal_R": {
-    "maxDepth": 0.001077,
-    "verts": 4,
-    "bothDirections": true
-   },
-   "Little_Proximal_R|Ring_Proximal_R": {
-    "maxDepth": 0.000452,
+   "Little_Proximal_R|Ring_Metacarpal_R": {
+    "maxDepth": 0.000878,
     "verts": 1,
     "bothDirections": false
+   },
+   "Middle_Proximal_R|Ring_Metacarpal_R": {
+    "maxDepth": 0.000755,
+    "verts": 1,
+    "bothDirections": false
+   },
+   "Little_Proximal_R|Ring_Proximal_R": {
+    "maxDepth": 0.000643,
+    "verts": 1,
+    "bothDirections": false
+   },
+   "Index_Distal_R|Thumb_Proximal_R": {
+    "maxDepth": 0.000618,
+    "verts": 6,
+    "bothDirections": false
+   },
+   "Little_Proximal_R|Ring_Intermediate_R": {
+    "maxDepth": 0.000482,
+    "verts": 4,
+    "bothDirections": true
    }
   },
   "B": {

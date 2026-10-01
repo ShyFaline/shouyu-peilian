@@ -101,13 +101,20 @@ def curl(arm, name, deg, axis):
     bpy.context.view_layer.update()
 
 
-def pose_letter(arm, curls, axis):
-    """curls: {finger_prefix: (metacarpal_deg, proximal_deg, intermediate_deg, distal_deg)}"""
+def pose_letter(arm, curls, axis, axis_bias=None, palm_normal=None):
+    """curls: {finger_prefix: (metacarpal_deg, proximal_deg, intermediate_deg, distal_deg)}
+
+    axis_bias: {finger_prefix: deg}——该指屈曲轴先绕 palm_normal 旋转 deg 再 curl。
+    用途：小指/食指的 rest 屈曲平面略偏尺/桡侧（斜向掌外缘），握拳时指节从
+    拳侧探出；偏置后折向掌背平面，消除侧探与邻骨嵌入。"""
     for finger, angles in curls.items():
+        fax = axis
+        if axis_bias and finger in axis_bias and palm_normal is not None:
+            fax = (Matrix.Rotation(math.radians(axis_bias[finger]), 4, palm_normal) @ axis).normalized()
         for seg, deg in zip(SEGMENTS, angles):
             name = f"{finger}_{seg}_R"
             if deg and name in arm.pose.bones:
-                curl(arm, name, deg, axis)
+                curl(arm, name, deg, fax)
 
 
 def setup_render(size=512):
@@ -180,6 +187,10 @@ def cmd_inspect(arm, mesh):
 
 
 FIST = (30, 95, 100, 60)   # 弯曲抵掌心
+
+# 屈曲轴偏置表：{letter: {finger: 绕掌法线的偏置角}}。
+# 正值 = 屈曲轴向小指侧旋（小指用正值把指节折回拳心方向）。
+AXIS_BIAS = {}
 EXT = (5, 0, 0, 0)         # 伸直（rest 微曲）
 BENT90 = (10, 90, 5, 5)    # 并拢微曲与手掌成 90 度角（S/SH 类：近节折 90，关节保持直）
 HOOK = (5, 10, 90, 20)     # J：PIP 折 90°，中节指背向上，远节随弯
@@ -190,7 +201,10 @@ C_CURVE = (20, 55, 55, 35) # C：五指弯曲成 C
 # 2026-10-01 全量重排：按 letters.json 官方原文转写逐字母摆姿。
 # 四指键：Index/Middle/Ring/Little → (掌骨, 近节, 中节, 远节) 屈曲角。
 LETTERS = {
-    "A": {f: FIST for f in FINGERS},                                  # 握拳伸拇指
+    "A": {                  # 握拳伸拇指；判定器投影角与穿模联合定标（探针 _probe_a_fix.py 扫描）
+        "Index": (30, 88, 88, 65), "Middle": (30, 88, 88, 65),
+        "Ring": (28, 92, 85, 45), "Little": (25, 92, 85, 60),
+    },
     "B": {f: EXT for f in FINGERS},                                   # 四指并拢直立
     "C": {f: C_CURVE for f in FINGERS},                               # 五指弯曲成 C
     "D": {f: FIST for f in FINGERS},                                  # 握拳，拇指搭中指中节
@@ -265,7 +279,7 @@ TUCK_RING = (-30, -8, -70, -95)  # 搭无名指远节指上
 TUCK_PALM = (-36, 0, -50, -95)   # 贴近手掌
 TUCK_PINKY = (-35, -8, -65, -95) # 搭小指远节指上（W）
 THUMB = {
-    "A": (-80, -10, 0, 0),     # 竖起，指尖朝上
+    "A": (-2, 0, 15, 0),     # 竖起搭食指侧：微贴 + 近节压 15°（BVH/胶囊/判定三验收定标）
     "B": TUCK_PALM,
     "C": (-15, -8, -45, -40),    # 向上弯曲成 C 的一边
     "D": TUCK_MID,               # 握拳搭中指中节
@@ -313,7 +327,7 @@ def apply_pose(arm, letter, palm_normal, finger_up, axis):
     swing, tmeta, tprox, tdist = THUMB[letter]
     if swing and "Thumb_Metacarpal_R" in arm.pose.bones:
         curl(arm, "Thumb_Metacarpal_R", swing, palm_normal)
-    pose_letter(arm, LETTERS[letter], axis)
+    pose_letter(arm, LETTERS[letter], axis, AXIS_BIAS.get(letter, {}), palm_normal)
     if tmeta and "Thumb_Metacarpal_R" in arm.pose.bones:
         curl(arm, "Thumb_Metacarpal_R", tmeta, finger_up)
     for seg, deg in (("Proximal", tprox), ("Distal", tdist)):
@@ -344,7 +358,7 @@ def reset_pose(arm):
     bpy.context.view_layer.update()
 
 
-def cmd_letters(arm, mesh):
+def cmd_letters(arm, mesh, letters=None):
     sc = setup_render()
     for mod in mesh.modifiers:
         if mod.type == "ARMATURE" and hasattr(mod, "use_preserve_volume"):
@@ -352,7 +366,7 @@ def cmd_letters(arm, mesh):
     center, palm_normal, finger_up = palm_frame(arm)
     axis = flex_axis()
     print("FLEX_AXIS", tuple(axis), "PALM_NORMAL", tuple(round(v, 3) for v in palm_normal))
-    for letter in LETTERS:
+    for letter in (letters or LETTERS):
         apply_pose(arm, letter, palm_normal, finger_up, axis)
         lo, hi = world_bbox(mesh)
         c = (lo + hi) / 2
@@ -504,6 +518,7 @@ def cmd_export_pose(arm, mesh):
         "letters": LETTERS,
         "splay": SPLAY,
         "thumb": THUMB,
+        "axisBias": AXIS_BIAS,
         "posed": {},
     }
     for letter in LETTERS:
@@ -628,7 +643,7 @@ def main():
     elif argv[0] == "selfcheck":
         cmd_selfcheck(arm, mesh)
     else:
-        cmd_letters(arm, mesh)
+        cmd_letters(arm, mesh, argv[1:] or None)
 
 
 if __name__ == "__main__":

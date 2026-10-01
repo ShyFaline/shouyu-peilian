@@ -43,7 +43,7 @@ function recordCount(h,id,mode){
 }
 async function harness(opts={}){
   const h={now:1000,epoch:1700000000000,raf:new Map(),seq:0,downloads:[],detects:0,painted:false,hands:[hand()],logs:[],streams:[],gumCalls:0,store:opts.store||new Map(),storageClears:0};
-  const ids=['video','overlay','status','verdict','hint','how','demo-stage','demo-image','demo-glyph','demo-label','capability','letter-btns','atlas-btns','demo-btns','practice-group','review-group','demo-group','practice-count','review-count','demo-count','similar-hints','similar-hints-text','similar-hint-btns','start-btn','stop-btn','mirror-toggle','export-toggle','export-btn','stage','demo-panel','mode-learn','mode-quest','quest-panel','quest-btns','quest-progress-text','quest-bar-fill','letter-library','confetti-layer','learn-eyebrow','learn-title','live-title','pass-seal','pass-seal-text','records','records-list','records-empty','persist-note','records-clear','records-clear-confirm','records-clear-yes','records-clear-no'];
+  const ids=['video','overlay','status','verdict','hint','how','demo-stage','demo-image','demo-glyph','demo-label','capability','letter-btns','atlas-btns','demo-btns','practice-group','review-group','demo-group','practice-count','review-count','demo-count','similar-hints','similar-hints-text','similar-hint-btns','start-btn','stop-btn','mirror-toggle','export-toggle','export-btn','stage','demo-panel','quest-panel','quest-btns','quest-progress-text','quest-bar-fill','letter-library','confetti-layer','learn-eyebrow','learn-title','live-title','pass-seal','pass-seal-text','records','records-list','records-empty','persist-note','records-clear','records-clear-confirm','records-clear-yes','records-clear-no'];
   h.els=Object.fromEntries(ids.map(id=>[id,new Target()]));
   h.els['similar-hints'].hidden=true;
   for(const id of ['pass-seal','records-clear-confirm','persist-note']) h.els[id].hidden=true;
@@ -264,15 +264,15 @@ test('initialization does not request camera',async()=>{
  assert.equal(h.streams.length,0);
  assert.equal(h.raf.size,0);
 });
-test('mode switch stops camera, cancels late gum, and clears hold snapshot',async()=>{
+test('stop button stops camera, cancels late gum, and clears hold snapshot',async()=>{
  const h=await harness();await h.pass();
- await h.els['mode-quest'].emit('click');
+ await h.els['stop-btn'].emit('click');
  await h.invalid();
  assert.equal(h.raf.size,0);
  assert.equal(h.streams[0].track.stops,1);
  assert.equal(h.els.video.srcObject,null);
  const late=await harness();await late.boot();const d=deferred();late.gum=()=>d.promise;const first=late.start();await new Promise(r=>setTimeout(r,0));
- await late.els['mode-quest'].emit('click');late.gum=null;const incoming=late.newStream();d.resolve(incoming);await first;
+ await late.els['stop-btn'].emit('click');late.gum=null;const incoming=late.newStream();d.resolve(incoming);await first;
  assert.equal(incoming.track.stops,1);assert.equal(late.els.video.srcObject,null);assert.equal(late.raf.size,0);
 });
 test('unknown or removed mode query stays learn; records hash does not start camera',async()=>{
@@ -313,15 +313,11 @@ test('real V pass records once; later frames and recovery do not re-record',asyn
  await same.emit('click');
  await h.tick();assert.equal(recordCount(h,'GF0021.V','learn'),1);
 });
-test('mode change and switching letter allow a new record',async()=>{
+test('switching letter allows a new record',async()=>{
  const h=await harness();await h.pass();
  assert.equal(recordCount(h,'GF0021.V','learn'),1);
- await h.els['mode-quest'].emit('click');
- await h.els['mode-learn'].emit('click');
- await h.select('GF0021.V');await h.start();await h.recover();
- assert.equal(recordCount(h,'GF0021.V','learn'),2);
  await h.select('GF0021.A');await h.select('GF0021.V');await h.recover();
- assert.equal(recordCount(h,'GF0021.V','learn'),3);
+ assert.equal(recordCount(h,'GF0021.V','learn'),2);
 });
 test('refresh reads sanitized records; unknown schema and illegal rows are dropped',async()=>{
  const store=new Map();

@@ -75,8 +75,6 @@ const els = {
   exportBtn: document.getElementById("export-btn"),
   stage: document.getElementById("stage"),
   demoPanel: document.getElementById("demo-panel"),
-  modeLearn: document.getElementById("mode-learn"),
-  modeQuest: document.getElementById("mode-quest"),
   questPanel: document.getElementById("quest-panel"),
   questBtns: document.getElementById("quest-btns"),
   questProgressText: document.getElementById("quest-progress-text"),
@@ -349,8 +347,6 @@ function applyModeUi() {
   const questing = mode === MODE_QUEST;
   if (els.letterLibrary) els.letterLibrary.hidden = questing;
   if (els.questPanel) els.questPanel.hidden = !questing;
-  if (els.modeLearn) els.modeLearn.setAttribute("aria-pressed", String(mode === MODE_LEARN));
-  if (els.modeQuest) els.modeQuest.setAttribute("aria-pressed", String(questing));
   if (els.learnEyebrow) {
     els.learnEyebrow.textContent = questing
       ? "闯关 · 一关一个手型"
@@ -404,37 +400,6 @@ function addLetterButton(letter, parent) {
   btn.setAttribute("aria-pressed", "false");
   btn.addEventListener("click", () => selectLetter(letter));
   parent.appendChild(btn);
-}
-
-function setMode(next) {
-  if (next !== MODE_LEARN && next !== MODE_QUEST) return;
-  if (next === mode) return;
-  stopLive();
-  mode = next;
-  hidePassSeal();
-  lastSnapshot = null;
-  resetHold(hold);
-  resetMotion(motion);
-  applyModeUi();
-  if (mode === MODE_QUEST && !isQuestUnlocked(quest, current?.id, letters)) {
-    const nextLetter = questStatus(quest, letters).current;
-    if (nextLetter) selectLetter(nextLetter);
-    else {
-      attempt = startAttempt(mode, current?.id || null);
-      presentLetterIdle(current);
-    }
-  } else if (current) {
-    attempt = startAttempt(mode, current.id);
-    showDemo(current);
-    presentLetterIdle(current);
-    renderSimilarHints(current);
-    syncLetterButtons(current.id);
-  }
-  setStatus(
-    mode === MODE_QUEST
-      ? "闯关按顺序来。通过当前关，下一关才会解锁。"
-      : "先看示范，准备好后再打开摄像头。",
-  );
 }
 
 function formatRecordTime(iso) {
@@ -886,8 +851,6 @@ async function main() {
     }
   });
   if (els.stopBtn) els.stopBtn.addEventListener("click", stopLive);
-  if (els.modeLearn) els.modeLearn.addEventListener("click", () => setMode(MODE_LEARN));
-  if (els.modeQuest) els.modeQuest.addEventListener("click", () => setMode(MODE_QUEST));
   if (els.recordsClear) els.recordsClear.addEventListener("click", () => showClearConfirm(true));
   if (els.recordsClearNo) els.recordsClearNo.addEventListener("click", () => showClearConfirm(false));
   if (els.recordsClearYes) {

@@ -70,9 +70,6 @@ a.path-card:hover { background: var(--panel); transform: translateY(-4px); }
 .page-heading { display: flex; justify-content: space-between; align-items: end; gap: 24px; padding: 38px 0 26px; }
 .page-heading h1 { font-size: 32px; margin: 0; }
 .page-heading .eyebrow { margin-bottom: 8px; }
-.mode-switch { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
-.mode-switch button { min-width: 88px; }
-.mode-switch button[aria-pressed="true"] { background: var(--ok); color: #fffdf5; border-color: var(--ok); }
 .status { color: var(--muted); max-width: 360px; font-size: 13px; margin: 0; }
 .status[data-kind="ok"] { color: var(--ok); }
 .status[data-kind="bad"] { color: var(--bad); }

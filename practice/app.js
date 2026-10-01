@@ -306,7 +306,15 @@ function renderQuest() {
         : unlocked
           ? "quest-letter"
           : "quest-letter is-locked";
-    btn.textContent = passed ? `${letter.label} ✓` : letter.label;
+    const thumb = document.createElement("img");
+    thumb.className = "quest-thumb";
+    thumb.src = demoSrc(letter);
+    thumb.alt = "";
+    thumb.loading = "lazy";
+    btn.appendChild(thumb);
+    const name = document.createElement("span");
+    name.textContent = passed ? `${letter.label} ✓` : letter.label;
+    btn.appendChild(name);
     btn.disabled = !unlocked;
     btn.setAttribute("aria-pressed", current?.id === letter.id ? "true" : "false");
     btn.setAttribute(

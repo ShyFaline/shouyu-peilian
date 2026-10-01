@@ -141,7 +141,9 @@ details.letter-group > summary { font-size: 14px; color: var(--ink); font-weight
 .quest-bar { height: 6px; background: #e9e7de; border-radius: 3px; overflow: hidden; margin: 4px 0 12px; }
 .quest-bar-fill { height: 100%; width: 0; background: var(--ok); border-radius: 3px; transition: width .5s ease; }
 .quest-btns { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
-.quest-letter { position: relative; min-width: 46px; padding: 7px 11px; font-size: 15px; }
+.quest-letter { position: relative; min-width: 58px; padding: 6px 10px 7px; font-size: 14px; display: inline-flex; flex-direction: column; align-items: center; gap: 4px; }
+.quest-thumb { width: 34px; height: 34px; object-fit: contain; background: #f1eee2; border: 1px solid var(--line); border-radius: 3px; padding: 2px; }
+.quest-letter[aria-pressed="true"] .quest-thumb { border-color: #ffffff88; }
 .quest-letter.is-passed { border-color: var(--ok); color: var(--ok); background: #edf3ee; }
 .quest-letter.is-current { border-color: var(--ok); box-shadow: 0 0 0 2px #345d4e33; }
 .quest-letter.is-locked { opacity: .38; cursor: not-allowed; }

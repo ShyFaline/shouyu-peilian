@@ -48,7 +48,7 @@ h1, h2, h3 { font-family: var(--serif); font-weight: 600; }
 .learning-path { padding: 42px 0 64px; border-top: 1px solid var(--line); scroll-margin-top: 24px; }
 .section-heading h2 { font-size: 30px; margin-bottom: 8px; }
 .section-heading > p:last-child { font-size: 14px; color: var(--muted); margin-bottom: 30px; }
-.path-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; }
+.path-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
 .path-card { display: block; padding: 26px; background: #fcfaf480; border: 1px solid var(--line); border-radius: 4px; text-decoration: none; transition: background .2s, transform .2s; }
 a.path-card:hover { background: var(--panel); transform: translateY(-4px); }
 .step-number { display: block; color: var(--accent); font-size: 11px; letter-spacing: .1em; margin-bottom: 25px; }
@@ -60,8 +60,6 @@ a.path-card:hover { background: var(--panel); transform: translateY(-4px); }
 .coming-label { color: var(--muted); padding: 2px 8px; background: #eae7dc; border-radius: 3px; }
 .upcoming { background: transparent; }
 .upcoming .step-number { color: var(--muted); }
-.home-records { margin: 22px 0 0; font-size: 13px; }
-.home-records a { color: var(--ok); }
 .home-note { text-align: center; padding: 34px 0 60px; }
 .home-note h2 { font-size: 24px; }
 .home-note p { color: var(--muted); font-size: 13px; }
@@ -180,6 +178,6 @@ input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--ok); }
 .sources a { color: var(--ok); }
 .sources code { font-size: 12px; }
 @keyframes arrive { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-@media (max-width: 900px) { .hero { gap: 20px; padding: 54px 0; } .paper-sheet { min-height: 330px; padding: 22px; } .path-grid { gap: 12px; } .path-card { padding: 20px; } .path-card h3 { font-size: 18px; } .practice-grid { gap: 16px; grid-template-columns: minmax(250px, 1fr) minmax(0, 1.4fr); } .panel { padding: 16px; } .toolbar label { margin-left: 0; } }
+@media (max-width: 900px) { .hero { gap: 20px; padding: 54px 0; } .paper-sheet { min-height: 330px; padding: 22px; } .path-grid { grid-template-columns: 1fr; gap: 12px; } .path-card { padding: 20px; } .path-card h3 { font-size: 18px; } .practice-grid { gap: 16px; grid-template-columns: minmax(250px, 1fr) minmax(0, 1.4fr); } .panel { padding: 16px; } .toolbar label { margin-left: 0; } }
 @media (max-width: 680px) { .site-header, .site-footer, main { width: calc(100% - 36px); } .site-header { min-height: 96px; gap: 14px; flex-wrap: wrap; padding: 18px 0 12px; } .brand { font-size: 21px; } .brand-seal { width: 34px; height: 38px; font-size: 25px; } .site-header nav { gap: 18px; } .site-header nav a { font-size: 12px; } .hero { grid-template-columns: 1fr; gap: 20px; padding: 40px 0; } .hero h1 { font-size: 44px; } .hero-intro { font-size: 14px; } .desktop-break { display: none; } .hero-art { width: min(350px, 90%); margin: 0 auto; padding: 20px 8px; } .paper-sheet { min-height: 310px; } .path-grid { grid-template-columns: 1fr; } .path-card { padding: 24px; } .path-card h3 { font-size: 22px; } .path-card p { min-height: auto; } .step-number { margin-bottom: 14px; } .home-note { padding-bottom: 34px; } .home-note h2 { font-size: 21px; } .page-heading { display: block; padding-top: 28px; } .page-heading h1 { font-size: 28px; } .page-heading .status { margin-top: 12px; } .practice-grid { grid-template-columns: 1fr; } .demo-stage { min-height: 200px; } .demo-stage img { max-height: 220px; } .placeholder strong { font-size: 15px; } .placeholder span { font-size: 12px; } #verdict { font-size: 20px; } #hint { font-size: 13px; } .sources { padding-top: 28px; } .sources h1 { font-size: 28px; } }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation: none !important; transition: none !important; } }

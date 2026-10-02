@@ -24,3 +24,7 @@ jobs:
         run: node --experimental-vm-modules practice/src/reliability.test.js
       - name: pose-goldens.test.js
         run: node practice/src/pose-goldens.test.js
+      - name: motion.test.js
+        run: node practice/src/motion.test.js
+      - name: pose-collision.test.js
+        run: node practice/src/pose-collision.test.js

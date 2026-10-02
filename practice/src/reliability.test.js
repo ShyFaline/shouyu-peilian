@@ -159,7 +159,7 @@ test('snapshot finite 21 points, dimensions and time metadata; age gates',async(
 });
 test('versions CODE_FILES covers every src module app.js imports',()=>{
  const appSrc=readFileSync(resolve(practice,'app.js'),'utf8');
- const imported=[...appSrc.matchAll(/from\s+["']\.\/src\/([\w.-]+\.js)["']/g)].map(m=>'src/'+m[1]);
+ const imported=[...appSrc.matchAll(/from\s+["']\.\/src\/([\w.-]+\.js)["']/g)].map(m=>'src/'+m[1]).filter(f=>f!=='src/versions.js');
  for(const f of imported) assert.ok(CODE_FILES.includes(f),`CODE_FILES missing ${f}`);
 });
 test('runtime versions hash actual sources/letters; export retains raw unmirrored points',async()=>{

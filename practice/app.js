@@ -7,6 +7,7 @@ import { createMotionState, resetMotion } from "./src/motion.js";
 import { canExportSnapshot, createSnapshot, serializeSnapshot } from "./src/snapshot.js";
 import { groupLetters, capabilityNote, letterAriaLabel, confusionCluster, isPracticeable } from "./src/letterLibrary.js";
 import { attachRotator, parseRotIndex } from "./src/rotator.js";
+import { createDemoHandStore, swapHowForHand } from "./src/demoHand.js";
 import {
   MODE_LEARN,
   MODE_QUEST,
@@ -59,6 +60,7 @@ const els = {
   hint: document.getElementById("hint"),
   how: document.getElementById("how"),
   demoStage: document.getElementById("demo-stage"),
+  demoHandToggle: document.getElementById("demo-hand-toggle"),
   demoImage: document.getElementById("demo-image"),
   demoGlyph: document.getElementById("demo-glyph"),
   demoLabel: document.getElementById("demo-label"),
@@ -112,6 +114,7 @@ const ctx = els.canvas.getContext("2d");
 
 let letters = [];
 let versionManifest = null;
+let demoHandStore = null;
 let current = null;
 let landmarker = null;
 let running = false;
@@ -138,7 +141,7 @@ let practiceDays = emptyDays();
 let lastEarnedBadges = new Set();
 let persisted = true;
 let storage = null;
-let rotIndex = new Map();
+let rotIndexes = { right: new Map(), left: new Map() };
 let detachRotator = null;
 let demoLetterId = null;
 
@@ -183,13 +186,26 @@ function setVerdict(decision, issues, extra) {
   els.hint.textContent = presented.hint || "";
 }
 
-function demoSrc(letter) {
-  return `./content/demos/${letter.id}_front.png`;
+function demoSrc(letter, hand) {
+  const suffix = hand === "left" ? "_front_L.png" : "_front.png";
+  return `./content/demos/${letter.id}${suffix}`;
+}
+
+function currentDemoHand() {
+  return demoHandStore ? demoHandStore.get() : "right";
+}
+
+function updateHandToggle() {
+  if (!els.demoHandToggle) return;
+  const hand = currentDemoHand();
+  for (const btn of els.demoHandToggle.querySelectorAll("button[data-hand]")) {
+    btn.setAttribute("aria-pressed", btn.dataset.hand === hand ? "true" : "false");
+  }
 }
 
 function updateRotHint() {
   if (!els.demoRotHint) return;
-  els.demoRotHint.hidden = !rotIndex.has(current?.id);
+  els.demoRotHint.hidden = !rotIndexes[currentDemoHand()].has(current?.id);
 }
 
 function applyDemoRotator(letter) {
@@ -199,7 +215,8 @@ function applyDemoRotator(letter) {
   }
   demoLetterId = letter ? letter.id : null;
   updateRotHint();
-  const frames = letter ? rotIndex.get(letter.id) : 0;
+  const hand = currentDemoHand();
+  const frames = letter ? rotIndexes[hand].get(letter.id) : 0;
   if (!frames) return;
   detachRotator = attachRotator({
     stage: els.demoStage,
@@ -207,6 +224,7 @@ function applyDemoRotator(letter) {
     letterId: letter.id,
     frames,
     alt: `${letter.title}标准手示范图`,
+    hand,
   });
 }
 
@@ -217,17 +235,18 @@ function showDemo(letter) {
   els.demoImage.removeAttribute("src");
   els.demoImage.alt = "";
 
-  const src = demoSrc(letter);
+  const hand = currentDemoHand();
+  const src = demoSrc(letter, hand);
   const probe = new Image();
   probe.onload = () => {
-    if (current?.id !== letter.id) return;
+    if (current?.id !== letter.id || currentDemoHand() !== hand) return;
     els.demoImage.src = src;
     els.demoImage.alt = `${letter.title}标准手示范图`;
     els.demoStage.dataset.mode = "image";
     applyDemoRotator(letter);
   };
   probe.onerror = () => {
-    if (current?.id !== letter.id) return;
+    if (current?.id !== letter.id || currentDemoHand() !== hand) return;
     els.demoImage.removeAttribute("src");
     els.demoImage.alt = "";
     els.demoStage.dataset.mode = "font";
@@ -243,10 +262,10 @@ function presentLetterIdle(letter) {
   const idle = presentJudge({
     decision: "blocked",
     practiceStatus: letter.practiceStatus,
-    issues: [{ code: `status.${letter.practiceStatus}`, hint: letter.how }],
+    issues: [{ code: `status.${letter.practiceStatus}`, hint: swapHowForHand(letter.how, currentDemoHand()) }],
   });
   if (isPracticeable(letter)) {
-    setVerdict("fail", [], { title: "比这个手型", state: "idle", hint: letter.how });
+    setVerdict("fail", [], { title: "比这个手型", state: "idle", hint: swapHowForHand(letter.how, currentDemoHand()) });
   } else {
     setVerdict("blocked", idle.hint ? [{ hint: idle.hint }] : [], idle);
   }
@@ -404,7 +423,7 @@ function selectLetter(letter) {
   showDemo(letter);
   els.demoLabel.textContent = letter.title;
   els.capability.textContent = capabilityNote(letter);
-  els.how.textContent = letter.how;
+  els.how.textContent = swapHowForHand(letter.how, currentDemoHand());
   presentLetterIdle(letter);
   renderSimilarHints(letter);
   syncLetterButtons(letter.id);
@@ -891,14 +910,21 @@ async function main() {
     return;
   }
 
-  fetch("./content/demos/rot/index.json", { cache: "no-store" })
-    .then((r) => (r && r.ok ? r.json() : null))
-    .then((raw) => {
-      rotIndex = parseRotIndex(raw);
-      if (rotIndex.has(demoLetterId)) applyDemoRotator(demoLetterId ? byId.get(demoLetterId) : null);
-      updateRotHint();
-    })
-    .catch(() => { /* 无旋转帧时示范区保持静态图 */ });
+  const fetchRotIndex = (url) =>
+    fetch(url, { cache: "no-store" })
+      .then((r) => (r && r.ok ? r.json() : null))
+      .then(parseRotIndex)
+      .catch(() => new Map());
+  Promise.all([
+    fetchRotIndex("./content/demos/rot/index.json"),
+    fetchRotIndex("./content/demos/rot-left/index.json"),
+  ]).then(([right, left]) => {
+    rotIndexes = { right, left };
+    if (rotIndexes[currentDemoHand()].has(demoLetterId)) {
+      applyDemoRotator(demoLetterId ? byId.get(demoLetterId) : null);
+    }
+    updateRotHint();
+  });
 
   try {
     mode = parsePracticeMode(globalThis.location?.search);
@@ -906,6 +932,7 @@ async function main() {
     mode = MODE_LEARN;
   }
   storage = readStorage();
+  demoHandStore = createDemoHandStore(storage);
   const loaded = loadProgress(storage, letters);
   progress = loaded.progress;
   persisted = loaded.persisted;
@@ -948,6 +975,20 @@ async function main() {
     mirror = els.mirrorToggle.checked;
     applyMirror();
   });
+
+  updateHandToggle();
+  if (els.demoHandToggle) {
+    els.demoHandToggle.addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-hand]");
+      if (!btn) return;
+      const hand = demoHandStore.set(btn.dataset.hand);
+      updateHandToggle();
+      if (current) {
+        els.how.textContent = swapHowForHand(current.how, hand);
+        showDemo(current);
+      }
+    });
+  }
 
   els.exportToggle.checked = false;
   els.exportBtn.disabled = true;

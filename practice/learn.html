@@ -24,7 +24,13 @@
     </div>
     <div class="practice-grid">
       <section id="demo-panel" class="panel demo" aria-labelledby="demo-label">
-        <p class="panel-label">01 / 看示范</p>
+        <div class="demo-head">
+          <p class="panel-label">01 / 看示范</p>
+          <div id="demo-hand-toggle" class="demo-hand-toggle" role="group" aria-label="示范用哪只手">
+            <button type="button" data-hand="right">右手</button>
+            <button type="button" data-hand="left">左手</button>
+          </div>
+        </div>
         <div id="demo-stage" class="demo-stage" data-mode="font"><img id="demo-image" alt="" /><div id="demo-glyph" class="glyph" aria-hidden="true">a</div></div>
         <p id="demo-rot-hint" class="demo-rot-hint" hidden>按住左右拖动，可以看手型的各个角度</p>
         <h2 id="demo-label" class="demo-label">正在准备字母…</h2>

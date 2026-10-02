@@ -1,7 +1,9 @@
 /** 示范手模拖动旋转。
  *
- * 帧约定见 blender/build_godot_hand_turntable.py：00 帧 = 正面机位，
+ * 帧约定见 blender/build_godot_hand_turntable.py：右手 00 帧 = 正面机位，
  * 帧号增大 = 观者看到手模左侧，因此向右拖动 = 帧号增大。
+ * 左手帧由右手水平镜像生成（tools/standard-figures/make_left_demos.py），
+ * 目录为 rot-left/，拖动方向与右手相反，属镜像预期。
  * 旋转帧目录缺失或索引读取失败时一律回退为静态正面图，不报错、不阻断练习。
  */
 
@@ -18,10 +20,11 @@ export function parseRotIndex(raw) {
   return out;
 }
 
-export function rotFrameUrl(letterId, frame, frames) {
+export function rotFrameUrl(letterId, frame, frames, hand = 'right') {
   if (!Number.isInteger(frame) || !Number.isInteger(frames) || frames <= 0) return '';
   const k = ((frame % frames) + frames) % frames;
-  return `./content/demos/rot/${letterId}/${String(k).padStart(2, '0')}.webp`;
+  const dir = hand === 'left' ? 'rot-left' : 'rot';
+  return `./content/demos/${dir}/${letterId}/${String(k).padStart(2, '0')}.webp`;
 }
 
 /** 拖动位移 → 帧号。拖满元素宽度 = 转半圈；startFrame 为按下时的帧。 */
@@ -40,10 +43,10 @@ export function stepFrame(frame, step, frames) {
 
 /**
  * 把拖动/键盘旋转绑到示范区。返回 detach；letter 无旋转帧时返回 null。
- * opts: { stage, image, letterId, frames, alt }
+ * opts: { stage, image, letterId, frames, alt, hand }，hand 缺省 'right'
  */
 export function attachRotator(opts) {
-  const { stage, image, letterId, frames, alt } = opts || {};
+  const { stage, image, letterId, frames, alt, hand = 'right' } = opts || {};
   if (!stage || !image || !letterId || !Number.isInteger(frames) || frames < 4) return null;
   let frame = 0;
   let dragging = false;
@@ -54,7 +57,7 @@ export function attachRotator(opts) {
   const apply = (next) => {
     if (next === lastApplied) return;
     lastApplied = next;
-    image.src = rotFrameUrl(letterId, next, frames);
+    image.src = rotFrameUrl(letterId, next, frames, hand);
     image.alt = next === 0 ? alt : `${alt}（已旋转）`;
     stage.dataset.rotFrame = String(next);
   };
@@ -100,7 +103,7 @@ export function attachRotator(opts) {
   if (typeof Image === 'function') {
     for (let k = 1; k < frames; k++) {
       const pre = new Image();
-      pre.src = rotFrameUrl(letterId, k, frames);
+      pre.src = rotFrameUrl(letterId, k, frames, hand);
     }
   }
 

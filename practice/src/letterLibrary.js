@@ -1,23 +1,5 @@
 /** 字母库分组与展示元信息。只读取 practiceStatus，不升格、不改判定。 */
 
-export const GROUP_META = {
-  practice: {
-    id: "practice",
-    title: "可跟练",
-    note: "先看示范，再试着摆出手型与动作。打开摄像头后，可以获得手型与动作提示。",
-  },
-  review: {
-    id: "review",
-    title: "待核对",
-    note: "这些字母暂不判定对错，可以查看示范，但不作为过关依据。",
-  },
-  demo: {
-    id: "demo",
-    title: "仅示范",
-    note: "这些字母目前只提供外形示范，不开放跟练判定。",
-  },
-};
-
 const PRACTICEABLE = new Set(["pose_practice", "accepted_practice"]);
 
 export function isPracticeable(letter) {

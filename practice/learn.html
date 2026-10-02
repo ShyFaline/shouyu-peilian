@@ -32,6 +32,10 @@
           </div>
         </div>
         <div id="demo-stage" class="demo-stage" data-mode="font"><img id="demo-image" alt="" /><div id="demo-glyph" class="glyph" aria-hidden="true">a</div></div>
+        <div id="demo-hidden-note" class="demo-hidden-note" hidden>
+          <p>这一关不看示范，凭记忆比划出目标手型</p>
+          <button type="button" id="demo-peek-btn" hidden>再看一眼示范</button>
+        </div>
         <p id="demo-rot-hint" class="demo-rot-hint" hidden>按住左右拖动，可以看手型的各个角度</p>
         <h2 id="demo-label" class="demo-label">正在准备字母…</h2>
         <p id="capability" class="capability-note"></p>
@@ -70,6 +74,7 @@
       <section class="panel live" aria-labelledby="live-title">
         <h2 id="live-title" class="panel-label">02 / 动手试试</h2>
         <div id="stage" class="stage" data-mirror="true"><div class="stage-media"><video id="video" playsinline autoplay muted></video><canvas id="overlay"></canvas><div class="placeholder"><div><span class="camera-mark" aria-hidden="true">＋</span><strong>准备好时，再打开摄像头</strong><span>让整只手出现在画面里，保持光线明亮</span></div></div></div><div class="live-verdict"><p id="verdict" data-state="idle">先看一看示范</p><p id="hint">不用急，准备好再开始。</p></div></div>
+        <div id="quest-timer" class="quest-timer" hidden aria-hidden="true"><div class="quest-timer-track"><div id="quest-timer-fill" class="quest-timer-fill"></div></div><span id="quest-timer-text">20.0</span></div>
         <p id="pass-seal" class="pass-seal" hidden><span class="pass-seal-mark" aria-hidden="true">通过</span><span id="pass-seal-text" aria-live="polite"></span></p>
         <div class="toolbar"><button id="start-btn" type="button" class="primary">打开摄像头</button><button id="stop-btn" type="button" disabled>停止摄像头</button><label><input id="mirror-toggle" type="checkbox" checked /> 镜像画面</label></div>
         <details class="export"><summary>高级工具 · 问题排查</summary><p class="atlas-note">仅在排查问题时使用。下载手部关键点。</p><label><input id="export-toggle" type="checkbox" /> 允许下载当前手部关键点</label><button id="export-btn" type="button" disabled>下载 JSON</button></details>
@@ -99,6 +104,18 @@
     </section>
     <noscript><p class="panel">学习页面需要启用 JavaScript 才能加载字母与练习提示。<a href="./index.html">返回首页</a></p></noscript>
   </main>
+  <div id="quest-overlay" class="quest-overlay" hidden>
+    <div class="quest-overlay-card" role="dialog" aria-modal="false" aria-labelledby="quest-overlay-title">
+      <p id="quest-overlay-title" class="quest-overlay-title"></p>
+      <p id="quest-overlay-desc" class="quest-overlay-desc"></p>
+      <p id="quest-overlay-count" class="quest-overlay-count" hidden>3</p>
+      <p id="quest-overlay-stars" class="quest-overlay-stars" hidden></p>
+      <div class="quest-overlay-actions">
+        <button type="button" id="quest-overlay-primary"></button>
+        <button type="button" id="quest-overlay-secondary" class="quest-overlay-quiet"></button>
+      </div>
+    </div>
+  </div>
   <div id="confetti-layer" class="confetti-layer" aria-hidden="true"></div>
   <footer class="site-footer"><span>一步一步，慢慢来。</span><a href="./sources.html">关于、隐私与来源</a></footer>
   <script type="module" src="./app.js?v=20261002"></script>

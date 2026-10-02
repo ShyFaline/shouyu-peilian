@@ -77,6 +77,14 @@ export function letterAriaLabel(letter) {
 
 export const CONFUSION_CLUSTERS = [
   {
+    ids: ["GF0021.V", "GF0021.W"],
+    note: "V 与 W 接近。V 只伸食指中指两指，W 再加无名指共三指；比错时先数伸了几根手指。",
+  },
+  {
+    ids: ["GF0021.I", "GF0021.Y"],
+    note: "I 与 Y 接近。I 只伸小指，Y 是小指和拇指一起伸；比错时先看拇指有没有伸出。",
+  },
+  {
     ids: ["GF0021.M", "GF0021.N", "GF0021.S"],
     note: "M、N、S 手型接近。目前规则还不能把它们稳定分开，这里的提示只作对照，不作为区分过关依据。",
   },

@@ -68,6 +68,7 @@ async function harness(opts={}){
   };
   h.location={search:opts.search||'',hash:opts.hash||'',pathname:'/learn.html',href:'http://local/learn.html'};
   const sandbox={document,Image:class {},performance:{now:()=>h.now},Date:ClockDate,TextEncoder,crypto:webcrypto,Blob,URLSearchParams,localStorage,location:h.location,
+    setTimeout:(f)=>0, clearTimeout(){},
     console:{log:(...a)=>h.logs.push(a),info:(...a)=>h.logs.push(a),warn:(...a)=>h.logs.push(a),error:(...a)=>h.logs.push(a)},
     URL:{createObjectURL:blob=>{h.blob=blob;return 'blob:test';},revokeObjectURL(){}},
     navigator:{mediaDevices:{getUserMedia:()=>{h.gumCalls++;return h.gum?h.gum():Promise.resolve(h.newStream());}}},

@@ -42,8 +42,10 @@ function neededFingertips(letter) {
   if (rules.hook) names.add(rules.hook);
   if (rules.pinch) names.add(rules.pinch);
   if (rules.pointing) {
-    const probe = (rules.extended || []).includes("index") ? "index" : (rules.extended || ["index"])[0];
-    names.add(probe || "index");
+    // 与 evaluate.js 的 pointing 探针一致：中指优先（手的轴线），其次食指
+    const ext = rules.extended || [];
+    const probe = ext.includes("middle") ? "middle" : ext.includes("index") ? "index" : (ext[0] || "index");
+    names.add(probe);
   }
   if (!names.size) {
     for (const name of Object.keys(FINGER_TIPS)) names.add(name);

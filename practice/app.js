@@ -744,7 +744,8 @@ function downloadHandFrame() {
   a.href = url;
   a.download = `handframe-${letterId}-${stamp}.json`;
   a.click();
-  URL.revokeObjectURL(url);
+  // 延迟撤销：Firefox/Safari 在 click 后立即 revoke 会取消下载
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
   setStatus("已下载 JSON", "ok");
 }
 

@@ -44,7 +44,7 @@ function recordCount(h,id,mode){
 }
 async function harness(opts={}){
   const h={now:1000,epoch:1700000000000,raf:new Map(),seq:0,downloads:[],detects:0,painted:false,hands:[hand()],logs:[],streams:[],gumCalls:0,store:opts.store||new Map(),storageClears:0};
-  const ids=['video','overlay','status','verdict','hint','how','demo-stage','demo-image','demo-glyph','demo-label','capability','letter-btns','atlas-btns','demo-btns','practice-group','review-group','demo-group','practice-count','review-count','demo-count','similar-hints','similar-hints-text','similar-hint-btns','start-btn','stop-btn','mirror-toggle','export-toggle','export-btn','stage','demo-panel','quest-panel','quest-btns','quest-progress-text','quest-bar-fill','letter-library','confetti-layer','learn-eyebrow','learn-title','live-title','pass-seal','pass-seal-text','records','records-list','records-empty','persist-note','records-clear','records-clear-confirm','records-clear-yes','records-clear-no'];
+  const ids=['video','overlay','status','verdict','hint','how','demo-stage','demo-image','demo-glyph','demo-label','capability','letter-btns','atlas-btns','demo-btns','practice-group','review-group','demo-group','practice-count','review-count','demo-count','similar-hints','similar-hints-text','similar-hint-btns','start-btn','stop-btn','mirror-toggle','export-toggle','export-btn','stage','demo-panel','quest-panel','quest-btns','quest-progress-text','quest-bar-fill','letter-library','confetti-layer','learn-eyebrow','learn-title','live-title','pass-seal','pass-seal-text','records','records-list','records-empty','persist-note','records-clear','records-clear-confirm','records-clear-yes','records-clear-no','records-total','records-hero-line','records-stats','records-wall','records-badges'];
   h.els=Object.fromEntries(ids.map(id=>[id,new Target()]));
   h.els['similar-hints'].hidden=true;
   for(const id of ['pass-seal','records-clear-confirm','persist-note']) h.els[id].hidden=true;
@@ -325,6 +325,38 @@ test('switching letter allows a new record',async()=>{
  assert.equal(recordCount(h,'GF0021.V','learn'),1);
  await h.select('GF0021.A');await h.select('GF0021.V');await h.recover();
  assert.equal(recordCount(h,'GF0021.V','learn'),2);
+});
+test('achievement sheet renders total, lit wall, badges, and records active days',async()=>{
+ const h=await harness();await h.pass();
+ assert.equal(h.els['records-total'].textContent,'1');
+ assert.match(h.els['records-hero-line'].textContent,/开始|保持/);
+ assert.equal(h.els['records-stats'].children.length,3);
+ const wall=h.els['records-wall'].children;
+ assert.equal(wall.length,9,'点亮墙覆盖全部可练字母');
+ const vCell=wall.find(b=>b.dataset.letterId==='GF0021.V');
+ assert.ok(vCell.classList.contains('is-lit'),'通过的字母点亮');
+ assert.match(vCell.getAttribute('aria-label'),/已通过 1 次/);
+ assert.ok(!wall.find(b=>b.dataset.letterId==='GF0021.A').classList.contains('is-lit'),'未通过的字母不点亮');
+ const badges=h.els['records-badges'].children;
+ assert.equal(badges.length,8);
+ assert.ok(badges[0].classList.contains('is-earned'),'首次通过解锁初露锋芒');
+ assert.ok(!badges.find(b=>(b.getAttribute('aria-label')||'').includes('百次磨炼')).classList.contains('is-earned'));
+ const days=JSON.parse(h.store.get('zhijian.practiceDays.v1'));
+ assert.equal(days.days.length,1,'通过当日记入活跃日');
+ assert.equal(h.els['records-empty'].hidden,true);
+ const empty=await harness();await empty.boot();
+ assert.equal(empty.els['records-total'].textContent,'0');
+ assert.equal(empty.els['records-empty'].hidden,false);
+ assert.equal(empty.els['records-wall'].children.length,9,'空数据也渲染点亮墙引导');
+});
+test('achievement sheet clear also wipes active days',async()=>{
+ const h=await harness();await h.pass();
+ assert.ok(h.store.has('zhijian.practiceDays.v1'));
+ await h.els['records-clear'].emit('click');
+ await h.els['records-clear-yes'].emit('click');
+ assert.equal(h.store.has('zhijian.practiceDays.v1'),false);
+ assert.equal(h.els['records-total'].textContent,'0');
+ assert.equal(h.els['records-empty'].hidden,false);
 });
 test('refresh reads sanitized records; unknown schema and illegal rows are dropped',async()=>{
  const store=new Map();

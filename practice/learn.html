@@ -70,10 +70,17 @@
       </section>
     </div>
     <section id="records" class="panel records" aria-labelledby="records-title">
-      <h2 id="records-title" class="panel-label">本机练习记录</h2>
-      <p class="letter-group-note">仅此浏览器。清除浏览器数据会丢失。只记下静态通过次数。</p>
+      <h2 id="records-title" class="panel-label">我的成就单</h2>
+      <p class="letter-group-note">仅此浏览器。清除浏览器数据会丢失。</p>
       <p id="persist-note" class="persist-note" hidden>当前记录只留在本次页面，未能写入此浏览器存储。</p>
-      <p id="records-empty" class="atlas-note">还没有通过记录。真实通过静态手型后，会记在这里。</p>
+      <p class="records-hero"><strong id="records-total">0</strong><span id="records-hero-line">摆对第一个手型，从这里开始。</span></p>
+      <div id="records-stats" class="records-stats" aria-label="累计统计"></div>
+      <h3 class="records-sub">字母点亮墙</h3>
+      <div id="records-wall" class="records-wall" role="group" aria-label="字母点亮墙"></div>
+      <h3 class="records-sub">成就徽章</h3>
+      <div id="records-badges" class="records-badges" role="group" aria-label="成就徽章"></div>
+      <h3 class="records-sub">最近记录</h3>
+      <p id="records-empty" class="atlas-note">还没有通过记录。摆对第一个手型，点亮第一格。</p>
       <div id="records-list" class="records-list"></div>
       <div class="records-actions">
         <button type="button" id="records-clear">清除记录</button>

@@ -3,8 +3,8 @@
  * Keep the local server/workspace frozen during a run; reload after any source edit.
  */
 export const CODE_FILES = [
-  'app.js', 'src/camera.js', 'src/coords.js', 'src/evaluate.js',
-  'src/inputQuality.js', 'src/judge.js', 'src/letterLibrary.js', 'src/motion.js', 'src/passState.js', 'src/practiceSession.js',
+  'app.js', 'src/achievements.js', 'src/camera.js', 'src/coords.js', 'src/evaluate.js',
+  'src/inputQuality.js', 'src/judge.js', 'src/letterLibrary.js', 'src/motion.js', 'src/passState.js', 'src/practiceDays.js', 'src/practiceSession.js',
   'src/progress.js', 'src/quest.js', 'src/rotator.js', 'src/snapshot.js', 'src/types.js', 'content/letters.json',
 ];
 export const RULE_FILES = [

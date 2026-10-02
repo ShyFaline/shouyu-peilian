@@ -30,9 +30,17 @@ import {
   saveProgress,
   clearProgressKey,
   recordPass,
-  visibleEntries,
   emptyProgress,
 } from "./src/progress.js";
+import {
+  emptyDays,
+  loadDays,
+  saveDays,
+  clearDaysKey,
+  markActiveDay,
+  localDayKey,
+} from "./src/practiceDays.js";
+import { BADGES, badgesFor, earnedBadgeIds, summarize } from "./src/achievements.js";
 
 const CONNECTIONS = [
   [0, 1], [1, 2], [2, 3], [3, 4],
@@ -86,6 +94,11 @@ const els = {
   passSeal: document.getElementById("pass-seal"),
   passSealText: document.getElementById("pass-seal-text"),
   records: document.getElementById("records"),
+  recordsTotal: document.getElementById("records-total"),
+  recordsHeroLine: document.getElementById("records-hero-line"),
+  recordsStats: document.getElementById("records-stats"),
+  recordsWall: document.getElementById("records-wall"),
+  recordsBadges: document.getElementById("records-badges"),
   recordsList: document.getElementById("records-list"),
   recordsEmpty: document.getElementById("records-empty"),
   persistNote: document.getElementById("persist-note"),
@@ -121,6 +134,8 @@ let mode = MODE_LEARN;
 let attempt = startAttempt(null, null);
 let progress = emptyProgress();
 let quest = emptyQuest();
+let practiceDays = emptyDays();
+let lastEarnedBadges = new Set();
 let persisted = true;
 let storage = null;
 let rotIndex = new Map();
@@ -313,12 +328,17 @@ function hidePassSeal() {
   if (els.passSealText) els.passSealText.textContent = "";
 }
 
-function showPassSeal(judged) {
+function badgeTitle(id) {
+  return BADGES.find((badge) => badge.id === id)?.title || id;
+}
+
+function showPassSeal(judged, extra = "") {
   if (!els.passSeal || !els.passSealText) return;
   els.passSealText.textContent = "";
   els.passSeal.hidden = false;
   els.passSeal.dataset.animate = "true";
-  els.passSealText.textContent = judged?.motion ? "记下一次手型与动作通过" : "记下一次静态通过";
+  const base = judged?.motion ? "记下一次手型与动作通过" : "记下一次静态通过";
+  els.passSealText.textContent = extra ? `${base} · ${extra}` : base;
 }
 
 function renderSimilarHints(letter) {
@@ -414,8 +434,86 @@ function formatRecordTime(iso) {
 
 function renderRecords() {
   if (!els.recordsList) return;
+  const summary = summarize(progress, quest, letters, practiceDays);
+  const badges = badgesFor(summary);
+  lastEarnedBadges = earnedBadgeIds(badges);
+  if (els.recordsTotal) els.recordsTotal.textContent = String(summary.stats.totalPasses);
+  if (els.recordsHeroLine) els.recordsHeroLine.textContent = summary.heroLine;
+  if (els.recordsStats) {
+    els.recordsStats.replaceChildren();
+    const stats = [
+      [summary.stats.litCount, `点亮字母 / ${summary.stats.practiceableCount}`],
+      [summary.stats.streak, "连续练习天数"],
+      [summary.stats.questPassedCount, `闯关通过 / ${summary.stats.practiceableCount}`],
+    ];
+    for (const [value, label] of stats) {
+      const item = document.createElement("div");
+      item.classList.add("records-stat");
+      const num = document.createElement("strong");
+      num.textContent = String(value);
+      const text = document.createElement("span");
+      text.textContent = label;
+      item.appendChild(num);
+      item.appendChild(text);
+      els.recordsStats.appendChild(item);
+    }
+  }
+  if (els.recordsWall) {
+    els.recordsWall.replaceChildren();
+    for (const cell of summary.wall) {
+      const letter = letters.find((item) => item.id === cell.id);
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.dataset.letterId = cell.id;
+      if (cell.lit) btn.classList.add("is-lit");
+      const glyph = document.createElement("span");
+      glyph.classList.add("records-wall-glyph");
+      glyph.textContent = letter?.demo ?? cell.label;
+      const name = document.createElement("span");
+      name.classList.add("records-wall-label");
+      name.textContent = cell.label;
+      btn.appendChild(glyph);
+      btn.appendChild(name);
+      if (cell.lit && cell.count > 0) {
+        const count = document.createElement("span");
+        count.classList.add("records-wall-count");
+        count.textContent = `×${cell.count}`;
+        btn.appendChild(count);
+      }
+      btn.setAttribute(
+        "aria-label",
+        cell.lit
+          ? `${cell.title}，已通过${cell.count > 0 ? ` ${cell.count} 次` : ""}${cell.questPassed ? "，闯关已过" : ""}`
+          : `${cell.title}，未点亮`,
+      );
+      btn.setAttribute("title", cell.lit ? "再练一次" : "去点亮这一格");
+      if (letter) btn.addEventListener("click", () => selectLetter(letter));
+      els.recordsWall.appendChild(btn);
+    }
+  }
+  if (els.recordsBadges) {
+    els.recordsBadges.replaceChildren();
+    for (const badge of badges) {
+      const item = document.createElement("div");
+      item.classList.add("records-badge");
+      if (badge.earned) item.classList.add("is-earned");
+      const title = document.createElement("strong");
+      title.textContent = badge.earned ? `${badge.title} ✓` : badge.title;
+      const desc = document.createElement("div");
+      desc.classList.add("records-badge-desc");
+      desc.textContent = badge.desc;
+      const state = document.createElement("div");
+      state.classList.add("records-badge-state");
+      state.textContent = badge.earned ? "已达成" : badge.gap;
+      item.appendChild(title);
+      item.appendChild(desc);
+      item.appendChild(state);
+      item.setAttribute("aria-label", `${badge.title}：${badge.desc}，${badge.earned ? "已达成" : badge.gap || "未达成"}`);
+      els.recordsBadges.appendChild(item);
+    }
+  }
   els.recordsList.replaceChildren();
-  const rows = visibleEntries(progress, letters);
+  const rows = summary.recent;
   if (els.recordsEmpty) els.recordsEmpty.hidden = rows.length > 0;
   for (const row of rows) {
     const letter = letters.find((item) => item.id === row.letterId);
@@ -438,11 +536,16 @@ function renderRecords() {
 function notePass(judged) {
   if (!canRecordPass({ judged, letter: current, mode, attempt })) return;
   attempt.recorded = true;
+  practiceDays = markActiveDay(practiceDays, localDayKey());
+  const daysSaved = saveDays(storage, practiceDays);
+  if (!daysSaved.persisted) persisted = false;
+  const wasLit = summarize(progress, quest, letters, practiceDays).wall.find((cell) => cell.id === current.id)?.lit;
+  const earnedBefore = lastEarnedBadges;
   if (mode === MODE_QUEST) {
     if (!markQuestPassed(quest, current.id, letters)) return;
     attempt.recorded = false;
     const status = questStatus(quest, letters);
-    persisted = saveQuest(storage, quest);
+    persisted = saveQuest(storage, quest) && persisted;
     showPassSeal(judged);
     renderQuest();
     celebrateQuestPass(status.complete);
@@ -463,8 +566,12 @@ function notePass(judged) {
   });
   const saved = saveProgress(storage, progress);
   persisted = saved.persisted;
-  showPassSeal(judged);
+  showPassSeal(judged, wasLit ? "" : `点亮新字母 ${current.label}！`);
   renderRecords();
+  const newlyEarned = [...lastEarnedBadges].filter((id) => !earnedBefore.has(id));
+  if (newlyEarned.length > 0) {
+    setStatus(`解锁成就：${newlyEarned.map((id) => badgeTitle(id)).join("、")}`, "ok");
+  }
 }
 
 function drawHand(lm, w, h, color) {
@@ -803,6 +910,7 @@ async function main() {
   progress = loaded.progress;
   persisted = loaded.persisted;
   quest = loadQuest(storage, letters);
+  practiceDays = loadDays(storage);
 
   const byId = new Map(letters.map((letter) => [letter.id, letter]));
   const grouped = groupLetters(letters);
@@ -877,7 +985,8 @@ async function main() {
   if (els.recordsClearYes) {
     els.recordsClearYes.addEventListener("click", () => {
       const result = clearProgressKey(storage);
-      if (!result.ok) {
+      const daysResult = clearDaysKey(storage);
+      if (!result.ok || !daysResult.ok) {
         setStatus("未能清除本机记录", "bad");
         if (els.persistNote) {
           els.persistNote.hidden = false;
@@ -887,6 +996,7 @@ async function main() {
         return;
       }
       progress = emptyProgress();
+      practiceDays = emptyDays();
       persisted = Boolean(storage);
       showClearConfirm(false);
       hidePassSeal();

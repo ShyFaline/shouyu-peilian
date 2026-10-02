@@ -125,6 +125,27 @@ details.letter-group > summary { font-size: 14px; color: var(--ink); font-weight
 .pass-seal[data-animate="true"] .pass-seal-mark { animation: seal-in .42s ease-out; }
 @keyframes seal-in { from { transform: scale(1.5) rotate(-18deg); opacity: 0; } to { transform: scale(1) rotate(-10deg); opacity: 1; } }
 .records { margin: 0 0 48px; }
+.records-hero { display: flex; align-items: baseline; gap: 14px; margin: 8px 0 16px; }
+.records-hero strong { font-family: var(--serif); font-size: 72px; line-height: 1; color: var(--ok); }
+.records-hero span { color: var(--muted); font-size: 15px; }
+.records-stats { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 6px; }
+.records-stat { flex: 1 1 120px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
+.records-stat strong { display: block; font-size: 24px; color: var(--ink); }
+.records-stat span { font-size: 13px; color: var(--muted); }
+.records-sub { margin: 20px 0 10px; font-size: 15px; font-weight: 600; }
+.records-wall { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 8px; }
+.records-wall button { position: relative; display: grid; place-items: center; gap: 2px; padding: 8px 4px 6px; border: 1px dashed var(--line); border-radius: 6px; background: transparent; cursor: pointer; }
+.records-wall button .records-wall-glyph { font-family: "SignPinyin", sans-serif; font-size: 34px; line-height: 1.3; color: var(--idle); }
+.records-wall button .records-wall-label { font-size: 12px; color: var(--muted); }
+.records-wall button.is-lit { border: 1px solid var(--ok); background: #edf3ee; }
+.records-wall button.is-lit .records-wall-glyph { color: var(--ok); }
+.records-wall button .records-wall-count { position: absolute; top: 2px; right: 5px; font-size: 11px; color: var(--ok); }
+.records-badges { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+.records-badge { padding: 10px 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); opacity: .55; }
+.records-badge.is-earned { opacity: 1; border-color: var(--ok); background: #edf3ee; }
+.records-badge strong { display: block; font-size: 14px; }
+.records-badge .records-badge-desc { font-size: 12px; color: var(--muted); }
+.records-badge .records-badge-state { font-size: 12px; color: var(--ok); }
 .records-list { display: grid; gap: 8px; }
 .records-list div { padding: 10px 12px; background: #f4f1e6; font-size: 14px; }
 .records-actions { margin-top: 14px; }

@@ -9,6 +9,7 @@ import { webcrypto, createHash } from 'node:crypto';
 import { groupLetters, groupIdForStatus, letterAriaLabel, capabilityNote, confusionCluster } from './letterLibrary.js';
 import { PROGRESS_KEY } from './progress.js';
 import { QUEST_KEY } from './quest.js';
+import { CODE_FILES } from './versions.js';
 const practice = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const pack = JSON.parse(readFileSync(resolve(practice, 'content/letters.json'), 'utf8'));
 const V = pack.letters.find(x => x.id === 'GF0021.V');
@@ -155,6 +156,11 @@ test('snapshot finite 21 points, dimensions and time metadata; age gates',async(
  assert.equal(s.canExportSnapshot(snap,{nowMs:1000,stale:true}),false);
  assert.equal(s.canExportSnapshot(snap,{nowMs:1000,qualityOk:false}),false);
  assert.equal(s.canExportSnapshot(snap,{nowMs:1000,currentLetterId:'other'}),false);
+});
+test('versions CODE_FILES covers every src module app.js imports',()=>{
+ const appSrc=readFileSync(resolve(practice,'app.js'),'utf8');
+ const imported=[...appSrc.matchAll(/from\s+["']\.\/src\/([\w.-]+\.js)["']/g)].map(m=>'src/'+m[1]);
+ for(const f of imported) assert.ok(CODE_FILES.includes(f),`CODE_FILES missing ${f}`);
 });
 test('runtime versions hash actual sources/letters; export retains raw unmirrored points',async()=>{
  const h=await harness();await h.pass();await h.download();const payload=JSON.parse(await h.blob.text());assert.equal(payload.schemaVersion,2);assert.equal(payload.mirrored,true);assert.deepEqual(payload.landmarks,hand());assert.match(payload.codeVersion,/^sha256:[a-f0-9]{64}$/);assert.match(payload.rulesVersion,/^sha256:[a-f0-9]{64}$/);

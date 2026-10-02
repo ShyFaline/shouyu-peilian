@@ -116,8 +116,7 @@ export const BADGES = [
   },
 ];
 
-export function computeBadges(progress, quest, letters, days, today) {
-  const summary = summarize(progress, quest, letters, days, today);
+export function badgesFor(summary) {
   const state = { wall: summary.wall, stats: summary.stats };
   return BADGES.map((badge) => ({
     id: badge.id,
@@ -126,6 +125,10 @@ export function computeBadges(progress, quest, letters, days, today) {
     earned: badge.earned(state),
     gap: badge.gap ? badge.gap(state) : "",
   }));
+}
+
+export function computeBadges(progress, quest, letters, days, today) {
+  return badgesFor(summarize(progress, quest, letters, days, today));
 }
 
 export function earnedBadgeIds(badges) {

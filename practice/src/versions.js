@@ -16,6 +16,15 @@ async function sha256(text) {
   return Array.from(new Uint8Array(bytes), b => b.toString(16).padStart(2, '0')).join('');
 }
 export async function loadVersionManifest(lettersText) {
+  // crypto.subtle 只在安全源（localhost/https）存在；局域网 http://IP 打开时
+  // 降级为 unversioned 清单，不能让版本审计拖垮整站加载。
+  if (!globalThis.crypto || !globalThis.crypto.subtle) {
+    return Object.freeze({
+      algorithm: 'SHA-256', format: 'path NUL sha256 LF; manifest order',
+      excluded: ['src/versions.js'], files: [],
+      codeVersion: 'unversioned', rulesVersion: 'unversioned',
+    });
+  }
   const files = [];
   for (const path of CODE_FILES) {
     let text = path === 'content/letters.json' ? lettersText : undefined;

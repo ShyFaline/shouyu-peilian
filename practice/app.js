@@ -520,8 +520,8 @@ function rememberSnapshot(lm, handedness, w, h, capturedAt) {
     mirrored: mirror,
     targetLetterId: current?.id || "",
     sourceType: "camera",
-    codeVersion: versionManifest.codeVersion,
-    rulesVersion: versionManifest.rulesVersion,
+    codeVersion: versionManifest?.codeVersion || "unversioned",
+    rulesVersion: versionManifest?.rulesVersion || "unversioned",
     handedness: handednessPayload(handedness),
     landmarks: Array.from(lm, (p) => ({ x: p.x, y: p.y, z: p.z ?? 0 })),
   });
@@ -745,8 +745,6 @@ async function main() {
     if (!res.ok) throw new Error(`字母包加载失败 (${res.status})`);
     const lettersText = await res.text();
     pack = JSON.parse(lettersText);
-    versionManifest = await loadVersionManifest(lettersText);
-    console.info("practice version manifest", versionManifest);
   } catch (err) {
     console.error(err);
     setStatus("字母包没读到", "bad");
@@ -756,6 +754,13 @@ async function main() {
       hint: String(err && err.message ? err.message : err),
     });
     return;
+  }
+  try {
+    versionManifest = await loadVersionManifest(lettersText);
+    console.info("practice version manifest", versionManifest);
+  } catch (err) {
+    console.warn("version manifest unavailable, exports degrade to unversioned", err);
+    versionManifest = null;
   }
   letters = pack.letters || [];
   if (!letters.length) {

@@ -740,10 +740,11 @@ function showClearConfirm(on) {
 
 async function main() {
   let pack;
+  let lettersText;
   try {
     const res = await fetch("./content/letters.json", { cache: "no-store" });
     if (!res.ok) throw new Error(`字母包加载失败 (${res.status})`);
-    const lettersText = await res.text();
+    lettersText = await res.text();
     pack = JSON.parse(lettersText);
   } catch (err) {
     console.error(err);
@@ -759,7 +760,7 @@ async function main() {
     versionManifest = await loadVersionManifest(lettersText);
     console.info("practice version manifest", versionManifest);
   } catch (err) {
-    console.warn("version manifest unavailable, exports degrade to unversioned", err);
+    console.warn("version manifest unavailable, exports degrade to unversioned", err && err.message ? err.message : err);
     versionManifest = null;
   }
   letters = pack.letters || [];

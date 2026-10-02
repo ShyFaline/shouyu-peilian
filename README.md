@@ -2,9 +2,9 @@
 
 浏览器本地跑的国标手指字母陪练：摄像头变成手的几何，几何再变成「像不像、差在哪」。识别在本机完成，默认不上传视频。
 
-字母包覆盖 GF 0021—2019 的 **32 个手指字母**（A–Z 以及 zh / ch / sh / ng / ê / ü）。当前本地版本从介绍首页进入跟练或静态自测，默认目标为 **A**。字母按实际能力分为可跟练9个、待核对18个、仅示范5个；U仍待核对，J/Z只核静态部分。跟练和自测通过记录仅保存在本浏览器，不保存视频或关键点。
+字母包覆盖 GF 0021—2019 的 **32 个手指字母**（A–Z 以及 zh / ch / sh / ng / ê / ü）。当前本地版本从介绍首页进入跟练或闯关，默认目标为 **A**。字母按实际能力分为可跟练9个、待核对18个、仅示范5个；U仍待核对，J/Z只核静态部分。跟练和闯关通过记录仅保存在本浏览器，不保存视频或关键点。
 
-前端产品化改造尚未提交发布；在线站点不保证包含本地新增功能。已实现内容与待验收事项见 `docs/前端产品化迭代.md`。
+在线站点与本地仓库可能存在差异。已实现内容与待验收事项见 `docs/前端产品化迭代.md`。
 
 规划总稿：`总体目标与并行拆分.md`。
 
@@ -14,9 +14,9 @@ https://shyfaline.github.io/shouyu-peilian/
 
 手机或电脑浏览器直接打开，不用装东西。首次加载要下约 17 MB 的识别资源（wasm + 模型），慢一点是正常的，之后就进缓存。
 
-站点只发布 `practice/` 这一个目录，仓库里其它资料不上网。本地工作流配置为：改动 `practice/**` 或两个工作流并推到 `main` 后，`pages.yml` 先调用同一提交的可复用 `test.yml`，三组必跑全部成功后才执行部署。测试失败或取消时，依赖它的部署作业不会执行；手动发布也经过相同测试门。测试作业只有读取仓库权限，Pages和身份令牌写权限只授予部署作业。当前只完成本地结构校验与测试复跑，远端Actions结果和发布时间尚未验证。
+站点只发布 `practice/` 这一个目录，仓库里其它资料不上网。本地工作流配置为：改动 `practice/**` 或两个工作流并推到 `main` 后，`pages.yml` 先调用同一提交的可复用 `test.yml`，必跑测试全部成功后才执行部署。测试失败或取消时，依赖它的部署作业不会执行；手动发布也经过相同测试门。测试作业只有读取仓库权限，Pages和身份令牌写权限只授予部署作业。远端 Actions 与 Pages 部署均已实测验证（2026-10-02）。
 
-浏览器只允许在**安全上下文**里开摄像头：`127.0.0.1`、`localhost` 或 `https://`。线上是 https，可以直接用；局域网内用 `http://192.168.x.x` 打开则读不到摄像头。
+浏览器只允许在**安全上下文**里开摄像头：`127.0.0.1`、`localhost` 或 `https://`。线上是 https，可以直接用；局域网内用 `http://192.168.x.x` 打开则读不到摄像头（页面其余功能仍可浏览与跟练，仅导出版本号降级为 unversioned）。
 
 ## 状态机
 
@@ -27,22 +27,22 @@ https://shyfaline.github.io/shouyu-peilian/
 | `pending_review` | `decision` 不得为 pass。界面写「暂不判定」。U不能记通过，也不能进入自测题目。 |
 | `demo_only` | 不得 pass。界面写「仅示范」。 |
 | `pose_practice` | 质量、几何和持续保持均通过后可以 pass。保持不足时提示「姿态接近，停稳」，成功仅表示静态手型通过，不表示完整掌握。 |
-| 质量失败 | `undetermined`，文案「暂时无法判断」，不用「伸直 / 收起来」类动作 hint。 |
+| 质量失败 | `undetermined`，兜底文案「暂时无法判断」；无手/画面里有两只手/指尖出框分别有具体引导，不用「伸直 / 收起来」类动作 hint。 |
 | 无目标 / 空规则 / 未知规则字段 / 状态不允许判定 | `blocked` |
 
 J / Z 只核静态手型。跟练示范优先读 `practice/content/demos/{字母ID}_front.png`；没有图时回退 SignPinyin 字体（字体不是识别模型）。自测隐藏示范与动作答案。2026-10-01 起 32 个字母全部接入 Godot XR（CC0）正面示范，并带 24 帧拖动旋转（`practice/content/demos/rot/`，`blender/build_godot_hand_poc.py` 姿态表 + `blender/build_godot_hand_turntable.py` 渲染）；旧 Human Base Meshes 图已全部退役。明细见 `practice/content/demos/manifest.json`。
 
 ## 本地运行
 
-使用桌面 Chrome。在本目录开静态服务（不要用 `file://`）：
+推荐**桌面 Chrome 最新版**。双击根目录 `启动服务.bat`（自动起 `practice/serve.py`，带 no-cache），或在本目录手动起静态服务（不要用 `file://`）：
 
 ```bash
-python -m http.server 8765
+py -3 practice/serve.py 8000   # 等价 python -m http.server，但响应带 Cache-Control: no-cache
 ```
 
-打开：http://127.0.0.1:8765/practice/index.html
+打开：http://127.0.0.1:8000/
 
-先在首页选择学习或自测，再主动点「打开摄像头」。跟练可切换字母查看动作，自测不显示答案；切换模式会停止摄像头并清空保持状态。可随时点「停止摄像头」释放轨道，之后重新开始。模型资源在 `practice/models` 与 `practice/vendor`。记录入口为 `practice/learn.html#records`，静态自测入口为 `practice/learn.html?mode=test`。来源页：http://127.0.0.1:8765/practice/sources.html
+先在首页选择学习或闯关，再主动点「打开摄像头」。跟练可切换字母查看动作；切换模式会停止摄像头并清空保持状态。可随时点「停止摄像头」释放轨道，之后重新开始。模型资源在 `practice/models` 与 `practice/vendor`。记录入口为 `practice/learn.html#records`。来源页：/sources.html
 
 镜像时视频和 canvas 一起翻（`.stage-media`），左下角判定文字不翻。视频与 canvas 同一盒、`object-fit: contain`。
 
@@ -51,18 +51,16 @@ python -m http.server 8765
 几何与编排是纯函数，不依赖摄像头（本机有 bun 或 Node 即可）：
 
 ```bash
-bun practice/src/evaluate.test.js
-```
-
-或：
-
-```bash
 node practice/src/evaluate.test.js
 node --experimental-vm-modules practice/src/reliability.test.js
 node practice/src/pose-goldens.test.js
+node practice/src/motion.test.js
+node practice/src/pose-collision.test.js
+node practice/src/practiceDays.test.js
+node practice/src/achievements.test.js
 ```
 
-第二条需要支持 `vm.SourceTextModule` 的 Node（本轮使用 Node 22.22.2），执行真实 app/core，只模拟 DOM、媒体、RAF、时钟和 vendor 边界。不安装依赖。原源码匹配用例标为结构检查，不等于行为验证；VM 测试也不是真实浏览器或真人实验，不报准确率。第三条是合成标准姿态的 8×8 规则回归：通过只表示示范与判定规则一致，不是国标正确，也不是真实检测通过。
+第二条需要支持 `vm.SourceTextModule` 的 Node（本轮使用 Node 22.22.2），执行真实 app/core，只模拟 DOM、媒体、RAF、时钟和 vendor 边界。不安装依赖。原源码匹配用例标为结构检查，不等于行为验证；VM 测试也不是真实浏览器或真人实验，不报准确率。第三条是合成标准姿态的 10×10 规则回归：通过只表示示范与判定规则一致，不是国标正确，也不是真实检测通过。
 
 `fixtures` 测试枚举实际 JSON，检查 schema v2 并调用共享核心；0 个时明确打印“真人未执行”。无独立标签不算准确性。`evaluate` 仅单帧几何，`judge` 增加质量/内容与连续帧门；离线合同见 `practice/src/types.js`。旧文件缺有限正尺寸拒绝回放，不猜尺寸。
 
@@ -111,9 +109,9 @@ py -3.12 practice/src/render-loop/run.py
 
 上例为字段示意（非可回放样本）；`landmarks` 必须有 21 个有限点。`capturedAt` 是检测开始时的 epoch 毫秒，`frameId` 为非负安全整数；`mirrored` 仅指显示镜像，JSON 点不翻转。视频和 JSON 都不上传。
 
-下载入口独立检查 epoch 帧龄及单调时钟/活动流门，不依赖后台 RAF：年龄 0–400ms 可用，>400ms 或时间回退拒绝。重复视频帧不累计；失效后需重新累计 6 个新有效帧，6 帧不是持续 400ms，两参数仍为 UNVERIFIED。隐藏/恢复、mute、异常、切目标和停止会清掉旧成功、快照与骨架。
+下载入口独立检查 epoch 帧龄及单调时钟/活动流门，不依赖后台 RAF：年龄 0–400ms 可用，>400ms 或时间回退拒绝。重复视频帧不累计；失效后需重新保持达标时长（当前初值 3 秒，UNVERIFIED 待验证）。隐藏/恢复、mute、异常、切目标和停止会清掉旧成功、快照与骨架。
 
-启动会读取 `practice/src/versions.js` 清单中的实际核心源码与同一次加载的 letters 原文，记录逐文件 SHA-256 manifest 到控制台 `practice version manifest`；组合得到导出的两个版本，不使用 HEAD 或标准编号代替。哈希 helper 自身明确排除，schema 仍为 v2。采集期间冻结服务目录，修改代码后刷新并保存新 manifest；加载源码/哈希失败不启动。浏览器、实机摄像头及真人验证需另做。
+启动会读取 `practice/src/versions.js` 清单中的实际核心源码与同一次加载的 letters 原文，记录逐文件 SHA-256 manifest 到控制台 `practice version manifest`；组合得到导出的两个版本，不使用 HEAD 或标准编号代替。哈希 helper 自身明确排除，schema 仍为 v2。采集期间冻结服务目录，修改代码后刷新并保存新 manifest。哈希不可用（如非安全源）时导出仍可工作，版本号记为 `unversioned`。浏览器、实机摄像头及真人验证需另做。
 
 ## 目录
 

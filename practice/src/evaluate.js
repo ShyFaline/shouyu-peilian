@@ -109,7 +109,11 @@ export function spreadBetween(lm, a, b) {
 }
 
 export function pointingOf(lm, name) {
-  const d = fingerDir(lm, name || "index");
+  // 朝向以近节（指根→近节）为准：钩状手指（J）指尖被弯回掌心，mcp→tip 方向会坍缩
+  const finger = name || "index";
+  const mcp = lm[FINGER_MCPS[finger]];
+  const pip = lm[FINGER_PIPS[finger]];
+  const d = { x: pip.x - mcp.x, y: pip.y - mcp.y };
   if (Math.abs(d.x) > Math.abs(d.y) * WIDE_SIDE_RATIO) return "side";
   return d.y < 0 ? "up" : "down";
 }
@@ -332,6 +336,9 @@ export function evaluate(letter, lm, geom) {
   if (rules.hook === "index") {
     if (curls.index === "none") {
       issues.push({ code: "index.not_hooked", hint: "食指弯成钩，不要完全伸直" });
+    } else if (pts[8].y >= pts[5].y) {
+      // 钩尖应抬在指根上方；全攥时指尖落进掌心（区分 J 与握拳）
+      issues.push({ code: "index.hook_tip_low", hint: "食指只弯中节成钩，指尖别攥进掌心" });
     }
   }
 

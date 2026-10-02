@@ -405,7 +405,7 @@ def cmd_landmarks(arm, mesh):
     pose-goldens.test.js 断言恒等矩阵：每个 golden 仅通过自身字母（B×U 碰撞除外）。
     只导出 8 个主路径字母；改角度表或改判定规则后：重跑本模式 + node practice/src/pose-goldens.test.js。"""
     from bpy_extras.object_utils import world_to_camera_view
-    golden_ids = ["A", "B", "I", "L", "U", "V", "W", "Y"]
+    golden_ids = ["A", "B", "I", "J", "L", "U", "V", "W", "Y", "Z"]
     sc = setup_render()
     center, palm_normal, finger_up = palm_frame(arm)
     axis = flex_axis()

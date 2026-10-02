@@ -20,7 +20,7 @@ const goldensDir = join(root, "pose-goldens");
 const pack = JSON.parse(readFileSync(join(root, "../content/letters.json"), "utf8"));
 const byId = Object.fromEntries((pack.letters || []).map((letter) => [letter.id, letter]));
 
-const GOLDEN_IDS = ["A", "B", "U", "V", "W", "L", "Y", "I"].map((l) => `GF0021.${l}`);
+const GOLDEN_IDS = ["A", "B", "U", "V", "W", "L", "Y", "I", "J", "Z"].map((l) => `GF0021.${l}`);
 
 const files = readdirSync(goldensDir).filter((name) => name.toLowerCase().endsWith(".json"));
 const goldens = new Map(files.map((name) => {
@@ -43,7 +43,7 @@ function test(name, fn) {
   }
 }
 
-test("golden 集合覆盖 8 个主路径字母且仅这 8 个", () => {
+test("golden 集合覆盖 10 个字母（含 J/Z 静态）且仅这 10 个", () => {
   assert.deepEqual([...goldens.keys()].sort(), [...GOLDEN_IDS].sort(),
     `golden 集合与主路径不一致: ${[...goldens.keys()].join(",")}`);
 });

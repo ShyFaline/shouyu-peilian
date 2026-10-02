@@ -23,7 +23,16 @@
         <p class="hero-intro">从认识一个手型开始。看清示范，试着比一比，<br class="desktop-break" />按自己的节奏练习汉语手指字母。</p>
         <div class="hero-actions"><a class="button primary" href="./learn.html">开始学习 <span aria-hidden="true">↗</span></a><a class="text-link" href="#learning-path">先了解怎么练 <span aria-hidden="true">↓</span></a></div>
       </div>
-      <div class="hero-art" aria-hidden="true"><div class="paper-sheet"><span class="paper-caption">手指字母 · 习字页</span><img class="hero-figure" src="./content/art/hero-l.webp" alt="" decoding="async" /><span class="paper-letter">L <small>从一个手型开始</small></span><span class="paper-stamp">日有所学</span></div></div>
+      <div class="hero-art" aria-hidden="true"><div class="paper-sheet"><span class="paper-caption">手指字母 · 习字页</span><img class="hero-figure" id="hero-figure" src="./content/art/hero-l.webp" alt="" decoding="async" /><span class="paper-letter"><span id="hero-letter">L</span> <small>从一个手型开始</small></span><span class="paper-stamp">日有所学</span></div></div>
+      <script>
+        (function () {
+          var letters = ["A","B","C","CH","D","E","F","G","H","I","J","K","L","M","N","NG","O","P","Q","R","S","SH","T","U","V","W","X","Y","Z","ZH"];
+          var pick = letters[Math.floor(Math.random() * letters.length)];
+          var img = document.getElementById("hero-figure");
+          img.src = "./content/art/hero-" + pick.toLowerCase() + ".webp";
+          document.getElementById("hero-letter").textContent = pick;
+        })();
+      </script>
     </section>
     <section id="learning-path" class="learning-path" aria-labelledby="path-title">
       <div class="section-heading"><p class="eyebrow">今天，学一点</p><h2 id="path-title">先看清，再动手。</h2><p>不急着记住所有字母，一次练好一个。</p></div>

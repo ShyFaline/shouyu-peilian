@@ -16,6 +16,7 @@ import {
   MOTION_WINDOW_MS,
   MOTION_MAX_GAP_MS,
 } from "./motion.js";
+import { judge, presentJudge, createHold } from "./judge.js";
 
 const TRACE_HOOK = { kind: "trace", finger: "pinky", path: "hook" };
 const TRACE_Z = { kind: "trace", finger: "index", path: "z" };
@@ -229,5 +230,124 @@ test("resetMotion 清空并回到 pose", () => {
   assert.equal(state.samples.length, 0);
   assert.equal(state.lastVideoTime, null);
 });
+
+// ---- judge 编排层：合成字母走通 hold → collecting → match → pass ----
+// 生产不可达（EH/UE 在状态门被 blocked），这里用合成 pose_practice + motion 字母驱动 judge()。
+
+const UNIT = { width: 1, height: 1, coordSpace: "image_normalized" };
+
+function pt(x, y, z = 0) {
+  return { x, y, z };
+}
+
+function setFinger(lm, mcp, extended, x, tipX) {
+  const mcpY = 0.58;
+  const tx = tipX ?? x;
+  lm[mcp] = pt(x, mcpY);
+  if (extended) {
+    lm[mcp + 1] = pt(x + (tx - x) / 3, mcpY - 0.12);
+    lm[mcp + 2] = pt(x + (tx - x) * 2 / 3, mcpY - 0.24);
+    lm[mcp + 3] = pt(tx, mcpY - 0.36);
+  } else {
+    lm[mcp + 1] = pt(x, mcpY - 0.05);
+    lm[mcp + 2] = pt(x + 0.015, mcpY + 0.04);
+    lm[mcp + 3] = pt(x + 0.02, mcpY + 0.1);
+  }
+}
+
+/** 四指并拢伸直、拇指收起（UE 静态部分同形），可整体平移用于 shake。 */
+function shakeHand(dy = 0) {
+  const lm = Array.from({ length: 21 }, () => pt(0.5, 0.5));
+  lm[0] = pt(0.5, 0.9);
+  lm[1] = pt(0.42, 0.82);
+  lm[2] = pt(0.36, 0.74);
+  lm[3] = pt(0.4, 0.7);
+  lm[4] = pt(0.44, 0.76);
+  setFinger(lm, 5, true, 0.44);
+  setFinger(lm, 9, true, 0.5);
+  setFinger(lm, 13, true, 0.56);
+  setFinger(lm, 17, true, 0.62);
+  if (dy) for (const p of lm) p.y += dy;
+  return lm;
+}
+
+const SHAKE_LETTER = {
+  id: "GF0021.T1",
+  label: "T1",
+  hand: "right",
+  practiceStatus: "pose_practice",
+  rules: {
+    extended: ["index", "middle", "ring", "pinky"],
+    curled: ["thumb"],
+    pointing: "up",
+    motion: { kind: "shake", part: "hand", axis: "vertical", cycles: 2 },
+  },
+};
+
+/** 逐帧驱动 judge()，motion 状态作为第三参传入（与 app.js:576 调用方式一致）。 */
+function drive(letter, hold, motionState, frames) {
+  let judged = null;
+  let t = frames.t0 || 0;
+  for (const lm of frames.hands) {
+    judged = judge(
+      { letter, lm, hands: [lm], geom: UNIT, videoTime: t / 1000, nowMs: t },
+      hold,
+      motionState,
+    );
+    t += frames.step ?? 80;
+  }
+  return { judged, nextT: t };
+}
+
+test("judge 编排：静态保持 → 收集 → 晃动两周期 → pass", () => {
+  const hold = createHold();
+  const motionState = createMotionState();
+
+  // 阶段一：手型保持 4 秒（PASS_MS=3000），应进入 collecting，decision 仍 fail（动作未完成），
+  // 进入收集瞬间提示做动作；保持不动时逐帧匹配会给 no_oscillation 提示，两者都属"晃动"类引导
+  const hold1 = drive(SHAKE_LETTER, hold, motionState, { hands: shakeHands(0, 40), step: 100 });
+  assert.equal(hold1.judged.decision, "fail");
+  assert.equal(hold1.judged.motion.phase, "collecting");
+  assert.match(hold1.judged.issues[0].hint, /晃动/);
+  assert.match(presentJudge(hold1.judged).title, /晃动/);
+
+  // 阶段二：整体上下平移两个完整周期（幅度超过 MIN_AMPLITUDE），应 pass
+  const amp = 0.16; // 绝对平移幅度；handScale≈0.32，归一化后 0.5 > MIN_AMPLITUDE(0.35)
+  const wave = [0, amp, 0, -amp, 0, amp, 0, -amp, 0, amp, 0, -amp, 0];
+  const hold2 = createHold();
+  const r2 = drive(SHAKE_LETTER, hold2, motionState, {
+    hands: wave.map((dy) => shakeHand(dy)),
+    t0: hold1.nextT,
+  });
+  assert.equal(r2.judged.decision, "pass", JSON.stringify(r2.judged.motion));
+  assert.equal(presentJudge(r2.judged).title, "做对了");
+});
+
+test("judge 编排：窗口超时回落重新计时；晃不动给出 almost 提示", () => {
+  // 超时：进 collecting 后停住不动，超过窗口后下一帧回到重新保持（fail + 保持住）
+  const holdA = createHold();
+  const m1 = createMotionState();
+  const r1 = drive(SHAKE_LETTER, holdA, m1, { hands: shakeHands(0, 40), step: 100 });
+  assert.equal(r1.judged.motion.phase, "collecting");
+  const r1b = drive(SHAKE_LETTER, createHold(), m1, { hands: shakeHands(0, 1), t0: r1.nextT + 4000 });
+  assert.equal(r1b.judged.decision, "fail");
+  assert.equal(r1b.judged.motion.phase, "pose", "超时后回落重新保持");
+  assert.equal(m1.samples.length, 0, "旧缓冲已清空");
+  assert.match(r1b.judged.issues[0].hint, /重新来/);
+
+  // 晃一次：few_cycles → fail + 次数提示
+  const holdB = createHold();
+  const m2 = createMotionState();
+  const r2 = drive(SHAKE_LETTER, holdB, m2, { hands: shakeHands(0, 40), step: 100 });
+  assert.equal(r2.judged.motion.phase, "collecting");
+  const wave = [0, 0.16, 0, -0.16, 0, 0, 0, 0]; // 只有一个完整周期
+  const r3 = drive(SHAKE_LETTER, createHold(), m2, { hands: wave.map((dy) => shakeHand(dy)), t0: r2.nextT });
+  assert.equal(r3.judged.decision, "fail");
+  assert.match(r3.judged.issues[0].hint, /次数不够|晃动/);
+});
+
+function shakeHands(dy, n) {
+  return Array.from({ length: n }, () => shakeHand(dy));
+}
 
 console.log("motion.test.js 合成序列回归完成");

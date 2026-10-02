@@ -5,7 +5,7 @@
 export const CODE_FILES = [
   'app.js', 'src/achievements.js', 'src/camera.js', 'src/coords.js', 'src/demoHand.js', 'src/evaluate.js',
   'src/inputQuality.js', 'src/judge.js', 'src/letterLibrary.js', 'src/motion.js', 'src/passState.js', 'src/practiceDays.js', 'src/practiceSession.js',
-  'src/progress.js', 'src/quest.js', 'src/rotator.js', 'src/snapshot.js', 'src/types.js', 'content/letters.json',
+  'src/progress.js', 'src/quest.js', 'src/questRun.js', 'src/rotator.js', 'src/snapshot.js', 'src/types.js', 'content/letters.json',
 ];
 export const RULE_FILES = [
   'src/coords.js', 'src/evaluate.js', 'src/inputQuality.js', 'src/judge.js',

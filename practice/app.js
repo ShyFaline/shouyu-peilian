@@ -20,11 +20,28 @@ import {
 import {
   emptyQuest,
   isQuestUnlocked,
+  levelConfig,
   loadQuest,
   markQuestPassed,
+  questSequence,
   questStatus,
+  recordQuestResult,
   saveQuest,
+  starRating,
 } from "./src/quest.js";
+import {
+  PHASE,
+  beginCountdown,
+  beginPlaying,
+  checkTimeout,
+  countdownStep,
+  createQuestRun,
+  failTimeout,
+  finishPass,
+  remainingMs,
+  startIntro,
+  useHint,
+} from "./src/questRun.js";
 import {
   readStorage,
   loadProgress,
@@ -89,6 +106,18 @@ const els = {
   questBtns: document.getElementById("quest-btns"),
   questProgressText: document.getElementById("quest-progress-text"),
   questBarFill: document.getElementById("quest-bar-fill"),
+  questTimer: document.getElementById("quest-timer"),
+  questTimerFill: document.getElementById("quest-timer-fill"),
+  questTimerText: document.getElementById("quest-timer-text"),
+  questOverlay: document.getElementById("quest-overlay"),
+  questOverlayTitle: document.getElementById("quest-overlay-title"),
+  questOverlayDesc: document.getElementById("quest-overlay-desc"),
+  questOverlayCount: document.getElementById("quest-overlay-count"),
+  questOverlayStars: document.getElementById("quest-overlay-stars"),
+  questOverlayPrimary: document.getElementById("quest-overlay-primary"),
+  questOverlaySecondary: document.getElementById("quest-overlay-secondary"),
+  demoHiddenNote: document.getElementById("demo-hidden-note"),
+  demoPeekBtn: document.getElementById("demo-peek-btn"),
   letterLibrary: document.getElementById("letter-library"),
   confettiLayer: document.getElementById("confetti-layer"),
   learnEyebrow: document.getElementById("learn-eyebrow"),
@@ -144,6 +173,24 @@ let storage = null;
 let rotIndexes = { right: new Map(), left: new Map() };
 let detachRotator = null;
 let demoLetterId = null;
+let questRun = createQuestRun();
+let questCountdownShown = null;
+let questFlashTimer = 0;
+let questTimerLastTenth = -1;
+let questOverlayAction = null;
+
+function questRunActive() {
+  return mode === MODE_QUEST;
+}
+
+function questLevelIndex() {
+  return questSequence(letters).findIndex((letter) => letter.id === questRun.letterId);
+}
+
+function clearQuestFlash() {
+  if (questFlashTimer) clearTimeout(questFlashTimer);
+  questFlashTimer = 0;
+}
 
 function invalidateFrame(reason = "stale") {
   resetHold(hold);
@@ -296,7 +343,18 @@ function renderQuest() {
         : unlocked
           ? "quest-letter"
           : "quest-letter is-locked";
-    btn.textContent = passed ? `${letter.label} ✓` : letter.label;
+    const labelSpan = document.createElement("span");
+    labelSpan.textContent = passed ? `${letter.label} ✓` : letter.label;
+    const stars = quest.stars?.[letter.id];
+    if (stars) labelSpan.textContent = `${letter.label} ${"★".repeat(stars)}`;
+    btn.appendChild(labelSpan);
+    const segment = levelConfig(index);
+    if (segment) {
+      const badge = document.createElement("span");
+      badge.className = "quest-segment";
+      badge.textContent = segment.name;
+      btn.appendChild(badge);
+    }
     btn.disabled = !unlocked;
     btn.setAttribute("aria-pressed", current?.id === letter.id ? "true" : "false");
     btn.setAttribute(
@@ -338,6 +396,241 @@ function celebrateQuestPass(finalPass) {
   layer.classList.remove("is-burst");
   void layer.offsetWidth;
   layer.classList.add("is-burst");
+}
+
+function setQuestOverlayButton(btn, label, action, hidden) {
+  btn.textContent = label;
+  btn.dataset.action = action;
+  btn.hidden = hidden;
+}
+
+function hideQuestOverlay() {
+  if (!els.questOverlay) return;
+  els.questOverlay.hidden = true;
+}
+
+function showQuestOverlay(title, desc, { primary = null, secondary = null, count = null, stars = null } = {}) {
+  if (!els.questOverlay) return;
+  els.questOverlayTitle.textContent = title;
+  els.questOverlayDesc.textContent = desc;
+  els.questOverlayDesc.hidden = !desc;
+  if (count != null) {
+    els.questOverlayCount.hidden = false;
+    els.questOverlayCount.textContent = count;
+  } else {
+    els.questOverlayCount.hidden = true;
+  }
+  if (stars != null) {
+    els.questOverlayStars.hidden = false;
+    els.questOverlayStars.textContent = "★".repeat(stars) + "☆".repeat(Math.max(0, 3 - stars));
+  } else {
+    els.questOverlayStars.hidden = true;
+  }
+  setQuestOverlayButton(els.questOverlayPrimary, primary?.label || "", primary?.action || "", !primary);
+  setQuestOverlayButton(els.questOverlaySecondary, secondary?.label || "", secondary?.action || "", !secondary);
+  els.questOverlay.hidden = false;
+}
+
+function questBestLine(letterId) {
+  const parts = [];
+  if (quest.stars?.[letterId]) parts.push(`最好成绩 ${"★".repeat(quest.stars[letterId])}`);
+  if (quest.bestMs?.[letterId]) parts.push(`最快 ${(quest.bestMs[letterId] / 1000).toFixed(1)} 秒`);
+  return parts.join(" · ");
+}
+
+function showQuestIntro(letter) {
+  const index = questLevelIndex();
+  const config = levelConfig(index);
+  if (!config) return;
+  const rules = [
+    config.demo === "always" ? "示范一直在" : config.demo === "flash" ? "示范只闪示 3 秒" : "没有示范，凭记忆比划",
+    `限时 ${Math.round(config.timeLimitMs / 1000)} 秒`,
+  ];
+  if (config.demo === "flash") rules.push("有 1 次再看示范的机会");
+  const best = questBestLine(letter.id);
+  showQuestOverlay(`第 ${index + 1} 关 · ${letter.title}`, `${config.name}：${rules.join(" · ")}${best ? `\n${best}` : ""}`, {
+    primary: { label: "开始挑战", action: "start" },
+    secondary: { label: "返回", action: "close" },
+  });
+}
+
+function updateQuestOverlayCount(nowMs) {
+  const step = countdownStep(questRun, nowMs);
+  if (!step || step.done) return;
+  if (step.count !== questCountdownShown) {
+    questCountdownShown = step.count;
+    els.questOverlayCount.textContent = String(step.count);
+    // 重新触发入场动画
+    els.questOverlayCount.style.animation = "none";
+    void els.questOverlayCount.offsetWidth;
+    els.questOverlayCount.style.animation = "";
+  }
+}
+
+function renderQuestTimer(nowMs) {
+  if (!els.questTimer) return;
+  if (!questRunActive() || questRun.phase !== PHASE.PLAYING) {
+    els.questTimer.hidden = true;
+    return;
+  }
+  const left = remainingMs(questRun, nowMs);
+  if (left == null) return;
+  els.questTimer.hidden = false;
+  const tenth = Math.floor(left / 100);
+  if (tenth !== questTimerLastTenth) {
+    questTimerLastTenth = tenth;
+    els.questTimerFill.style.width = `${Math.max(0, Math.min(100, (left / questRun.timeLimitMs) * 100))}%`;
+    els.questTimerText.textContent = (left / 1000).toFixed(1);
+    if (left < 5000) els.questTimer.classList.add("is-urgent");
+    else els.questTimer.classList.remove("is-urgent");
+  }
+}
+
+function setDemoHidden(hiddenState, { allowPeek = false } = {}) {
+  els.demoStage.hidden = hiddenState;
+  els.demoHiddenNote.hidden = !hiddenState;
+  if (els.demoPeekBtn) els.demoPeekBtn.hidden = !(hiddenState && allowPeek);
+  if (els.demoRotHint) els.demoRotHint.hidden = hiddenState || !rotIndexes[currentDemoHand()].has(current?.id);
+  updateHandToggle();
+}
+
+function applyQuestDemo() {
+  if (!questRunActive()) {
+    setDemoHidden(false);
+    return;
+  }
+  const config = levelConfig(questLevelIndex());
+  if (!config || !current) {
+    setDemoHidden(false);
+    return;
+  }
+  if (config.demo === "always") {
+    setDemoHidden(false);
+    return;
+  }
+  if (config.demo === "flash") {
+    if (questRun.phase === PHASE.COUNTDOWN && !questRun.usedHint) {
+      setDemoHidden(false);
+    } else {
+      setDemoHidden(true, { allowPeek: questRun.phase === PHASE.PLAYING && !questRun.usedHint && config.hintFlashMs > 0 });
+    }
+    return;
+  }
+  setDemoHidden(true);
+}
+
+function scheduleQuestFlash(config) {
+  clearQuestFlash();
+  if (config.demo !== "flash" || !(config.flashMs > 0)) return;
+  questFlashTimer = setTimeout(() => {
+    questFlashTimer = 0;
+    applyQuestDemo();
+  }, config.flashMs);
+}
+
+function enterQuestIntro(letter) {
+  clearQuestFlash();
+  startIntro(questRun, letter.id);
+  questCountdownShown = null;
+  questTimerLastTenth = -1;
+  applyQuestDemo();
+  showQuestIntro(letter);
+  renderQuestTimer(performance.now());
+}
+
+async function startQuestChallenge() {
+  if (!questRunActive() || !current || questRun.letterId !== current.id) return;
+  if (questRun.phase !== PHASE.INTRO && questRun.phase !== PHASE.TIMEOUT) return;
+  const config = levelConfig(questLevelIndex());
+  if (!config) return;
+  hideQuestOverlay();
+  if (!running) {
+    await startLive();
+    if (!running) {
+      startIntro(questRun, current.id);
+      showQuestIntro(current);
+      return;
+    }
+  }
+  if (beginCountdown(questRun, performance.now())) {
+    questCountdownShown = null;
+    invalidateFrame("quest_start");
+    applyQuestDemo();
+    scheduleQuestFlash(config);
+    showQuestOverlay(`第 ${questLevelIndex() + 1} 关 · ${current.title}`, "", { count: "3" });
+    updateQuestOverlayCount(performance.now());
+  }
+}
+
+function questTimeout(nowMs) {
+  if (!failTimeout(questRun)) return;
+  clearQuestFlash();
+  invalidateFrame("quest_timeout");
+  applyQuestDemo();
+  renderQuestTimer(nowMs);
+  const index = questLevelIndex();
+  showQuestOverlay("时间到", `第 ${index + 1} 关还差一点点，再来一次。`, {
+    primary: { label: "再试一次", action: "start" },
+    secondary: { label: "返回", action: "close" },
+  });
+}
+
+function questAdvance() {
+  hideQuestOverlay();
+  const status = questStatus(quest, letters);
+  if (status.complete) {
+    clearQuestFlash();
+    questRun = createQuestRun();
+    applyQuestDemo();
+    renderQuestTimer(performance.now());
+    return;
+  }
+  if (status.current && status.current.id !== current?.id) {
+    selectLetter(status.current);
+  }
+}
+
+function tickQuest(nowMs) {
+  if (!questRunActive()) return;
+  if (questRun.phase === PHASE.COUNTDOWN) {
+    const step = countdownStep(questRun, nowMs);
+    if (!step) return;
+    if (step.done) {
+      const config = levelConfig(questLevelIndex());
+      if (beginPlaying(questRun, nowMs, config || {})) {
+        hideQuestOverlay();
+        applyQuestDemo();
+        invalidateFrame("quest_go");
+        if (current) {
+          setVerdict("fail", [], {
+            title: "开始！",
+            state: "idle",
+            hint: swapHowForHand(current.how, currentDemoHand()),
+          });
+        }
+      }
+    } else {
+      updateQuestOverlayCount(nowMs);
+    }
+    return;
+  }
+  if (questRun.phase === PHASE.PLAYING) {
+    if (checkTimeout(questRun, nowMs)) {
+      questTimeout(nowMs);
+      return;
+    }
+    renderQuestTimer(nowMs);
+  }
+}
+
+function resetQuestRun() {
+  clearQuestFlash();
+  questRun = createQuestRun();
+  questCountdownShown = null;
+  questTimerLastTenth = -1;
+  hideQuestOverlay();
+  applyQuestDemo();
+  renderQuestTimer(performance.now());
 }
 
 function hidePassSeal() {
@@ -388,12 +681,12 @@ function applyModeUi() {
   if (els.questPanel) els.questPanel.hidden = !questing;
   if (els.learnEyebrow) {
     els.learnEyebrow.textContent = questing
-      ? "闯关 · 一关一个手型"
+      ? "闯关 · 限时挑战"
       : "跟着练 · 一次一个手型";
   }
   if (els.learnTitle) {
     els.learnTitle.textContent = questing
-      ? "按顺序闯关，过了这关开下关。"
+      ? "看规则、听倒数，限时过关。"
       : "看清楚，再试一试。";
   }
   if (questing) renderQuest();
@@ -413,6 +706,9 @@ function selectLetter(letter) {
   if (mode === MODE_QUEST && !isQuestUnlocked(quest, letter.id, letters)) return;
   if (letter.id === current?.id) {
     syncLetterButtons(letter.id);
+    if (questRunActive() && (questRun.phase === PHASE.IDLE || questRun.phase === PHASE.INTRO)) {
+      enterQuestIntro(letter);
+    }
     return;
   }
   current = letter;
@@ -427,6 +723,7 @@ function selectLetter(letter) {
   presentLetterIdle(letter);
   renderSimilarHints(letter);
   syncLetterButtons(letter.id);
+  if (questRunActive()) enterQuestIntro(letter);
 }
 
 function addLetterButton(letter, parent) {
@@ -554,6 +851,7 @@ function renderRecords() {
 
 function notePass(judged) {
   if (!canRecordPass({ judged, letter: current, mode, attempt })) return;
+  if (mode === MODE_QUEST && questRun.phase !== PHASE.PLAYING) return;
   attempt.recorded = true;
   practiceDays = markActiveDay(practiceDays, localDayKey());
   const daysSaved = saveDays(storage, practiceDays);
@@ -561,18 +859,34 @@ function notePass(judged) {
   const wasLit = summarize(progress, quest, letters, practiceDays).wall.find((cell) => cell.id === current.id)?.lit;
   const earnedBefore = lastEarnedBadges;
   if (mode === MODE_QUEST) {
-    if (!markQuestPassed(quest, current.id, letters)) return;
+    const result = finishPass(questRun, performance.now());
+    if (!result) return;
+    const config = levelConfig(questLevelIndex());
+    const stars = starRating(result.remainingMs, result.timeLimitMs, result.usedHint);
+    recordQuestResult(quest, current.id, { stars, elapsedMs: result.elapsedMs }, letters);
     attempt.recorded = false;
     const status = questStatus(quest, letters);
     persisted = saveQuest(storage, quest) && persisted;
+    clearQuestFlash();
+    applyQuestDemo();
+    renderQuestTimer(performance.now());
     showPassSeal(judged);
     renderQuest();
     celebrateQuestPass(status.complete);
+    const usedText = (result.elapsedMs / 1000).toFixed(1);
+    const limitSec = Math.round((config?.timeLimitMs ?? result.timeLimitMs) / 1000);
     setStatus(
       status.complete
         ? "全部关卡通过，厉害！"
         : `过关！已解锁第 ${status.unlockedIndex + 1} 关：${status.current.title}`,
       "ok",
+    );
+    showQuestOverlay(
+      status.complete ? "闯关完成" : "过关！",
+      `用时 ${usedText} 秒（限时 ${limitSec} 秒）${result.usedHint ? " · 用过提示" : ""}${result.attempts ? ` · 第 ${result.attempts + 1} 次尝试` : ""}`,
+      status.complete
+        ? { stars, secondary: { label: "留在本关", action: "close" } }
+        : { stars, primary: { label: "下一关", action: "next" }, secondary: { label: "留在本关", action: "close" } },
     );
     renderRecords();
     return;
@@ -669,6 +983,7 @@ async function loop() {
       return;
     }
     lastClockTime = now;
+    tickQuest(now);
     // Check before every early return; background RAF is not an export authority.
     if (!freshFrame(now)) invalidateFrame("stale");
     if (!activeFrameSource()) {
@@ -714,7 +1029,8 @@ async function loop() {
     }
     applyJudge(judged);
     if (judged.decision === "pass" && judged.quality.ok) notePass(judged);
-    if (mode === MODE_QUEST && judged.decision === "pass" && judged.quality.ok) {
+    if (mode === MODE_QUEST && judged.decision === "pass" && judged.quality.ok
+      && (questRun.phase === PHASE.PLAYING || questRun.phase === PHASE.PASSED)) {
       applyJudge({
         ...judged,
         speech: { title: "过关！", hint: "这一关记为通过，下一关已解锁。" },
@@ -818,6 +1134,32 @@ function stopLive() {
   setLiveButtons(false);
   setStatus("摄像头已停，可再开", "idle");
   presentLetterIdle(current);
+  if (questRunActive() && questRun.phase !== PHASE.IDLE && questRun.phase !== PHASE.INTRO) {
+    resetQuestRun();
+    if (current) enterQuestIntro(current);
+  }
+}
+
+async function startLive() {
+  if (starting || running) return;
+  starting = true;
+  const generation = ++startGeneration;
+  setLiveButtons(true); // Stop remains available during permission/play/model waits.
+  try {
+    if (!landmarker) {
+      if (!modelPromise) modelPromise = initModel().finally(() => { modelPromise = null; });
+      await modelPromise;
+    }
+    if (generation !== startGeneration) return;
+    await startCamera(generation);
+  } catch (err) {
+    if (generation !== startGeneration) return;
+    console.error(err);
+    stopLive();
+    setStatus(cameraErrorMessage(err), "bad");
+  } finally {
+    if (generation === startGeneration) starting = false;
+  }
 }
 
 function applyMirror() {
@@ -998,28 +1340,43 @@ async function main() {
   });
   els.exportBtn.addEventListener("click", downloadHandFrame);
 
-  document.addEventListener("visibilitychange", () => invalidateFrame("visibility_changed"));
-  els.startBtn.addEventListener("click", async () => {
-    if (starting || running) return;
-    starting = true;
-    const generation = ++startGeneration;
-    setLiveButtons(true); // Stop remains available during permission/play/model waits.
-    try {
-      if (!landmarker) {
-        if (!modelPromise) modelPromise = initModel().finally(() => { modelPromise = null; });
-        await modelPromise;
-      }
-      if (generation !== startGeneration) return;
-      await startCamera(generation);
-    } catch (err) {
-      if (generation !== startGeneration) return;
-      console.error(err);
-      stopLive();
-      setStatus(cameraErrorMessage(err), "bad");
-    } finally {
-      if (generation === startGeneration) starting = false;
+  document.addEventListener("visibilitychange", () => {
+    invalidateFrame("visibility_changed");
+    if (document.visibilityState === "hidden" && questRunActive()
+      && (questRun.phase === PHASE.COUNTDOWN || questRun.phase === PHASE.PLAYING)) {
+      resetQuestRun();
+      if (current) enterQuestIntro(current);
     }
   });
+
+  els.startBtn.addEventListener("click", startLive);
+
+  async function onQuestOverlayAction(action) {
+    if (!questRunActive()) return;
+    if (action === "start") await startQuestChallenge();
+    else if (action === "next") questAdvance();
+    else hideQuestOverlay();
+  }
+  if (els.questOverlayPrimary) {
+    els.questOverlayPrimary.addEventListener("click", async () => onQuestOverlayAction(els.questOverlayPrimary.dataset.action));
+  }
+  if (els.questOverlaySecondary) {
+    els.questOverlaySecondary.addEventListener("click", async () => onQuestOverlayAction(els.questOverlaySecondary.dataset.action));
+  }
+  if (els.demoPeekBtn) {
+    els.demoPeekBtn.addEventListener("click", () => {
+      if (!questRunActive() || !useHint(questRun)) return;
+      const config = levelConfig(questLevelIndex());
+      if (!config || !(config.hintFlashMs > 0)) return;
+      setDemoHidden(false);
+      clearQuestFlash();
+      questFlashTimer = setTimeout(() => {
+        questFlashTimer = 0;
+        applyQuestDemo();
+      }, config.hintFlashMs);
+      setStatus("示范只看一眼，记住了就接着比", "idle");
+    });
+  }
   if (els.stopBtn) els.stopBtn.addEventListener("click", stopLive);
   if (els.recordsClear) els.recordsClear.addEventListener("click", () => showClearConfirm(true));
   if (els.recordsClearNo) els.recordsClearNo.addEventListener("click", () => showClearConfirm(false));

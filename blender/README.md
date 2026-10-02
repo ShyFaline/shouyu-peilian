@@ -1,45 +1,41 @@
 # GF 0021 标准手（Blender 内容工厂）
 
-示范图只给练习页对照，**不进识别循环**。  
-Blender：`C:\Program Files\Blender Foundation\Blender 4.5\blender.exe`（4.5.10 LTS）
+示范图只给练习页对照，**不进识别循环**。
 
-## 1. 打开
+## 当前生产管线（2026-10-01 起）
 
-```bat
-"C:\Program Files\Blender Foundation\Blender 4.5\blender.exe" "C:\Users\15424\Desktop\2026.9.15\blender\hand_gf0021.blend"
-```
+- 渲染器：Blender 5.2.x（本机 `C:\Program Files\Blender Foundation\Blender 5.2\blender.exe`；`blender/vendor/` 里另存了 4.5.14 压缩包作回退）。
+- 手模：Godot XR Tools 右手网格 `vendor/godot-xr-hands/hand_r.gltf`（CC0 1.0，作者 DigitalN8m4r3 aka Miodrag Sejic，2022；**体积原因 gitignore，不入库**）。
+- 姿态表：`build_godot_hand_poc.py` 内逐字母姿态角度表（32 个字母，含 ORIENT 朝向表与 KNOWN_VIOLATIONS 穿模基线）。
 
-时间轴标记：`REST`、`GF0021.A` / `B` / `U` / `V` / `L` / `Y` / `I` / `W`。  
-选中 `HandRig`，进入 Pose Mode。姿态按 GF 0021—2019，不要摆成 ASL。  
-改网格、打光、拇指贴掌用 `blender\improve_mesh.py`（`-b` 打开现有 `.blend` 再 `-P`）。不改 U/V 开合。不要跑 `build_gf0021.py` 推倒 HandRig。
-
-## 2. 摆手
-
-跳到对应标记那一帧，对照国标图微调，再插入关键帧（插值是 Constant）。
-
-只重建绑定和草稿姿态（会覆盖手动角度）：
+### 一键重跑
 
 ```bat
-cd /d C:\Users\15424\Desktop\2026.9.15
-"C:\Program Files\Blender Foundation\Blender 4.5\blender.exe" -b -P blender\build_gf0021.py
+cd blender
+"C:\Program Files\Blender Foundation\Blender 5.2\blender.exe" -b --python build_godot_hand_poc.py -- landmarks   :: 导出 golden 关键点（practice/src/pose-goldens/）
+"C:\Program Files\Blender Foundation\Blender 5.2\blender.exe" -b --python build_godot_hand_poc.py -- all         :: 渲染全部正面图（practice/content/demos/）
+"C:\Program Files\Blender Foundation\Blender 5.2\blender.exe" -b --python build_godot_hand_turntable.py          :: 渲染 24 帧转盘（practice/content/demos/rot/）
 ```
 
-## 3. 渲染
+（脚本入口见两个文件尾部 `main()`：`poc` 支持 `inspect / landmarks / export-pose / selfcheck`，其余首参按字母列表渲染，留空用 `all` 渲全量；turntable 在 `--` 后可跟字母过滤。）
 
-```bat
-cd /d C:\Users\15424\Desktop\2026.9.15
-"C:\Program Files\Blender Foundation\Blender 4.5\blender.exe" -b blender\hand_gf0021.blend -P blender\render_gf0021.py
-```
+### fresh clone 复现
 
-输出必须带 `_front`：
+`hand_r.gltf` 不入库。重渲前手动补齐：
 
-```
-practice/content/demos/GF0021.A_front.png
-practice/content/demos/GF0021.B_front.png
-practice/content/demos/GF0021.U_front.png
-practice/content/demos/GF0021.V_front.png
-practice/content/demos/GF0021.L_front.png
-practice/content/demos/GF0021.Y_front.png
-practice/content/demos/GF0021.I_front.png
-practice/content/demos/GF0021.W_front.png
-```
+1. 从上游 <https://github.com/GodotVR/godot-xr-tools> 找到 `hand_r.gltf`（在 demo/资产目录内，路径可能随上游调整，以仓库搜索为准）。
+2. 放到 `blender/vendor/godot-xr-hands/hand_r.gltf`。
+3. 校验 SHA-256 应为 `eb8d9765dcb7dcb67928f90e5fbad6ae1f7705043ab900dbe4a43b68a2721d37`（不一致则说明上游资产变动，渲染结果会与现图不同）。
+4. 许可全文副本见 `practice/vendor/godot-xr-hands/LICENSE.md`（随站点发布）。
+
+## 许可与署名
+
+- **Godot XR 手模**：CC0 1.0 Universal，无署名义务；署名信息见 `practice/vendor/godot-xr-hands/README.md`。
+- **历史 Human Base Meshes 派生 `.blend`**（`hand_gf0021*.blend`、`candidates/` 等，仍在仓库内分发）：底层网格源自 Blender Studio Human Base Meshes，手部网格含 Snow（Hjalti Hjálmarsson）作品，**CC-BY 4.0**，须署名。这些文件已退役不参与现行管线，仅作历史留档；若再次使用其渲染产物，必须在成品处署名 "Hand mesh by Snow (Hjalti Hjálmarsson), Human Base Meshes, CC-BY 4.0"。
+- 现行示范图与旋转图全部由 Godot XR 网格渲染，HBM 图已全部退役（2026-10-01）。
+
+## 历史脚本
+
+`_probe_*`、`_scan_*`、`_list_hbm.py`、`hour*`、`build_candidate_r*`、`build_gf0021.py`、`render_gf0021.py`、`import_hbm_hand.py`、`fix_hbm_orient.py` 等是 HBM 时代与探针脚本，已退役，仅供参考，不要对现行管线运行。`build_godot_hand_poc.py` / `build_godot_hand_turntable.py` 是当前唯一生产路径。
+
+改姿态角度表后必须重跑：golden 导出 → `node practice/src/pose-goldens.test.js` → `node practice/src/pose-collision.test.js`。

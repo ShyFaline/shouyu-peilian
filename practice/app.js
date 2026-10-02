@@ -698,6 +698,20 @@ function applyMirror() {
   els.stage.dataset.mirror = mirror ? "true" : "false";
 }
 
+function cameraErrorMessage(err) {
+  const name = err && err.name;
+  if (name === "NotAllowedError" || name === "SecurityError") {
+    return "摄像头权限被拒绝，请在浏览器地址栏的锁形图标里允许摄像头，再点开始";
+  }
+  if (name === "NotFoundError" || name === "OverconstrainedError") {
+    return "没找到可用的摄像头设备，可先看左边示范";
+  }
+  if (name === "NotReadableError" || name === "AbortError") {
+    return "摄像头被其他应用占用，关掉占用它的程序（如会议软件）后再点开始";
+  }
+  return "摄像头或模型失败，可先看左边示范";
+}
+
 function downloadHandFrame() {
   if (!exportEnabled) {
     setStatus("导出默认关闭，先勾选再下载", "idle");
@@ -851,7 +865,7 @@ async function main() {
       if (generation !== startGeneration) return;
       console.error(err);
       stopLive();
-      setStatus("摄像头或模型失败，可先看左边示范", "bad");
+      setStatus(cameraErrorMessage(err), "bad");
     } finally {
       if (generation === startGeneration) starting = false;
     }

@@ -9,6 +9,9 @@ export const DEGENERATE_EPS = 1e-6;
 // 手在画面里太小时规则判断不可信（如把手凑到下巴边）。相对画面短边的最小腕-掌距离。
 export const MIN_HAND_SCALE_RATIO = 0.1; // UNVERIFIED 待验证
 export const HAND_TOO_SMALL_HINT = "手太小了，把手举近摄像头再试";
+export const NO_HAND_HINT = "把手举到摄像头前，让整只手进画面";
+export const TWO_HANDS_HINT = "画面里有两只手，请只留一只手";
+export const FINGERTIP_OOB_HINT = "手指出画面了，把手往画面中间收一收";
 
 const BONES = [
   [0, 9],
@@ -64,8 +67,11 @@ function boneLen(a, b) {
  */
 export function assessInputQuality(input = {}) {
   const hands = input.hands ?? (input.lm ? [input.lm] : []);
-  if (!Array.isArray(hands) || hands.length !== 1) {
-    return fail("hand_count");
+  if (!Array.isArray(hands) || hands.length === 0) {
+    return fail("no_hand", NO_HAND_HINT);
+  }
+  if (hands.length !== 1) {
+    return fail("two_hands", TWO_HANDS_HINT);
   }
   const lm = hands[0];
   if (!Array.isArray(lm) || lm.length !== 21) {
@@ -106,7 +112,7 @@ export function assessInputQuality(input = {}) {
     const idx = FINGER_TIPS[name];
     const p = lm[idx];
     if (!p || !inNormFrame(p)) {
-      return fail("fingertip_oob");
+      return fail("fingertip_oob", FINGERTIP_OOB_HINT);
     }
   }
 

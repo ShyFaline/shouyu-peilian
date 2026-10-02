@@ -495,7 +495,8 @@ test("A03 全0/NaN/指尖出框掌心在框/零骨段 → undetermined，hint �
     });
     assert.equal(judged.decision, "undetermined", item.name);
     const blob = judged.issues.map((issue) => `${issue.code} ${issue.hint}`).join("；");
-    assert.match(blob, /暂时无法判断/, item.name);
+    // 无法判断时必须给说明性提示（通用兜底或具体引导），且不得夹带规则层的动作词
+    assert.match(blob, /暂时无法判断|画面/, item.name);
     assert.doesNotMatch(blob, /伸直|收起来/);
     assert.equal(judged.issues.some((issue) => /伸直|收起来/.test(issue.hint || "")), false);
     assert.ok(judged.quality.ok === false);
@@ -526,6 +527,43 @@ test("A10 手太小（如凑到下巴边）→ undetermined / hand_too_small，�
   // 同一只手不缩放：腕-掌距离约为画面短边的 0.32 倍，照常进入判定
   const normal = assessInputQuality({ hands: [vApartHand()], geom, letter: letterV });
   assert.equal(normal.ok, true, JSON.stringify(normal));
+});
+
+test("A11 无手/双手/指尖出框 → undetermined，各自给出引导文案", () => {
+  const geom = { width: 640, height: 480, coordSpace: "image_normalized" };
+
+  const none = assessInputQuality({ hands: [], geom, letter: letterV });
+  assert.equal(none.reason, "no_hand");
+  const judgedNone = judge(
+    { letter: letterV, lm: [], hands: [], geom, videoTime: 0, nowMs: 0 },
+    createHold(),
+  );
+  assert.equal(judgedNone.decision, "undetermined");
+  assert.equal(presentJudge(judgedNone).title, "没看到手");
+  assert.match(judgedNone.issues[0].hint, /摄像头|画面/);
+
+  const two = assessInputQuality({ hands: [vApartHand(), vApartHand()], geom, letter: letterV });
+  assert.equal(two.reason, "two_hands");
+  const judgedTwo = judge(
+    { letter: letterV, lm: vApartHand(), hands: [vApartHand(), vApartHand()], geom, videoTime: 0, nowMs: 0 },
+    createHold(),
+  );
+  assert.equal(judgedTwo.decision, "undetermined");
+  assert.equal(presentJudge(judgedTwo).title, "画面里有两只手");
+  assert.match(judgedTwo.issues[0].hint, /一只手/);
+
+  // 食指尖推出画面（V 的 pointing 探针是食指）
+  const oob = vApartHand();
+  oob[8] = pt(1.2, 0.5, 0);
+  const oobQ = assessInputQuality({ hands: [oob], geom, letter: letterV });
+  assert.equal(oobQ.reason, "fingertip_oob");
+  const judgedOob = judge(
+    { letter: letterV, lm: oob, hands: [oob], geom, videoTime: 0, nowMs: 0 },
+    createHold(),
+  );
+  assert.equal(judgedOob.decision, "undetermined");
+  assert.equal(presentJudge(judgedOob).title, "手指出画面了");
+  assert.match(judgedOob.issues[0].hint, /画面/);
 });
 
 test("A04 U/V 拇指伸直负例不得 geometry pass", () => {

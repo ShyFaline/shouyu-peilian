@@ -49,10 +49,20 @@ export function presentJudge(judged) {
   const issues = judged?.issues || [];
   const blob = issues.map((x) => x.hint).filter(Boolean).join("；");
   if (judged?.decision === "undetermined") {
-    if (issues.some((x) => x.code === "hand_too_small")) {
+    const reason = issues[0]?.code || "";
+    if (reason === "hand_too_small") {
       return { title: "手太小了", hint: blob || QUALITY_HINT, state: "idle" };
     }
-    return { title: "暂时无法判断", hint: QUALITY_HINT, state: "idle" };
+    if (reason === "no_hand") {
+      return { title: "没看到手", hint: blob || QUALITY_HINT, state: "idle" };
+    }
+    if (reason === "two_hands") {
+      return { title: "画面里有两只手", hint: blob || QUALITY_HINT, state: "idle" };
+    }
+    if (reason === "fingertip_oob") {
+      return { title: "手指出画面了", hint: blob || QUALITY_HINT, state: "idle" };
+    }
+    return { title: "暂时无法判断", hint: blob || QUALITY_HINT, state: "idle" };
   }
   if (judged?.decision === "blocked") {
     if (judged.practiceStatus === "demo_only") {

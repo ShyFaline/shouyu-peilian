@@ -12,6 +12,8 @@
   - `node practice/src/pose-goldens.test.js`（合成 golden，只做规则回归，不等于国标或真实检测通过）
   - `node practice/src/motion.test.js`（动态判定合成序列回归，同上不等价声明）
   - `node practice/src/pose-collision.test.js`（示范手模胶囊重合门禁；FK 锚点对齐 + 修复基线，修好基线字母后从 KNOWN_VIOLATIONS 移除）
+  - `node practice/src/practiceDays.test.js`（活跃日与连续打卡纯函数）
+  - `node practice/src/achievements.test.js`（成就单派生统计/点亮墙/徽章纯函数）
 
 ## 项目速览
 

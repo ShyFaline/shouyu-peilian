@@ -1,8 +1,8 @@
 {
   "id": "practice-content-demos",
-  "updated": "2026-10-01",
+  "updated": "2026-10-02",
   "purpose": "练习页正面示范图的来源与目检记录。PNG 给人看，不进入 MediaPipe，不参与 evaluate()。",
-  "naming": "{letterId}_front.png，letterId 与 letters.json 的 id 一致",
+  "naming": "{letterId}_front.png（右手正本）/ {letterId}_front_L.png（左手镜像），letterId 与 letters.json 的 id 一致",
   "generator": "blender/build_godot_hand_poc.py",
   "candidateDir": "blender/vendor/godot-xr-hands/poc/",
   "mesh": {
@@ -102,6 +102,14 @@
     ],
     "inspection": "新姿态表全量 32 字母重渲 24 帧；主代理抽查帧序列连续性。U 已有帧（姿态层无争议，仅词汇层与 B 不可区分）。",
     "mesh": "同 mesh 字段（Godot XR hand_r.gltf，CC0）"
+  },
+  "leftHand": {
+    "addedOn": "2026-10-02",
+    "purpose": "左手示范：规范 GF0021-2019 §5.1「一般用右手表示；如用左手表示，方向作相应的改变」，左手版 = 右手版水平镜像，不重渲",
+    "files": "{letterId}_front_L.png（正面图）+ rot-left/{letterId}/{NN}.webp（旋转帧）+ rot-left/index.json",
+    "generator": "tools/standard-figures/make_left_demos.py",
+    "inspection": "主代理抽查 A/方向性字母镜像后左右与文案互换一致；左手版拖动方向与右手相反属镜像预期",
+    "letters": "同 rotFrames.letters（全量 32 个）"
   },
   "letters": {
     "GF0021.A": {

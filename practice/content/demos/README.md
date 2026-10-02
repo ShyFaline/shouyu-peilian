@@ -2,10 +2,13 @@
 
 练习页示范区**优先**读本目录的 PNG，缺图时回退 `practice/fonts` 里的 SignPinyin 字体，不空白、不弹错。
 
+右手是正本（规范 GF0021-2019 §5.1）；左手版由右手图水平镜像生成，文件名加 `_L` 后缀，旋转帧在 `rot-left/`。左手重出图：改完右手图后跑 `python tools/standard-figures/make_left_demos.py`。
+
 ## 文件名
 
 ```
-{字母ID}_front.png
+{字母ID}_front.png      # 右手正本
+{字母ID}_front_L.png    # 左手镜像（由脚本生成，勿手改）
 ```
 
 例子：

@@ -46,6 +46,14 @@ function result({ decision, practiceStatus, issues, quality, hold, motion = null
 }
 
 export function presentJudge(judged) {
+  const speech = judged?.speech;
+  if (speech && (speech.title || speech.hint)) {
+    return {
+      title: speech.title || "",
+      hint: speech.hint || "",
+      state: speech.state || (judged?.decision === "pass" ? "ok" : "idle"),
+    };
+  }
   const issues = judged?.issues || [];
   const blob = issues.map((x) => x.hint).filter(Boolean).join("；");
   if (judged?.decision === "undetermined") {

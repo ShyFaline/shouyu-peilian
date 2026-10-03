@@ -1338,6 +1338,7 @@ async function main() {
     if (!questRunActive()) return;
     if (action === "start") await startQuestChallenge();
     else if (action === "next") questAdvance();
+    else if (questRun.phase === PHASE.PASSED && current) enterQuestIntro(current);
     else hideQuestOverlay();
   }
   if (els.questOverlayPrimary) {

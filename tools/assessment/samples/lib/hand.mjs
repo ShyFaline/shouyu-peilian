@@ -60,14 +60,14 @@ export function buildHand({ fingers, base = {}, thumbTurn }) {
 export const POSES = {
   V_OK: { fingers: { index: "extended", middle: "extended", ring: "curled", pinky: "curled", thumb: "curled" }, base: { index: -18, middle: 18, thumb: -40 } },
   V_TOGETHER: { fingers: { index: "extended", middle: "extended", ring: "curled", pinky: "curled", thumb: "curled" }, base: { index: -5, middle: 5, thumb: -40 } },
-  U_OK: { fingers: { index: "extended", middle: "extended", ring: "curled", pinky: "curled", thumb: "curled" }, base: { index: -5, middle: 5, thumb: -40 } },
+  U_OK: { fingers: { index: "extended", middle: "extended", ring: "extended", pinky: "extended", thumb: "curled" }, base: { index: -5, middle: 5, thumb: -40 } },
   L_OK: { fingers: { index: "extended", middle: "curled", ring: "curled", pinky: "curled", thumb: "extended" }, base: { index: 0, thumb: -90 } },
   L_PARALLEL: { fingers: { index: "extended", middle: "curled", ring: "curled", pinky: "curled", thumb: "extended" }, base: { index: 0, thumb: -12 } },
-  Y_OK: { fingers: { index: "curled", middle: "curled", ring: "curled", pinky: "extended", thumb: "extended" }, base: { pinky: 12, thumb: -70 } },
-  A_OK: { fingers: { index: "curled", middle: "curled", ring: "curled", pinky: "curled", thumb: "extended" }, base: { thumb: -60 } },
+  Y_OK: { fingers: { index: "curled", middle: "curled", ring: "curled", pinky: "extended", thumb: "extended" }, base: { pinky: 12, thumb: -20 } },
+  A_OK: { fingers: { index: "curled", middle: "curled", ring: "curled", pinky: "curled", thumb: "extended" }, base: { thumb: -10 } },
   B_OK: { fingers: { index: "extended", middle: "extended", ring: "extended", pinky: "extended", thumb: "curled" }, base: { index: -6, middle: -2, ring: 2, pinky: 6, thumb: -30 } },
   W_OK: { fingers: { index: "extended", middle: "extended", ring: "extended", pinky: "curled", thumb: "curled" }, base: { index: -26, middle: 0, ring: 26, thumb: -30 } },
-  I_OK: { fingers: { index: "curled", middle: "curled", ring: "curled", pinky: "extended", thumb: "curled" }, base: { pinky: 0, thumb: -30 } },
+  I_OK: { fingers: { index: "extended", middle: "curled", ring: "curled", pinky: "curled", thumb: "curled" }, base: { index: 0, thumb: -30 } },
 };
 
 export const SYNTHETIC_SIZE = { imageWidth: 640, imageHeight: 480 };

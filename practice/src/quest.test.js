@@ -104,6 +104,28 @@ test("parseQuest 迁移 v1 存档，星级与用时只对已通过字母生效",
   assert.deepEqual(v2.bestMs, { "GF0021.A": 6400 });
 });
 
+test("解锁下标取序列首个未通过字母：字母新增或重排后旧存档仍能继续过关", () => {
+  const mk = (id) => ({ id, practiceStatus: "pose_practice" });
+  // 旧存档已全通过，随后序列前面新增一个可练字母：passed 不再是前缀
+  const grown = { schemaVersion: QUEST_SCHEMA, passed: ["A", "B", "C"], stars: {}, bestMs: {} };
+  const withNew = [mk("D"), mk("A"), mk("B"), mk("C")];
+  assert.equal(questStatus(grown, withNew).unlockedIndex, 0, "新增字母应为当前关");
+  assert.equal(questStatus(grown, withNew).current.id, "D");
+  assert.equal(recordQuestResult(grown, "D", { stars: 2, elapsedMs: 3000 }, withNew), true, "旧存档能过新增关");
+  assert.deepEqual(grown.passed, ["A", "B", "C", "D"]);
+  assert.equal(questStatus(grown, withNew).complete, true);
+
+  // 序列重排后 passed 落在中段：当前关回到首个未通过字母，且不能跳过它
+  const reordered = { schemaVersion: QUEST_SCHEMA, passed: ["B"], stars: {}, bestMs: {} };
+  const seq = [mk("A"), mk("B"), mk("C")];
+  assert.equal(questStatus(reordered, seq).unlockedIndex, 0);
+  assert.equal(questStatus(reordered, seq).current.id, "A");
+  assert.equal(recordQuestResult(reordered, "C", { stars: 3, elapsedMs: 1000 }, seq), false, "不能跳关");
+  assert.equal(recordQuestResult(reordered, "A", { stars: 3, elapsedMs: 1000 }, seq), true);
+  assert.deepEqual(reordered.passed, ["B", "A"]);
+  assert.equal(questStatus(reordered, seq).current.id, "C");
+});
+
 test("parseQuest 坏数据回退空档，questStatus/解锁语义不变", () => {
   for (const bad of [null, "", "not json", '{"schemaVersion":99,"passed":["GF0021.A"]}', '{"schemaVersion":2,"passed":"nope"}']) {
     const parsed = parseQuest(bad, letters);

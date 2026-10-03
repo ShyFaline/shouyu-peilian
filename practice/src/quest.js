@@ -45,6 +45,12 @@ function sanitizeMap(raw, passedSet, pick) {
 const pickStars = (v) => (Number.isInteger(v) && v >= 1 && v <= 3 ? v : null);
 const pickBestMs = (v) => (Number.isFinite(v) && v > 0 ? v : null);
 
+/** 解锁下标 = 序列中第一个未通过的字母；全部通过时回退到末位（0 基，空序列给 0）。 */
+function firstUnpassedIndex(sequence, passedSet) {
+  const index = sequence.findIndex((letter) => !passedSet.has(letter.id));
+  return index >= 0 ? index : Math.max(0, sequence.length - 1);
+}
+
 export function parseQuest(raw, letters) {
   let data;
   try {
@@ -79,8 +85,9 @@ export function recordQuestResult(quest, letterId, result, letters) {
   const sequence = questSequence(letters);
   const index = sequence.findIndex((letter) => letter.id === letterId);
   if (index < 0) return false;
-  const unlockedIndex = quest.passed.length;
-  const alreadyPassed = quest.passed.includes(letterId);
+  const passedSet = new Set(quest.passed);
+  const alreadyPassed = passedSet.has(letterId);
+  const unlockedIndex = firstUnpassedIndex(sequence, passedSet);
   if (!alreadyPassed && index !== unlockedIndex) return false;
   if (!alreadyPassed) quest.passed.push(letterId);
   if (!quest.stars || typeof quest.stars !== "object") quest.stars = {};
@@ -100,7 +107,7 @@ export function questStatus(quest, letters) {
   const passedSet = new Set(quest?.passed || []);
   const passedCount = sequence.filter((letter) => passedSet.has(letter.id)).length;
   const total = sequence.length;
-  const unlockedIndex = Math.min(passedCount, Math.max(0, total - 1));
+  const unlockedIndex = firstUnpassedIndex(sequence, passedSet);
   const current = sequence[unlockedIndex] || null;
   return { sequence, passedSet, passedCount, total, unlockedIndex, current, complete: total > 0 && passedCount >= total };
 }

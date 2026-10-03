@@ -13,8 +13,11 @@
 全部用 `bun`（本机 1.4.1）。在仓库根目录执行。
 
 ```bash
-# 合成夹具重新生成（产物全部标记 synthetic）
+# 合成夹具重新生成（产物全部标记 synthetic；生成器写完即用核心 evaluate 复核声明意图，不达即 exit 1）
 bun tools/assessment/samples/generate-synthetic.mjs
+
+# 生成期意图校验（生成器已内置调用；也可单独对某个夹具目录重跑）
+bun tools/assessment/samples/verify-samples.mjs [dir]
 
 # 元数据校验（只读，不改输入）
 bun tools/assessment/validate-captures.mjs <dir> [--out <report.json>] [--json]
@@ -294,7 +297,8 @@ tools/assessment/
     fingerprint.mjs               核心源指纹
   samples/
     lib/hand.mjs                  共享合成手型构造器（无国标规则）
-    generate-synthetic.mjs        合成冒烟夹具生成器（24 个）
+    generate-synthetic.mjs        合成冒烟夹具生成器（24 个；写完调用 verify-samples 复核意图）
+    verify-samples.mjs            生成期意图校验：核心 evaluate() 复核声明意图，不达即非零退出
     counterexamples/              反例夹具生成器 + 4 组（钉死修正后的定义）
   verify-skeleton.mjs             骨架自检（62 断言）
   verify-legacy-migration.mjs     旧离线入口迁移专项验证（31 断言）

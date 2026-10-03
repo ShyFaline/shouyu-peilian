@@ -12,6 +12,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { POSES, SYNTHETIC_SIZE, buildHand } from "./lib/hand.mjs";
+import { verifySamples } from "./verify-samples.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const OUT = join(HERE, "synthetic");
@@ -280,3 +281,12 @@ write("MANIFEST.json", {
 });
 
 console.log(`wrote synthetic samples to ${OUT}`);
+
+// 生成期护栏：写完就用核心 evaluate() 复核声明意图，规则演进后夹具不得静默漂移。
+const intent = verifySamples({ dir: OUT });
+console.log(`生成期意图校验：核对 ${intent.checked} 条（跳过 ${intent.skipped} 条非几何意图样本）`);
+if (!intent.ok) {
+  console.error("夹具与现行核心规则脱节，生成中止：");
+  for (const f of intent.failures) console.error(`  - ${f}`);
+  process.exit(1);
+}

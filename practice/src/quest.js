@@ -5,12 +5,8 @@ import { isPracticeable } from "./letterLibrary.js";
 export const QUEST_KEY = "zhijian.questProgress.v1";
 export const QUEST_SCHEMA = 2;
 
-/** 段位表：第 1..upto 关（1 基）共用一段规则；超出最后一段的关沿用末段。 */
-export const SEGMENTS = [
-  { name: "跟练段", upto: 3, demo: "always", timeLimitMs: 20000, flashMs: 0, hintFlashMs: 0 },
-  { name: "记忆段", upto: 6, demo: "flash", timeLimitMs: 15000, flashMs: 3000, hintFlashMs: 2000 },
-  { name: "盲考段", upto: 9, demo: "hidden", timeLimitMs: 12000, flashMs: 0, hintFlashMs: 0 },
-];
+/** 关卡规则（全关统一）：倒数时示范放 5 秒后隐藏，限时挑战；每关有 1 次再看示范的机会。 */
+export const LEVEL_RULE = { demo: "flash", timeLimitMs: 15000, flashMs: 5000, hintFlashMs: 2000 };
 
 export function emptyQuest() {
   return { schemaVersion: QUEST_SCHEMA, passed: [], stars: {}, bestMs: {} };
@@ -20,12 +16,10 @@ export function questSequence(letters = []) {
   return (Array.isArray(letters) ? letters : []).filter(isPracticeable);
 }
 
-/** 关卡（0 基下标）的段位规则。 */
+/** 关卡（0 基下标）的挑战规则，全关统一。 */
 export function levelConfig(index) {
   if (!Number.isInteger(index) || index < 0) return null;
-  const level = index + 1;
-  const segment = SEGMENTS.find((s) => level <= s.upto) || SEGMENTS[SEGMENTS.length - 1];
-  return { ...segment };
+  return { ...LEVEL_RULE };
 }
 
 /** 过关星级：剩余越多越高；用过提示最高 2 星。 */

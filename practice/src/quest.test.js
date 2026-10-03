@@ -4,7 +4,6 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   QUEST_SCHEMA,
-  SEGMENTS,
   emptyQuest,
   isQuestUnlocked,
   levelConfig,
@@ -38,18 +37,14 @@ test("emptyQuest 是 schema v2 形状", () => {
   assert.deepEqual(emptyQuest(), { schemaVersion: 2, passed: [], stars: {}, bestMs: {} });
 });
 
-test("levelConfig 按段位递进，越界沿用末段，非法下标回空", () => {
-  assert.equal(levelConfig(0).demo, "always");
-  assert.equal(levelConfig(2).demo, "always");
-  assert.equal(levelConfig(2).timeLimitMs, 20000);
-  assert.equal(levelConfig(3).demo, "flash");
-  assert.equal(levelConfig(3).flashMs, 3000);
-  assert.equal(levelConfig(3).hintFlashMs, 2000);
-  assert.equal(levelConfig(5).demo, "flash");
-  assert.equal(levelConfig(6).demo, "hidden");
-  assert.equal(levelConfig(6).timeLimitMs, 12000);
-  assert.equal(levelConfig(8).name, "盲考段");
-  assert.equal(levelConfig(99).name, SEGMENTS.at(-1).name);
+test("levelConfig 全关统一：5 秒闪示后隐藏，限时 15 秒，非法下标回空", () => {
+  for (const index of [0, 3, 5, 8, 99]) {
+    const config = levelConfig(index);
+    assert.equal(config.demo, "flash");
+    assert.equal(config.flashMs, 5000);
+    assert.equal(config.timeLimitMs, 15000);
+    assert.equal(config.hintFlashMs, 2000);
+  }
   assert.equal(levelConfig(-1), null);
   assert.equal(levelConfig(1.5), null);
 });

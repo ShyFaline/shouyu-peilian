@@ -9,7 +9,7 @@ export const PHASE = {
   TIMEOUT: "timeout",
 };
 
-export const COUNTDOWN_STEPS = 3;
+export const COUNTDOWN_STEPS = 5;
 export const COUNTDOWN_STEP_MS = 1000;
 
 export function createQuestRun() {

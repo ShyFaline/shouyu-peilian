@@ -348,13 +348,6 @@ function renderQuest() {
     const stars = quest.stars?.[letter.id];
     if (stars) labelSpan.textContent = `${letter.label} ${"★".repeat(stars)}`;
     btn.appendChild(labelSpan);
-    const segment = levelConfig(index);
-    if (segment) {
-      const badge = document.createElement("span");
-      badge.className = "quest-segment";
-      badge.textContent = segment.name;
-      btn.appendChild(badge);
-    }
     btn.disabled = !unlocked;
     btn.setAttribute("aria-pressed", current?.id === letter.id ? "true" : "false");
     btn.setAttribute(
@@ -442,13 +435,9 @@ function showQuestIntro(letter) {
   const index = questLevelIndex();
   const config = levelConfig(index);
   if (!config) return;
-  const rules = [
-    config.demo === "always" ? "示范一直在" : config.demo === "flash" ? "示范只闪示 3 秒" : "没有示范，凭记忆比划",
-    `限时 ${Math.round(config.timeLimitMs / 1000)} 秒`,
-  ];
-  if (config.demo === "flash") rules.push("有 1 次再看示范的机会");
+  const desc = `倒数 ${Math.round(config.flashMs / 1000)} 秒看示范，随后隐藏 · 限时 ${Math.round(config.timeLimitMs / 1000)} 秒 · 有 1 次再看示范的机会`;
   const best = questBestLine(letter.id);
-  showQuestOverlay(`第 ${index + 1} 关 · ${letter.title}`, `${config.name}：${rules.join(" · ")}${best ? `\n${best}` : ""}`, {
+  showQuestOverlay(`第 ${index + 1} 关 · ${letter.title}`, `${desc}${best ? `\n${best}` : ""}`, {
     primary: { label: "开始挑战", action: "start" },
     secondary: { label: "返回", action: "close" },
   });
@@ -504,28 +493,30 @@ function applyQuestDemo() {
     setDemoHidden(false);
     return;
   }
-  if (config.demo === "always") {
+  if (questRun.phase === PHASE.COUNTDOWN) {
     setDemoHidden(false);
     return;
   }
-  if (config.demo === "flash") {
-    if (questRun.phase === PHASE.COUNTDOWN && !questRun.usedHint) {
-      setDemoHidden(false);
-    } else {
-      setDemoHidden(true, { allowPeek: questRun.phase === PHASE.PLAYING && !questRun.usedHint && config.hintFlashMs > 0 });
-    }
-    return;
-  }
-  setDemoHidden(true);
+  setDemoHidden(true, {
+    allowPeek: questRun.phase === PHASE.PLAYING && !questRun.usedHint && config.hintFlashMs > 0,
+  });
 }
 
-function scheduleQuestFlash(config) {
+function questGo(nowMs) {
+  const config = levelConfig(questLevelIndex());
+  if (!beginPlaying(questRun, nowMs, config || {})) return;
   clearQuestFlash();
-  if (config.demo !== "flash" || !(config.flashMs > 0)) return;
-  questFlashTimer = setTimeout(() => {
-    questFlashTimer = 0;
-    applyQuestDemo();
-  }, config.flashMs);
+  hideQuestOverlay();
+  applyQuestDemo();
+  renderQuestTimer(nowMs);
+  invalidateFrame("quest_go");
+  if (current) {
+    setVerdict("fail", [], {
+      title: "开始！",
+      state: "idle",
+      hint: swapHowForHand(current.how, currentDemoHand()),
+    });
+  }
 }
 
 function enterQuestIntro(letter) {
@@ -556,8 +547,11 @@ async function startQuestChallenge() {
     questCountdownShown = null;
     invalidateFrame("quest_start");
     applyQuestDemo();
-    scheduleQuestFlash(config);
-    showQuestOverlay(`第 ${questLevelIndex() + 1} 关 · ${current.title}`, "", { count: "3" });
+    showQuestOverlay(
+      `第 ${questLevelIndex() + 1} 关 · ${current.title}`,
+      "看住示范，倒数结束就隐藏 · 点击画面跳过",
+      { count: "5" },
+    );
     updateQuestOverlayCount(performance.now());
   }
 }
@@ -596,19 +590,7 @@ function tickQuest(nowMs) {
     const step = countdownStep(questRun, nowMs);
     if (!step) return;
     if (step.done) {
-      const config = levelConfig(questLevelIndex());
-      if (beginPlaying(questRun, nowMs, config || {})) {
-        hideQuestOverlay();
-        applyQuestDemo();
-        invalidateFrame("quest_go");
-        if (current) {
-          setVerdict("fail", [], {
-            title: "开始！",
-            state: "idle",
-            hint: swapHowForHand(current.how, currentDemoHand()),
-          });
-        }
-      }
+      questGo(nowMs);
     } else {
       updateQuestOverlayCount(nowMs);
     }
@@ -1362,6 +1344,11 @@ async function main() {
   }
   if (els.questOverlaySecondary) {
     els.questOverlaySecondary.addEventListener("click", async () => onQuestOverlayAction(els.questOverlaySecondary.dataset.action));
+  }
+  if (els.questOverlay) {
+    els.questOverlay.addEventListener("click", () => {
+      if (questRunActive() && questRun.phase === PHASE.COUNTDOWN) questGo(performance.now());
+    });
   }
   if (els.demoPeekBtn) {
     els.demoPeekBtn.addEventListener("click", () => {

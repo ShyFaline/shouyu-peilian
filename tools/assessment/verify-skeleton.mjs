@@ -6,7 +6,7 @@
  * 用法：bun tools/assessment/verify-skeleton.mjs
  * 退出码：0 全部通过；1 有断言失败。
  */
-import { mkdtempSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { mkdtempSync, readFileSync, writeFileSync, mkdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -15,7 +15,7 @@ import { loadLetters } from "./lib/core.mjs";
 import { coreFingerprint } from "./lib/fingerprint.mjs";
 import { buildReport, fmtRate } from "./lib/report.mjs";
 import { loadSamples, replayAll, replayOne } from "./lib/replay.mjs";
-import { alignLabels, loadLabels } from "./lib/truth.mjs";
+import { alignLabels, loadLabels, readLabels } from "./lib/truth.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SYN = join(HERE, "samples", "synthetic");
@@ -34,7 +34,7 @@ const byId = (arr) => new Map(arr.map((r) => [r.sampleId, r]));
 const synReplays = replayAll(loadSamples(SYN), letters);
 const syn = byId(synReplays);
 const synLabels = loadLabels(JSON.parse(readFileSync(join(SYN, "labels.json"), "utf8")));
-const synAligned = alignLabels(synLabels.accepted, synReplays.map((r) => r.sampleId));
+const synAligned = alignLabels(synLabels.accepted, synReplays);
 
 const synReport = buildReport({
   replays: synReplays,
@@ -46,6 +46,16 @@ const synReport = buildReport({
 
 check("合成标签集被接受", synLabels.ok, `接受 ${synLabels.accepted.length} 拒收 ${synLabels.rejected.length}`);
 check("合成标签没有孤立项", synAligned.orphaned.length === 0, `孤立 ${synAligned.orphaned.length}`);
+check(
+  "合成标签没有层级不符（序列标签对序列样本）",
+  synAligned.levelMismatch.length === 0,
+  `层级不符 ${synAligned.levelMismatch.length}`,
+);
+check(
+  "合成标签声明了序列判定层级",
+  synLabels.sequenceJudgmentLevel === "product_decision",
+  String(synLabels.sequenceJudgmentLevel),
+);
 
 // 几何正例：应 predicted=correct
 for (const id of ["syn-v-pos", "syn-l-pos", "syn-y-pos", "syn-a-pos", "syn-b-pos", "syn-w-pos", "syn-i-pos"]) {
@@ -151,8 +161,79 @@ check("坏数值不产生任何预测", ["syn-bad-number-nan", "syn-bad-number-n
 }
 // 标签指向不存在的样本 => 孤立
 {
-  const orphan = alignLabels([{ sampleId: "does-not-exist", expectedVerdict: "correct" }], synReplays.map((r) => r.sampleId));
+  const orphan = alignLabels([{ sampleId: "does-not-exist", expectedVerdict: "correct" }], synReplays);
   check("标签指向不存在样本 => 孤立拒收", orphan.aligned.length === 0 && orphan.orphaned.length === 1);
+}
+
+// --------------------------------------------------- 标签层级契约（临时目录构造标签文件实测）
+{
+  const tmpLabels = mkdtempSync(join(tmpdir(), "assess-labels-"));
+  const seqLabel = {
+    sampleId: "syn-seq-v-pass",
+    expectedVerdict: "correct",
+    expectedIssueCodes: [],
+    level: "sequence",
+    independent: true,
+    truthOrigin: "synthetic-construction",
+    humanReviewed: false,
+    reviewedBy: "fixture-author:synthetic",
+    reviewedAt: "2026-09-24T00:00:00Z",
+  };
+  const writeLabels = (name, obj) => {
+    const p = join(tmpLabels, name);
+    writeFileSync(p, JSON.stringify(obj), "utf8");
+    return p;
+  };
+
+  const noSeqLevel = readLabels(writeLabels("no-seq-level.json", { labels: [seqLabel] }));
+  check(
+    "序列标签缺 sequenceJudgmentLevel => 整份拒收（新拒收码）",
+    !noSeqLevel.ok && noSeqLevel.rejected.some((r) => r.code === "label_missing_sequence_level"),
+    JSON.stringify(noSeqLevel.reasons),
+  );
+
+  const badSeqLevel = readLabels(
+    writeLabels("bad-seq-level.json", { sequenceJudgmentLevel: "frame_geometry", labels: [seqLabel] }),
+  );
+  check(
+    "sequenceJudgmentLevel 不在封闭词表 => 拒收",
+    !badSeqLevel.ok && badSeqLevel.rejected.some((r) => r.code === "label_bad_sequence_level"),
+    JSON.stringify(badSeqLevel.reasons),
+  );
+
+  const goodSeqLevel = readLabels(
+    writeLabels("good-seq-level.json", { sequenceJudgmentLevel: "product_decision", labels: [seqLabel] }),
+  );
+  check("声明了 sequenceJudgmentLevel => 该标签被接受", goodSeqLevel.ok, `接受 ${goodSeqLevel.accepted.length}`);
+
+  // 单帧几何标签不得冒充序列样本的真值
+  const mismatch = alignLabels([{ ...seqLabel, level: "geometry" }], synReplays);
+  check(
+    "几何标签对上序列样本 => 层级不符拒收，不进对齐集",
+    mismatch.aligned.length === 0 &&
+      mismatch.levelMismatch.length === 1 &&
+      mismatch.levelMismatch[0].code === "label_level_mismatch",
+    JSON.stringify(mismatch.levelMismatch),
+  );
+  const matched = alignLabels([seqLabel], synReplays);
+  check("序列标签对上序列样本 => 正常对齐", matched.aligned.length === 1 && matched.levelMismatch.length === 0);
+
+  // report 层兜底：即使调用方按 id 对齐（拿不到层级），混进混淆矩阵也会被剔掉
+  const strayLabel = { ...seqLabel, sampleId: "syn-bad-number-null", level: "sequence" };
+  const mismatchedReport = buildReport({
+    replays: synReplays,
+    labels: [...synAligned.aligned, strayLabel],
+    level: "auto",
+    coreFingerprint: coreFingerprint(ROOT),
+    labelInfo: { provided: true },
+  });
+  check(
+    "report 层再兜一次底：层级不符的标签被剔出评分，其余标签不受影响",
+    mismatchedReport.labelLevelMismatch.length === 1 &&
+      mismatchedReport.totals.labeled === synAligned.aligned.length,
+    `mismatch=${mismatchedReport.labelLevelMismatch.length} labeled=${mismatchedReport.totals.labeled} 期望 ${synAligned.aligned.length}`,
+  );
+  rmSync(tmpLabels, { recursive: true, force: true });
 }
 
 // ---------------------------------------------------------------- 无标签
@@ -233,7 +314,7 @@ function runGroup(group) {
   const raw = JSON.parse(readFileSync(join(dir, "labels.json"), "utf8"));
   const reps = replayAll(loadSamples(dir), letters);
   const lb = loadLabels(raw);
-  const { aligned, orphaned } = alignLabels(lb.accepted, reps.map((r) => r.sampleId));
+  const { aligned, orphaned, levelMismatch } = alignLabels(lb.accepted, reps);
   const rep = buildReport({
     replays: reps,
     labels: aligned,
@@ -241,7 +322,7 @@ function runGroup(group) {
     coreFingerprint: coreFingerprint(ROOT),
     labelInfo: { provided: true },
   });
-  return { reps, byId: byId(reps), lb, raw, aligned, orphaned, rep };
+  return { reps, byId: byId(reps), lb, raw, aligned, orphaned, levelMismatch, rep };
 }
 
 // --- 反例 1：只有人工标签，没有现场采集 => executed 必须 false

@@ -240,6 +240,9 @@ write("labels.json", {
   labelVersion: "synthetic-labels-1",
   truthOrigin: "synthetic-construction",
   humanReviewed: false,
+  // 序列标签的判定层级：expectedVerdict 指「整次尝试是否被产品放行」，不是单帧几何 pass。
+  sequenceJudgmentLevel: "product_decision",
+  sequenceJudgmentNote: "序列标签的 expectedVerdict 指 judge().decision==='pass'（整次尝试被放行），不是单帧几何 pass。",
   note: "合成夹具标签，不是真人标注。只验证回放骨架接线，不得当准确率。序列标签的期望来自 passState spec。",
   labels: [
     G("syn-v-pos", "correct"),

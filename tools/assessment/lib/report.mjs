@@ -186,6 +186,21 @@ function humanEvidence({ replays, byId, protocols }) {
  */
 export function buildReport({ replays, labels, level, coreFingerprint, labelInfo }) {
   const byId = new Map(labels.map((l) => [l.sampleId, l]));
+  // 标签层级必须与回放层级一致：单帧几何标签不得冒充序列真值混进序列混淆矩阵。
+  // 这里再兜一次底（对齐阶段已按 replay.level 交叉校验过），保证无论调用方怎么对齐都不漏。
+  const labelLevelMismatch = [];
+  for (const r of replays) {
+    const l = byId.get(r.sampleId);
+    if (!l) continue;
+    if (l.level !== r.level) {
+      labelLevelMismatch.push({
+        sampleId: r.sampleId,
+        code: "label_level_mismatch",
+        detail: `标签 level=${l.level}，该样本按 ${r.level} 回放`,
+      });
+      byId.delete(r.sampleId);
+    }
+  }
   const protocols = new Set(
     replays.filter((r) => r.collection?.protocol).map((r) => r.sampleId),
   );
@@ -227,6 +242,8 @@ export function buildReport({ replays, labels, level, coreFingerprint, labelInfo
     level,
     coreFingerprint,
     labelInfo,
+    /** 层级不符而被排除的标签：有内容时该报告的标签分母不可信，必须先处理。 */
+    labelLevelMismatch,
     /** 序列层结论依赖这两个常量；它们仍标 UNVERIFIED，所以必须随报告一起给出。 */
     holdThresholds: holdThresholds(),
     totals: finalize(totals),

@@ -10,6 +10,8 @@ import { readFileSync } from "node:fs";
 
 export const VERDICTS = ["correct", "incorrect"];
 export const LEVELS = ["geometry", "quality", "sequence"];
+/** 序列标签的判定层级封闭词表：expectedVerdict 指「整次尝试是否被产品放行」。 */
+export const SEQUENCE_JUDGMENT_LEVELS = ["product_decision"];
 
 /** reviewedBy 命中这些词说明标签来自工具/模型自动产物，不是独立人工。 */
 const PREDICTION_REVIEWER = /(auto|model|judge|evaluate|prediction|pipeline|self|工具|模型|预测)/i;
@@ -24,6 +26,7 @@ const isObj = (v) => v !== null && typeof v === "object" && !Array.isArray(v);
 export function loadLabels(file) {
   const rejected = [];
   const accepted = [];
+  const seqLevel = isObj(file) && typeof file.sequenceJudgmentLevel === "string" ? file.sequenceJudgmentLevel : null;
 
   if (!isObj(file) || !Array.isArray(file.labels)) {
     return {
@@ -32,6 +35,7 @@ export function loadLabels(file) {
       rejected: [{ sampleId: null, code: "labels_malformed", detail: "缺少 labels 数组" }],
       truthOrigin: "unknown",
       humanReviewed: false,
+      sequenceJudgmentLevel: null,
       reasons: {},
     };
   }
@@ -50,6 +54,14 @@ export function loadLabels(file) {
       return push("label_bad_verdict", `expectedVerdict=${JSON.stringify(lb.expectedVerdict)}`);
     }
     if (!LEVELS.includes(lb.level)) return push("label_bad_level", `level=${JSON.stringify(lb.level)}`);
+    // 序列标签必须在文件级声明判定层级：否则「整次尝试是否放行」会被当成单帧几何真值、
+    // 静默混进序列混淆矩阵（README §2.2）。
+    if (lb.level === "sequence") {
+      if (!seqLevel) return push("label_missing_sequence_level", "序列标签缺文件级 sequenceJudgmentLevel");
+      if (!SEQUENCE_JUDGMENT_LEVELS.includes(seqLevel)) {
+        return push("label_bad_sequence_level", `sequenceJudgmentLevel=${JSON.stringify(seqLevel)}`);
+      }
+    }
 
     // 独立性：标签不得由被评工具自己产生。
     if (lb.independent !== true) return push("label_not_independent", "independent 不是 true");
@@ -78,6 +90,7 @@ export function loadLabels(file) {
     rejected,
     truthOrigin,
     humanReviewed,
+    sequenceJudgmentLevel: seqLevel,
     reasons: rejected.reduce((m, r) => ((m[r.code] = (m[r.code] ?? 0) + 1), m), {}),
   };
 }
@@ -86,14 +99,36 @@ export function readLabels(path) {
   return loadLabels(JSON.parse(readFileSync(path, "utf8")));
 }
 
-/** 标签与样本对齐。标签指向不存在的样本 => 拒收该标签。 */
-export function alignLabels(labels, sampleIds) {
-  const ids = new Set(sampleIds);
+/**
+ * 标签与样本对齐。两种拒收：
+ *   - 标签指向不存在的样本（orphaned）
+ *   - 标签层级与回放层级不一致（levelMismatch）：单帧几何标签不得冒充序列真值
+ * 样本可以是 id 数组，也可以是 replayOne 结果（带 level）；字符串没有 level，无从交叉校验。
+ */
+export function alignLabels(labels, samples) {
+  const byId = new Map();
+  for (const s of samples) {
+    if (typeof s === "string") byId.set(s, null);
+    else if (s && typeof s.sampleId === "string") byId.set(s.sampleId, s.level ?? null);
+  }
   const aligned = [];
   const orphaned = [];
+  const levelMismatch = [];
   for (const lb of labels) {
-    if (ids.has(lb.sampleId)) aligned.push(lb);
-    else orphaned.push({ sampleId: lb.sampleId, code: "label_unknown_sample", detail: "标签指向不存在的样本" });
+    if (!byId.has(lb.sampleId)) {
+      orphaned.push({ sampleId: lb.sampleId, code: "label_unknown_sample", detail: "标签指向不存在的样本" });
+      continue;
+    }
+    const replayLevel = byId.get(lb.sampleId);
+    if (replayLevel && replayLevel !== lb.level) {
+      levelMismatch.push({
+        sampleId: lb.sampleId,
+        code: "label_level_mismatch",
+        detail: `标签 level=${lb.level}，该样本按 ${replayLevel} 回放`,
+      });
+      continue;
+    }
+    aligned.push(lb);
   }
-  return { aligned, orphaned };
+  return { aligned, orphaned, levelMismatch };
 }

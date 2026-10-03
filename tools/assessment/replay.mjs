@@ -47,20 +47,23 @@ let exitCode = 0;
 
 if (labelsArg) {
   const loaded = loadLabels(JSON.parse(readFileSync(resolve(labelsArg), "utf8")));
-  const { aligned, orphaned } = alignLabels(loaded.accepted, replays.map((r) => r.sampleId));
+  const { aligned, orphaned, levelMismatch } = alignLabels(loaded.accepted, replays);
   labels = aligned;
   labelInfo = {
     provided: true,
     path: resolve(labelsArg),
     truthOrigin: loaded.truthOrigin,
     humanReviewed: loaded.humanReviewed,
+    sequenceJudgmentLevel: loaded.sequenceJudgmentLevel,
     accepted: loaded.accepted.length,
     rejected: loaded.rejected.length,
     rejectedReasons: loaded.reasons,
     aligned: aligned.length,
     orphaned: orphaned.length,
+    levelMismatch: levelMismatch.length,
     rejectedDetail: loaded.rejected,
     orphanedDetail: orphaned,
+    levelMismatchDetail: levelMismatch,
     wholeSetRejected: !loaded.ok,
   };
   // 整份标签被拒（例如全是伪标签）时，不得偷偷用一半：一个都不评分。
@@ -69,6 +72,8 @@ if (labelsArg) {
     exitCode = 1;
   }
   if (orphaned.length) exitCode = 1;
+  // 层级不符 = 该标签不得进混淆矩阵（单帧几何标签不得冒充序列真值）。
+  if (levelMismatch.length) exitCode = 1;
 }
 
 const invalid = replays.filter((r) => r.status === "invalid");
@@ -132,9 +137,12 @@ if (!quiet) {
   if (labelInfo.provided) {
     console.log(
       `标签: 接受 ${labelInfo.accepted} / 拒收 ${labelInfo.rejected} / 对齐 ${labelInfo.aligned} / 孤立 ${labelInfo.orphaned}` +
-        ` | truthOrigin=${labelInfo.truthOrigin} humanReviewed=${labelInfo.humanReviewed}`,
+        ` / 层级不符 ${labelInfo.levelMismatch}` +
+        ` | truthOrigin=${labelInfo.truthOrigin} humanReviewed=${labelInfo.humanReviewed}` +
+        `${labelInfo.sequenceJudgmentLevel ? ` seqLevel=${labelInfo.sequenceJudgmentLevel}` : ""}`,
     );
     if (labelInfo.rejected) console.log(`  拒收原因: ${JSON.stringify(labelInfo.rejectedReasons)}`);
+    if (labelInfo.levelMismatch) console.log(`  层级不符: ${JSON.stringify(labelInfo.levelMismatchDetail)}`);
   } else {
     console.log("标签: 未提供，只回放不评分。");
   }

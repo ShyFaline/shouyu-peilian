@@ -167,7 +167,7 @@ details.letter-group > summary { font-size: 14px; color: var(--ink); font-weight
 .quest-letter { position: relative; min-width: 46px; padding: 7px 11px; font-size: 15px; }
 .quest-letter.is-passed { border-color: var(--ok); color: var(--ok); background: #edf3ee; }
 .quest-letter.is-current { border-color: var(--ok); box-shadow: 0 0 0 2px #345d4e33; }
-.quest-letter.is-locked { opacity: .38; cursor: not-allowed; }
+.quest-letter.is-locked { color: #7d8172; background: #efead9; border-color: var(--line); cursor: not-allowed; }
 .quest-letter[aria-pressed="true"] { background: var(--ok); color: white; border-color: var(--ok); }
 .quest-letter.is-passed::after { content: ""; position: absolute; top: -4px; right: -4px; width: 9px; height: 9px; border-radius: 50%; background: var(--ok); }
 .confetti-layer { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 40; }

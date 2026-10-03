@@ -95,8 +95,11 @@ bash tools/assessment/run-all-r2.sh
 | `truthOrigin` | 否 | 覆盖文件级来源，如 `synthetic-construction`、`spec-derived-gate`、`human-annotation` |
 | （文件级）`sequenceJudgmentLevel` | 序列**必需** | 先声明序列任务的预期判定层级，当前 `product_decision`（= `judge().decision==='pass'`），不是单帧几何 `pass` |
 
-伪标签拒收码：`label_not_independent`、`label_derived_from_prediction`、`label_bad_level`、`label_bad_verdict`、`label_missing_reviewer`、`label_missing_time`、`label_origin_conflict`、`label_malformed`、`label_missing_sample`、`label_missing_sequence_level`、`label_bad_sequence_level`。
+伪标签拒收码：`label_not_independent`、`label_derived_from_prediction`、`label_bad_level`、`label_bad_verdict`、`label_missing_reviewer`、`label_missing_time`、`label_origin_conflict`、`label_malformed`、`label_missing_sample`、`label_missing_sequence_level`、`label_bad_sequence_level`、`label_duplicate_sample_id`。
+文件本身读不到 / 不是合法 JSON => `labels_unreadable` / `labels_malformed`，同样按「整份拒收 + 退出码 1」处理，**不崩栈**（与样本装载的 `parseError` 降级口径一致）。
 **任一条被拒 → 整份标签集拒收，一个都不用**（不偷偷用一半）。标签指向不存在的样本 → `label_unknown_sample`（孤立）。
+同一 `sampleId` 出现两条标签 => `label_duplicate_sample_id`：真值互相矛盾，整份拒收，绝不让「后者静默胜出」；
+`buildReport` 另有一层兜底，重复的 sampleId 两条一起剔出评分并记进 `labelDuplicateIds`。
 
 **层级交叉校验**：标签的 `level` 必须与回放推断出的 `level` 一致（`alignLabels` 拿回放结果逐条比对），
 不一致记 `label_level_mismatch`：该标签拒收（同孤立项，退出码 1），不进退回混淆矩阵——单帧几何标签不得冒充序列真值。
@@ -310,7 +313,7 @@ tools/assessment/
     generate-synthetic.mjs        合成冒烟夹具生成器（24 个；写完调用 verify-samples 复核意图）
     verify-samples.mjs            生成期意图校验：核心 evaluate() 复核声明意图，不达即非零退出
     counterexamples/              反例夹具生成器 + 4 组（钉死修正后的定义）
-  verify-skeleton.mjs             骨架自检（72 断言）
+  verify-skeleton.mjs             骨架自检（76 断言）
   verify-legacy-migration.mjs     旧离线入口迁移专项验证（32 断言）
   pre-fix-evidence.mjs            修前证据生成（用 5b56abd 旧 report.mjs 复现两个 bug）
   out/                            第一轮证据（只读，历史）

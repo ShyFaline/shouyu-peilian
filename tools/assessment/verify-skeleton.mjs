@@ -233,6 +233,46 @@ check("坏数值不产生任何预测", ["syn-bad-number-nan", "syn-bad-number-n
       mismatchedReport.totals.labeled === synAligned.aligned.length,
     `mismatch=${mismatchedReport.labelLevelMismatch.length} labeled=${mismatchedReport.totals.labeled} 期望 ${synAligned.aligned.length}`,
   );
+  // 标签文件读不到 / 坏 JSON / 重复 sampleId：一律干净降级，不崩栈
+  const missing = readLabels(join(tmpLabels, "does-not-exist.json"));
+  check(
+    "标签文件缺失 => 干净拒收（labels_unreadable），不抛异常",
+    !missing.ok && missing.rejected.some((r) => r.code === "labels_unreadable"),
+    JSON.stringify(missing.reasons),
+  );
+  const corrupted = join(tmpLabels, "corrupt.json");
+  writeFileSync(corrupted, "{ not json", "utf8");
+  const bad = readLabels(corrupted);
+  check(
+    "标签文件损坏 => 干净拒收（labels_malformed），不抛异常",
+    !bad.ok && bad.rejected.some((r) => r.code === "labels_malformed"),
+    JSON.stringify(bad.reasons),
+  );
+
+  const dupFile = readLabels(
+    writeLabels("dup.json", {
+      sequenceJudgmentLevel: "product_decision",
+      labels: [seqLabel, { ...seqLabel, expectedVerdict: "incorrect" }],
+    }),
+  );
+  check(
+    "同一 sampleId 两条标签 => 整份拒收（label_duplicate_sample_id），不取其一",
+    !dupFile.ok && dupFile.accepted.length === 0 && dupFile.rejected.some((r) => r.code === "label_duplicate_sample_id"),
+    `接受 ${dupFile.accepted.length} 拒收 ${JSON.stringify(dupFile.reasons)}`,
+  );
+
+  const dupReport = buildReport({
+    replays: synReplays,
+    labels: [...synAligned.aligned, { ...synAligned.aligned.at(-1), expectedVerdict: "incorrect" }],
+    level: "auto",
+    coreFingerprint: coreFingerprint(ROOT),
+    labelInfo: { provided: true },
+  });
+  check(
+    "report 层：重复 sampleId 的两条标签都剔出评分（不让后者静默胜出）",
+    dupReport.labelDuplicateIds.length === 1 && dupReport.totals.labeled === synAligned.aligned.length - 1,
+    `dup=${dupReport.labelDuplicateIds.length} labeled=${dupReport.totals.labeled} 期望 ${synAligned.aligned.length - 1}`,
+  );
   rmSync(tmpLabels, { recursive: true, force: true });
 }
 

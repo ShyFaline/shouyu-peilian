@@ -16,7 +16,7 @@ import { coreFingerprint } from "./lib/fingerprint.mjs";
 import { buildReport, fmtRate } from "./lib/report.mjs";
 import { loadSamples, replayAll } from "./lib/replay.mjs";
 import { loadLetters } from "./lib/core.mjs";
-import { alignLabels, loadLabels } from "./lib/truth.mjs";
+import { alignLabels, readLabels } from "./lib/truth.mjs";
 
 const argv = process.argv.slice(2);
 const dir = argv.find((a) => !a.startsWith("--"));
@@ -46,7 +46,7 @@ let labelInfo = { provided: false };
 let exitCode = 0;
 
 if (labelsArg) {
-  const loaded = loadLabels(JSON.parse(readFileSync(resolve(labelsArg), "utf8")));
+  const loaded = readLabels(resolve(labelsArg));
   const { aligned, orphaned, levelMismatch } = alignLabels(loaded.accepted, replays);
   labels = aligned;
   labelInfo = {
@@ -61,6 +61,7 @@ if (labelsArg) {
     aligned: aligned.length,
     orphaned: orphaned.length,
     levelMismatch: levelMismatch.length,
+    duplicateSampleIds: loaded.duplicateSampleIds ?? [],
     rejectedDetail: loaded.rejected,
     orphanedDetail: orphaned,
     levelMismatchDetail: levelMismatch,

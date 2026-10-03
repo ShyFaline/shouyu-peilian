@@ -36,7 +36,8 @@ export function loadLabels(file) {
       truthOrigin: "unknown",
       humanReviewed: false,
       sequenceJudgmentLevel: null,
-      reasons: {},
+      duplicateSampleIds: [],
+      reasons: { labels_malformed: 1 },
     };
   }
 
@@ -84,19 +85,55 @@ export function loadLabels(file) {
     accepted.push({ ...lb, truthOrigin: typeof lb.truthOrigin === "string" ? lb.truthOrigin : truthOrigin });
   });
 
+  // 重复 sampleId：同一份标签集里两条真值互相矛盾，不得让「后者静默胜出」，整份拒收。
+  const seen = new Map();
+  const duplicates = [];
+  for (const lb of accepted) {
+    if (seen.has(lb.sampleId)) duplicates.push(lb.sampleId);
+    else seen.set(lb.sampleId, lb);
+  }
+  for (const sampleId of duplicates) {
+    rejected.push({ sampleId, at: null, code: "label_duplicate_sample_id", detail: "同一 sampleId 出现多次，真值互相矛盾" });
+  }
+
   return {
     ok: rejected.length === 0 && accepted.length > 0,
-    accepted,
+    accepted: duplicates.length ? [] : accepted,
     rejected,
     truthOrigin,
     humanReviewed,
     sequenceJudgmentLevel: seqLevel,
+    duplicateSampleIds: [...new Set(duplicates)],
     reasons: rejected.reduce((m, r) => ((m[r.code] = (m[r.code] ?? 0) + 1), m), {}),
   };
 }
 
+/** 标签文件读不到 / 不是 JSON：降级成可判读结果，不崩栈。 */
+function unreadableLabels(path, code, detail) {
+  return {
+    ok: false,
+    accepted: [],
+    rejected: [{ sampleId: null, at: path, code, detail }],
+    truthOrigin: "unknown",
+    humanReviewed: false,
+    sequenceJudgmentLevel: null,
+    duplicateSampleIds: [],
+    reasons: { [code]: 1 },
+  };
+}
+
 export function readLabels(path) {
-  return loadLabels(JSON.parse(readFileSync(path, "utf8")));
+  let raw;
+  try {
+    raw = readFileSync(path, "utf8");
+  } catch (e) {
+    return unreadableLabels(path, "labels_unreadable", `读不到标签文件：${e.code ?? e.message}`);
+  }
+  try {
+    return loadLabels(JSON.parse(raw));
+  } catch (e) {
+    return unreadableLabels(path, "labels_malformed", `标签文件不是合法 JSON：${e.message}`);
+  }
 }
 
 /**

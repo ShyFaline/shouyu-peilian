@@ -53,7 +53,7 @@ record "generate-synthetic" 0 "$?"
 bun tools/assessment/samples/counterexamples/generate-counterexamples.mjs
 record "generate-counterexamples" 0 "$?"
 
-banner "3. 骨架自检（72 断言：含来源/标签正交、全体 vs conditional、序列层级）"
+banner "3. 骨架自检（76 断言：含来源/标签正交、全体 vs conditional、序列层级）"
 bun tools/assessment/verify-skeleton.mjs 2>&1 | tail -20
 record "verify-skeleton" 0 "${PIPESTATUS[0]}"
 

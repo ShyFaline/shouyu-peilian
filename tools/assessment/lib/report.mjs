@@ -186,6 +186,10 @@ function humanEvidence({ replays, byId, protocols }) {
  */
 export function buildReport({ replays, labels, level, coreFingerprint, labelInfo }) {
   const byId = new Map(labels.map((l) => [l.sampleId, l]));
+  // 同一 sampleId 两条标签 = 真值互相矛盾。绝不让「后者静默胜出」：两条一起剔出评分并记录，
+  // 下游 `labelDuplicateIds` 有内容就说明这份报告的标签分母不可信。
+  const labelDuplicateIds = [...new Set(labels.map((l) => l.sampleId).filter((id, i, a) => a.indexOf(id) !== i))];
+  for (const id of labelDuplicateIds) byId.delete(id);
   // 标签层级必须与回放层级一致：单帧几何标签不得冒充序列真值混进序列混淆矩阵。
   // 这里再兜一次底（对齐阶段已按 replay.level 交叉校验过），保证无论调用方怎么对齐都不漏。
   const labelLevelMismatch = [];
@@ -244,6 +248,8 @@ export function buildReport({ replays, labels, level, coreFingerprint, labelInfo
     labelInfo,
     /** 层级不符而被排除的标签：有内容时该报告的标签分母不可信，必须先处理。 */
     labelLevelMismatch,
+    /** 重复 sampleId（互相矛盾的标签）：全部剔出评分，不取其一。 */
+    labelDuplicateIds,
     /** 序列层结论依赖这两个常量；它们仍标 UNVERIFIED，所以必须随报告一起给出。 */
     holdThresholds: holdThresholds(),
     totals: finalize(totals),

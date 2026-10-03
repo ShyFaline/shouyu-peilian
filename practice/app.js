@@ -881,7 +881,7 @@ function notePass(judged) {
     letters,
   });
   const saved = saveProgress(storage, progress);
-  persisted = saved.persisted;
+  persisted = saved.persisted && persisted;
   showPassSeal(judged, wasLit ? "" : `点亮新字母 ${current.label}！`);
   renderRecords();
   const newlyEarned = [...lastEarnedBadges].filter((id) => !earnedBefore.has(id));

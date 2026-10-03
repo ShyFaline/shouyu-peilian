@@ -1,9 +1,11 @@
 /** 示范手模拖动旋转。
  *
  * 帧约定见 blender/build_godot_hand_turntable.py：右手 00 帧 = 正面机位，
- * 帧号增大 = 观者看到手模左侧，因此向右拖动 = 帧号增大。
+ * 帧号增大 = 相机绕 finger_up 俯视顺时针前进。对 rot/（右手）实测：右拖 =
+ * 帧号增大 = 画面近侧表面跟着手指向右滑，即抓取跟手。
  * 左手帧由右手水平镜像生成（tools/standard-figures/make_left_demos.py），
- * 目录为 rot-left/，拖动方向与右手相反，属镜像预期。
+ * 目录为 rot-left/；镜像后表面运动方向反转，若沿用右手映射会「拖着反着转」，
+ * 因此左手模式下 dx 取反，恢复跟手。
  * 旋转帧目录缺失或索引读取失败时一律回退为静态正面图，不报错、不阻断练习。
  */
 
@@ -27,18 +29,20 @@ export function rotFrameUrl(letterId, frame, frames, hand = 'right') {
   return `./content/demos/${dir}/${letterId}/${String(k).padStart(2, '0')}.webp`;
 }
 
-/** 拖动位移 → 帧号。拖满元素宽度 = 转半圈；startFrame 为按下时的帧。 */
-export function frameForDrag({ dx, width, frames, startFrame }) {
+/** 拖动位移 → 帧号。拖满元素宽度 = 转半圈；startFrame 为按下时的帧。
+ * hand='left' 时帧序列是右手的水平镜像，表面运动方向相反，dx/步进取反保持跟手。 */
+export function frameForDrag({ dx, width, frames, startFrame, hand = 'right' }) {
   if (!Number.isFinite(dx) || !Number.isFinite(width) || width <= 0) return startFrame | 0;
   if (!Number.isInteger(frames) || frames <= 0) return startFrame | 0;
   const perFrame = width / (frames / 2);
-  const delta = Math.round(dx / perFrame);
+  const delta = Math.round((hand === 'left' ? -dx : dx) / perFrame);
   return (((startFrame | 0) + delta) % frames + frames) % frames;
 }
 
-export function stepFrame(frame, step, frames) {
-  if (!Number.isInteger(frames) || frames <= 0) return 0;
-  return (((frame + step) % frames) + frames) % frames;
+export function stepFrame(frame, step, frames, hand = 'right') {
+  if (!Number.isInteger(frame) || !Number.isInteger(frames) || frames <= 0) return 0;
+  const s = hand === 'left' ? -step : step;
+  return (((frame + s) % frames) + frames) % frames;
 }
 
 /**
@@ -76,13 +80,13 @@ export function attachRotator(opts) {
   };
   const onPointerMove = (ev) => {
     if (!dragging || !ev || !Number.isFinite(ev.clientX)) return;
-    frame = frameForDrag({ dx: ev.clientX - startX, width: width(), frames, startFrame });
+    frame = frameForDrag({ dx: ev.clientX - startX, width: width(), frames, startFrame, hand });
     apply(frame);
   };
   const endDrag = () => { dragging = false; };
   const onKeyDown = (ev) => {
     if (!ev || (ev.key !== 'ArrowLeft' && ev.key !== 'ArrowRight')) return;
-    frame = stepFrame(frame, ev.key === 'ArrowRight' ? 1 : -1, frames);
+    frame = stepFrame(frame, ev.key === 'ArrowRight' ? 1 : -1, frames, hand);
     apply(frame);
     ev.preventDefault?.();
   };

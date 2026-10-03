@@ -875,6 +875,12 @@ test("R3 拖动位移换算：拖满宽度=半圈，右拖帧号增大，非法�
   assert.equal(frameForDrag({ dx: Number.NaN, width: 240, frames: 24, startFrame: 3 }), 3);
   assert.equal(stepFrame(23, 1, 24), 0);
   assert.equal(stepFrame(0, -1, 24), 23);
+  // 左手帧是右手的水平镜像，镜像后表面运动方向反转，dx/步进取反保持跟手。
+  assert.equal(frameForDrag({ dx: 240, width: 240, frames: 24, startFrame: 0, hand: "left" }), 12, "左手拖满宽度仍是半圈");
+  assert.equal(frameForDrag({ dx: 20, width: 240, frames: 24, startFrame: 23, hand: "left" }), 22, "左手右拖帧号减小（镜像帧序列）");
+  assert.equal(frameForDrag({ dx: -20, width: 240, frames: 24, startFrame: 0, hand: "left" }), 1, "左手左拖帧号增大");
+  assert.equal(stepFrame(0, 1, 24, "left"), 23, "左手键盘步进取反");
+  assert.equal(stepFrame(0, -1, 24, "left"), 1);
 });
 
 test("R4 attachRotator 拖动/键盘驱动换帧，detach 完整还原", () => {

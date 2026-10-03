@@ -399,6 +399,47 @@ test("未知规则字段不得 pass", () => {
   assert.equal(judged.decision, "blocked");
 });
 
+test("curled 含未知手指名不得静默放行", () => {
+  const letter = { id: "x", practiceStatus: "pose_practice", rules: { extended: ["index"], curled: ["indx"] } };
+  const result = evaluate(letter, vApartHand(), UNIT);
+  assert.equal(result.pass, false);
+  assert.equal(result.ruleStatus, "unsupported");
+  assert.equal((result.audit || result.issues)[0]?.code, "unsupported_rule");
+});
+
+test("spread 非法值不得静默放行", () => {
+  const bad = [
+    { spread: "togetherr" },
+    { spread: { index_middle: "togetherr" } },
+    { spread: { index_midle: "together" } },
+    { spread: { thumb_index: "apart" } },
+    { spread: {} },
+  ];
+  for (const rules of bad) {
+    const result = evaluate({ id: "x", rules }, vApartHand(), UNIT);
+    assert.equal(result.pass, false, JSON.stringify(rules));
+    assert.equal(result.ruleStatus, "unsupported", JSON.stringify(rules));
+    assert.equal((result.audit || result.issues)[0]?.code, "unsupported_rule");
+  }
+  // 合法值域不受影响：V 的食指中指分开照样通过
+  assert.equal(evaluate({ id: "ok", rules: { spread: "apart" } }, vApartHand(), UNIT).pass, true);
+  const judged = judge({
+    letter: { id: "x", practiceStatus: "pose_practice", rules: { extended: ["index", "middle"], spread: "togetherr" } },
+    lm: vApartHand(), hands: [vApartHand()], geom: UNIT, videoTime: 0, nowMs: 0,
+  });
+  assert.equal(judged.decision, "blocked");
+});
+
+test("pinch 未知手指不得抛 TypeError，且 fail-closed", () => {
+  const letter = { id: "x", practiceStatus: "pose_practice", rules: { extended: ["index"], pinch: "indx" } };
+  const result = evaluate(letter, vApartHand(), UNIT);
+  assert.equal(result.pass, false);
+  assert.equal(result.ruleStatus, "unsupported");
+  assert.equal((result.audit || result.issues)[0]?.code, "unsupported_rule");
+  // 合法 pinch 值域照常进入判定（不做 TypeError 也不被误判 unsupported）
+  assert.equal(evaluate({ id: "ok", rules: { pinch: "index" } }, vApartHand(), UNIT).ruleStatus, "ok");
+});
+
 test("零长度向量不返回 180/0", () => {
   const p = pt(0.2, 0.2);
   assert.ok(Number.isNaN(angleDeg(p, p, pt(0.3, 0.3))));

@@ -163,15 +163,53 @@ export function isReadyToScore({ handCount, conf, lm } = {}) {
   return inFrameOf(lm);
 }
 
+const SPREAD_KEYS = SPREAD_PAIRS.map(([a, b]) => `${a}_${b}`);
+
+function isFingerName(v) {
+  return typeof v === "string" && FINGERS.includes(v);
+}
+
+function isFingerList(v) {
+  return Array.isArray(v) && v.every(isFingerName);
+}
+
+function isSpreadValue(v) {
+  return v === "together" || v === "apart";
+}
+
+function isSpreadSpec(v) {
+  if (isSpreadValue(v)) return true;
+  if (!v || typeof v !== "object" || Array.isArray(v)) return false;
+  const keys = Object.keys(v);
+  if (!keys.length) return false;
+  return keys.every((k) => SPREAD_KEYS.includes(k) && isSpreadValue(v[k]));
+}
+
+/** key → 值域校验表。缺失条目或校验失败一律 unsupported，避免错字被静默放行。 */
+const RULE_VALUE_CHECKS = {
+  extended: isFingerList,
+  curled: isFingerList,
+  spread: isSpreadSpec,
+  pinch: isFingerName,
+  shape: (v) => v === "o" || v === "c",
+  pointing: (v) => v === "up" || v === "down" || v === "side",
+  cross: (v) => v === "index_middle",
+  thumb_between: (v) => typeof v === "boolean",
+  thumb_index: (v) => v === "right_angle" || v === "parallel",
+  hook: (v) => v === "index",
+  // motion 是时序规则，深度校验在 motion.js；这里只保证它是对象，不参与单帧几何
+  motion: (v) => Boolean(v) && typeof v === "object" && !Array.isArray(v),
+};
+
 export function inspectRules(rules) {
   const src = rules && typeof rules === "object" ? rules : {};
   const keys = Object.keys(src);
   const unknown = keys.filter((k) => !KNOWN_RULE_KEYS.includes(k));
-  if (unknown.length) {
-    return { kind: "unsupported", unknown };
+  const invalid = keys.filter((k) => RULE_VALUE_CHECKS[k] && !RULE_VALUE_CHECKS[k](src[k]));
+  if (unknown.length || invalid.length) {
+    return { kind: "unsupported", unknown, invalid };
   }
-  const known = keys.filter((k) => KNOWN_RULE_KEYS.includes(k));
-  if (!known.length) {
+  if (!keys.length) {
     return { kind: "empty" };
   }
   return { kind: "ok" };

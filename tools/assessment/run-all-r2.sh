@@ -11,6 +11,9 @@ OUT="tools/assessment/out-r2"
 SYN="tools/assessment/samples/synthetic"
 CE="tools/assessment/samples/counterexamples"
 mkdir -p "$OUT"
+# 零样本目录当场造，不依赖仓库里存在某个空目录（空目录 git 不跟踪，全新 clone 会缺）
+EMPTY_SAMPLES="$(mktemp -d)"
+trap 'rm -rf "$EMPTY_SAMPLES"' EXIT
 
 PASS=0
 FAIL=0
@@ -50,11 +53,11 @@ record "generate-synthetic" 0 "$?"
 bun tools/assessment/samples/counterexamples/generate-counterexamples.mjs
 record "generate-counterexamples" 0 "$?"
 
-banner "3. 骨架自检（62 断言：含来源/标签正交、全体 vs conditional、序列层级）"
+banner "3. 骨架自检（64 断言：含来源/标签正交、全体 vs conditional、序列层级）"
 bun tools/assessment/verify-skeleton.mjs 2>&1 | tail -20
 record "verify-skeleton" 0 "${PIPESTATUS[0]}"
 
-banner "4. 旧离线入口迁移专项验证（31 断言）"
+banner "4. 旧离线入口迁移专项验证（32 断言）"
 bun tools/assessment/verify-legacy-migration.mjs 2>&1 | tail -12
 record "verify-legacy-migration" 0 "${PIPESTATUS[0]}"
 
@@ -63,22 +66,24 @@ bun tools/assessment/pre-fix-evidence.mjs
 record "pre-fix-evidence" 0 "$?"
 
 banner "5. 反例夹具：修后行为"
+CE_FAIL=0
 for g in label-only-human source-orthogonality metric-cells sequence-levels; do
   echo "--- $g ---"
   bun tools/assessment/replay.mjs "$CE/$g" --labels "$CE/$g/labels.json" --allow-invalid --out "$OUT/ce-$g.json" 2>&1 | head -14
+  [ "${PIPESTATUS[0]}" -eq 0 ] || CE_FAIL=1
 done
-record "replay counterexamples" 0 "$?"
+record "replay counterexamples" 0 "$CE_FAIL"
 
 banner "6. 合成夹具：修后行为（应与第一轮结论一致，但字段口径更新）"
 bun tools/assessment/replay.mjs "$SYN" --labels "$SYN/labels.json" --allow-invalid --out "$OUT/replay-synthetic.json" 2>&1 | head -14
-record "replay synthetic" 0 "$?"
+record "replay synthetic" 0 "${PIPESTATUS[0]}"
 
 banner "7. 伪标签整份拒收（期望 exit 1）"
 bun tools/assessment/replay.mjs "$SYN" --labels "$SYN/labels.pseudo.json" --allow-invalid --quiet --out "$OUT/replay-pseudo-rejected.json"
 record "pseudo labels rejected" 1 "$?"
 
 banner "8. 零样本（期望 exit 0，分母 0 => null）"
-bun tools/assessment/replay.mjs tools/assessment/samples/empty --quiet --out "$OUT/replay-empty.json"
+bun tools/assessment/replay.mjs "$EMPTY_SAMPLES" --quiet --out "$OUT/replay-empty.json"
 record "replay empty" 0 "$?"
 
 banner "9. 历史产物可回放性（只读；期望全部阻断 => exit 1）"

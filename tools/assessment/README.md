@@ -305,14 +305,13 @@ tools/assessment/
     generate-synthetic.mjs        合成冒烟夹具生成器（24 个；写完调用 verify-samples 复核意图）
     verify-samples.mjs            生成期意图校验：核心 evaluate() 复核声明意图，不达即非零退出
     counterexamples/              反例夹具生成器 + 4 组（钉死修正后的定义）
-  verify-skeleton.mjs             骨架自检（62 断言）
-  verify-legacy-migration.mjs     旧离线入口迁移专项验证（31 断言）
+  verify-skeleton.mjs             骨架自检（64 断言）
+  verify-legacy-migration.mjs     旧离线入口迁移专项验证（32 断言）
   pre-fix-evidence.mjs            修前证据生成（用 5b56abd 旧 report.mjs 复现两个 bug）
   out/                            第一轮证据（只读，历史）
-  out-r2/                         第二轮证据（当前）
-    synthetic/              24 个合成样本 + 标签 + 伪标签反例
-    empty/                  零样本目录
-  out/                      新报告（不覆盖任何历史产物）
+  out-r2/                         第二轮证据（当前；run-all-r2.sh 产出，不覆盖任何历史产物）
+    合成 / 反例 / 零样本 / 校验报告 JSON + pre-fix/ + post-fix/
+    零样本那项用临时空目录回放（不依赖仓库里存在空目录），报告见 replay-empty.json
 ```
 
 核心指纹 = 下列 8 个文件的 sha256 前 16 位拼接后再取 sha256 前 16 位：

@@ -6,6 +6,14 @@ export const MAX_DAYS_ENTRIES = 400;
 
 const DAY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
+/** 格式之外还要求是真实日期：构造后回读同一字符串，拒绝 2026-13-45 / 2026-02-30 这类假日期。 */
+function isValidDayKey(day) {
+  if (typeof day !== "string" || !DAY_PATTERN.test(day)) return false;
+  const [y, m, d] = day.split("-").map(Number);
+  const date = new Date(y, m - 1, d);
+  return Number.isFinite(date.getTime()) && localDayKey(date) === day;
+}
+
 export function emptyDays() {
   return { schemaVersion: DAYS_SCHEMA, days: [] };
 }
@@ -38,7 +46,7 @@ export function parseDays(raw) {
     const seen = new Set();
     const days = [];
     for (const item of data.days) {
-      if (typeof item !== "string" || !DAY_PATTERN.test(item) || seen.has(item)) continue;
+      if (!isValidDayKey(item) || seen.has(item)) continue;
       seen.add(item);
       days.push(item);
       if (days.length >= MAX_DAYS_ENTRIES) break;
@@ -82,7 +90,7 @@ export function clearDaysKey(storage) {
 /** 记录一天活跃；已记过则原样返回。day 非法时原样返回。 */
 export function markActiveDay(daysState, day) {
   const current = daysState && typeof daysState === "object" ? daysState : emptyDays();
-  if (typeof day !== "string" || !DAY_PATTERN.test(day)) return current;
+  if (!isValidDayKey(day)) return current;
   const days = Array.isArray(current.days) ? current.days.slice() : [];
   if (days.includes(day)) return current;
   days.push(day);

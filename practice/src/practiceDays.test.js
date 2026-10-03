@@ -82,6 +82,31 @@ test("markActiveDay 幂等、升序、超长截断保留最近", () => {
   assert.equal(big.days.at(-1), "2026-10-02");
 });
 
+test("parseDays 拒绝格式合法但不存在的日期", () => {
+  const parsed = parseDays(JSON.stringify({
+    schemaVersion: 1,
+    days: ["2026-13-45", "2026-00-00", "2026-02-30", "2026-04-31", "2026-02-29", "2024-02-29", "2026-10-02"],
+  }));
+  assert.deepEqual(parsed.days, ["2024-02-29", "2026-10-02"], "只留真实日期，闰年 2 月 29 日保留");
+});
+
+test("markActiveDay 拒绝格式合法但不存在的日期", () => {
+  const state = markActiveDay(emptyDays(), "2026-10-02");
+  for (const bad of ["2026-13-45", "2026-00-00", "2026-02-30", "2026-04-31", "2026-02-29"]) {
+    assert.equal(markActiveDay(state, bad), state, `${bad} 原样返回`);
+    assert.equal(markActiveDay(emptyDays(), bad).days.length, 0, `${bad} 不入库`);
+  }
+});
+
+test("假日期不再虚高 activeDayCount 或污染 dayStreak", () => {
+  const days = parseDays(JSON.stringify({
+    schemaVersion: 1,
+    days: ["2026-13-45", "2026-10-01", "2026-10-02"],
+  })).days;
+  assert.equal(days.length, 2, "activeDayCount 只数真实日期");
+  assert.equal(dayStreak(days, "2026-10-02"), 2);
+});
+
 test("dayStreak 今天没练从昨天数，断了就归零", () => {
   const days = ["2026-09-28", "2026-09-29", "2026-09-30", "2026-10-01"];
   assert.equal(dayStreak(days, "2026-10-02"), 4, "今天未练，昨天起连续 4 天");

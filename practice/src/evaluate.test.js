@@ -399,12 +399,18 @@ test("未知规则字段不得 pass", () => {
   assert.equal(judged.decision, "blocked");
 });
 
-test("curled 含未知手指名不得静默放行", () => {
+test("curled 含未知手指名不得静默放行，质量门报规则非法而非手指出画面", () => {
   const letter = { id: "x", practiceStatus: "pose_practice", rules: { extended: ["index"], curled: ["indx"] } };
   const result = evaluate(letter, vApartHand(), UNIT);
   assert.equal(result.pass, false);
   assert.equal(result.ruleStatus, "unsupported");
   assert.equal((result.audit || result.issues)[0]?.code, "unsupported_rule");
+
+  const geom = { width: 640, height: 480, coordSpace: "image_normalized" };
+  const quality = assessInputQuality({ hands: [vApartHand()], geom, letter });
+  assert.equal(quality.ok, false);
+  assert.equal(quality.reason, "invalid_rule");
+  assert.notEqual(quality.reason, "fingertip_oob");
 });
 
 test("spread 非法值不得静默放行", () => {

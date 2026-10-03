@@ -12,6 +12,39 @@ export const HAND_TOO_SMALL_HINT = "手太小了，把手举近摄像头再试";
 export const NO_HAND_HINT = "把手举到摄像头前，让整只手进画面";
 export const TWO_HANDS_HINT = "画面里有两只手，请只留一只手";
 export const FINGERTIP_OOB_HINT = "手指出画面了，把手往画面中间收一收";
+export const INVALID_RULE_HINT = "这条规则里的手指名无法识别，暂时不能判定";
+
+function asList(v) {
+  if (Array.isArray(v)) return v;
+  return v == null ? [] : [v];
+}
+
+/** @returns {{ names: string[], invalid: unknown[] }} invalid 非空表示规则本身不合法，不能算手指出画面。 */
+function neededFingertips(letter) {
+  const rules = letter?.rules || {};
+  const raw = [...asList(rules.extended), ...asList(rules.curled)];
+  if (rules.hook) raw.push(rules.hook);
+  if (rules.pinch) raw.push(rules.pinch);
+  if (rules.pointing) {
+    // 与 evaluate.js 的 pointing 探针一致：中指优先（手的轴线），其次食指
+    const ext = Array.isArray(rules.extended) ? rules.extended : [];
+    const probe = ext.includes("middle") ? "middle" : ext.includes("index") ? "index" : (ext[0] || "index");
+    raw.push(probe);
+  }
+  const names = [];
+  const invalid = [];
+  for (const f of raw) {
+    if (typeof f === "string" && FINGER_TIPS[f] !== undefined) {
+      if (!names.includes(f)) names.push(f);
+    } else {
+      invalid.push(f);
+    }
+  }
+  if (!names.length && !invalid.length) {
+    for (const name of Object.keys(FINGER_TIPS)) names.push(name);
+  }
+  return { names, invalid };
+}
 
 const BONES = [
   [0, 9],
@@ -32,25 +65,6 @@ function isFiniteNum(n) {
 
 function inNormFrame(p) {
   return p.x >= 0 && p.x <= 1 && p.y >= 0 && p.y <= 1;
-}
-
-function neededFingertips(letter) {
-  const rules = letter?.rules || {};
-  const names = new Set();
-  for (const f of rules.extended || []) names.add(f);
-  for (const f of rules.curled || []) names.add(f);
-  if (rules.hook) names.add(rules.hook);
-  if (rules.pinch) names.add(rules.pinch);
-  if (rules.pointing) {
-    // 与 evaluate.js 的 pointing 探针一致：中指优先（手的轴线），其次食指
-    const ext = rules.extended || [];
-    const probe = ext.includes("middle") ? "middle" : ext.includes("index") ? "index" : (ext[0] || "index");
-    names.add(probe);
-  }
-  if (!names.size) {
-    for (const name of Object.keys(FINGER_TIPS)) names.add(name);
-  }
-  return [...names];
 }
 
 function boneLen(a, b) {
@@ -109,8 +123,12 @@ export function assessInputQuality(input = {}) {
     }
   }
 
-  const tips = neededFingertips(input.letter);
-  for (const name of tips) {
+  const needed = neededFingertips(input.letter);
+  if (needed.invalid.length) {
+    // 规则里出现不认识的手指名：是内容问题，不能报成「手指出画面」误导用户
+    return fail("invalid_rule", INVALID_RULE_HINT);
+  }
+  for (const name of needed.names) {
     const idx = FINGER_TIPS[name];
     const p = lm[idx];
     if (!p || !inNormFrame(p)) {

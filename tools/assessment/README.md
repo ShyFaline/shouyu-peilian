@@ -313,7 +313,7 @@ tools/assessment/
     generate-synthetic.mjs        合成冒烟夹具生成器（24 个；写完调用 verify-samples 复核意图）
     verify-samples.mjs            生成期意图校验：核心 evaluate() 复核声明意图，不达即非零退出
     counterexamples/              反例夹具生成器 + 4 组（钉死修正后的定义）
-  verify-skeleton.mjs             骨架自检（76 断言）
+  verify-skeleton.mjs             骨架自检（79 断言）
   verify-legacy-migration.mjs     旧离线入口迁移专项验证（32 断言）
   pre-fix-evidence.mjs            修前证据生成（用 5b56abd 旧 report.mjs 复现两个 bug）
   out/                            第一轮证据（只读，历史）

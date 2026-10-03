@@ -1,12 +1,12 @@
 /**
  * 采集记录的最小元数据校验。只查「能不能回放」，不判对错、不判标签。
  *
- * 几何尺寸/坐标空间的裁决复用核心 geometryError()，这里不另写一套阈值。
+ * 几何尺寸/坐标空间（含 unsupported_coord_space 的封闭词表）一律以核心 coords.js 的
+ * geometryError() 为准，这里不另写一套，也不另记一次阻断。
  */
 import { geometryError, geomOf } from "./core.mjs";
 
 export const SUPPORTED_SCHEMA_VERSION = 2;
-export const SUPPORTED_COORD_SPACES = ["image_normalized", "equal_scale_unit"];
 export const LANDMARK_COUNT = 21;
 
 /** 这些字段是「当时的选中目标」或「工具自己的预测」，永远不能当标签。 */
@@ -88,11 +88,9 @@ export function validateCapture(record) {
 
   const space = record.coordSpace ?? "image_normalized";
   meta.coordSpace = space;
-  if (!SUPPORTED_COORD_SPACES.includes(space)) {
-    blockers.push({ code: "unsupported_coord_space", field: "coordSpace", detail: String(space) });
-  }
 
-  // 尺寸裁决复用核心。缺尺寸不补、不猜。
+  // 尺寸/坐标空间裁决一律走核心 geometryError()：unsupported_coord_space 也由它给，
+  // 不在这里另记一次（否则同一阻断会重复两次）。
   const geomError = geometryError(geomOf(record));
   if (geomError) {
     blockers.push({

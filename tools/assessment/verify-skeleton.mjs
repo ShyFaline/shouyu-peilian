@@ -16,7 +16,7 @@ import { coreFingerprint } from "./lib/fingerprint.mjs";
 import { buildReport, fmtRate } from "./lib/report.mjs";
 import { loadSamples, replayAll, replayOne } from "./lib/replay.mjs";
 import { alignLabels, loadLabels, readLabels } from "./lib/truth.mjs";
-
+import { validateCapture } from "./lib/validate.mjs";
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SYN = join(HERE, "samples", "synthetic");
 const ROOT = resolve(HERE, "..", "..");
@@ -29,6 +29,28 @@ const check = (name, cond, detail = "") => {
 };
 
 const byId = (arr) => new Map(arr.map((r) => [r.sampleId, r]));
+
+// ---------------------------------------------------------------- 元数据校验：同一阻断不得记两次
+{
+  const unsupported = validateCapture(JSON.parse(readFileSync(join(SYN, "syn-unsupported-space.json"), "utf8")));
+  check(
+    "未知坐标空间只记一次阻断（不再重复记）",
+    unsupported.ok === false &&
+      unsupported.blockers.filter((b) => b.code === "unsupported_coord_space").length === 1,
+    `blockers=${unsupported.blockers.map((b) => b.code).join(",")}`,
+  );
+  check(
+    "该记录没有任何重复阻断码",
+    unsupported.blockers.length === new Set(unsupported.blockers.map((b) => b.code)).size,
+    unsupported.blockers.map((b) => b.code).join(","),
+  );
+  const missingSize = validateCapture(JSON.parse(readFileSync(join(SYN, "syn-missing-size.json"), "utf8")));
+  check(
+    "缺尺寸同样只记一次阻断",
+    missingSize.blockers.filter((b) => b.code === "missing_size").length === 1,
+    missingSize.blockers.map((b) => b.code).join(","),
+  );
+}
 
 // ---------------------------------------------------------------- 合成正负例
 const synReplays = replayAll(loadSamples(SYN), letters);

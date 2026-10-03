@@ -7,9 +7,9 @@
  *
  * 层级缺省：序列 -> sequence，其余 -> geometry。
  * 没有 --labels 时只回放不评分（覆盖率为 0，不编指标）。
- * 退出码：0 正常；1 有 invalid 记录或标签被拒；2 用法错误。
+ * 退出码：0 正常；1 有 invalid 记录或标签被拒；2 用法错误（含目录不存在）。
  */
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { basename, dirname, resolve } from "node:path";
 
 import { coreFingerprint } from "./lib/fingerprint.mjs";
@@ -17,27 +17,31 @@ import { buildReport, fmtRate } from "./lib/report.mjs";
 import { loadSamples, replayAll } from "./lib/replay.mjs";
 import { loadLetters } from "./lib/core.mjs";
 import { alignLabels, readLabels } from "./lib/truth.mjs";
+import { parseArgs, singleDir, usageError } from "./lib/argv.mjs";
 
 const argv = process.argv.slice(2);
-const dir = argv.find((a) => !a.startsWith("--"));
-const val = (name) => {
-  const i = argv.indexOf(name);
-  return i >= 0 ? argv[i + 1] : null;
-};
-const levelArg = val("--level");
-const labelsArg = val("--labels");
-const outPath = val("--out");
-const asJson = argv.includes("--json");
-const quiet = argv.includes("--quiet");
-/** 目录本来就放反例夹具时显式声明，退出码才不报 1；默认仍然如实报错。 */
-const allowInvalid = argv.includes("--allow-invalid");
+const USAGE = "用法: bun tools/assessment/replay.mjs <dir> [--level geometry|quality|sequence] [--labels <file>] [--out <file>] [--json]";
+const { values, positionals, error } = parseArgs(argv, {
+  options: ["--level", "--labels", "--out"],
+  flags: ["--json", "--quiet", "--allow-invalid"],
+});
+if (error) usageError(error, USAGE);
+const dirArg = singleDir(positionals);
+if (dirArg.error) usageError(dirArg.error, USAGE);
 
-if (!dir || (levelArg && !["geometry", "quality", "sequence"].includes(levelArg))) {
-  console.error("用法: bun tools/assessment/replay.mjs <dir> [--level geometry|quality|sequence] [--labels <file>] [--out <file>] [--json]");
-  process.exit(2);
+const target = dirArg.target;
+const levelArg = values["--level"] ?? null;
+const labelsArg = values["--labels"] ?? null;
+const outPath = values["--out"] ?? null;
+const asJson = values["--json"] === true;
+const quiet = values["--quiet"] === true;
+/** 目录本来就放反例夹具时显式声明，退出码才不报 1；默认仍然如实报错。 */
+const allowInvalid = values["--allow-invalid"] === true;
+
+if (levelArg && !["geometry", "quality", "sequence"].includes(levelArg)) {
+  usageError(`--level 只接受 geometry|quality|sequence，收到 ${levelArg}`, USAGE);
 }
 
-const target = resolve(dir);
 const letters = loadLetters();
 const replays = replayAll(loadSamples(target), letters, levelArg);
 

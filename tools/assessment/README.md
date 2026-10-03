@@ -42,6 +42,8 @@ bash tools/assessment/run-all-r2.sh
 ```
 
 退出码：`validate-captures` / `replay` 有阻断项或标签被拒返回 1；`verify-skeleton` 有断言失败返回 1。目录本来就是放反例夹具时，显式加 `--allow-invalid`，默认仍如实报错。
+用法错误（缺目录、目录不存在、`--level`/`--out` 缺取值、未知选项、给了多个位置参数）一律退出码 2，并打印一行可判读的原因 + 用法。
+位置参数会跳过选项取值，所以 `--level geometry <dir>` 与 `<dir> --level geometry` 等价（`geometry` 不会被当成目录）。
 
 ### 三个 level 的含义（互不冒充）
 
@@ -308,6 +310,7 @@ tools/assessment/
     replay.mjs                    三层回放 + decision/failureClass
     report.mjs                    正交轴 + 全体/conditional 两层口径
     fingerprint.mjs               核心源指纹
+    argv.mjs                      位置参数跳过选项取值 + 目录存在性前置检查
   samples/
     lib/hand.mjs                  共享合成手型构造器（无国标规则）
     generate-synthetic.mjs        合成冒烟夹具生成器（24 个；写完调用 verify-samples 复核意图）

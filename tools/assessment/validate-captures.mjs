@@ -9,21 +9,24 @@ import { dirname, resolve } from "node:path";
 import { coreFingerprint } from "./lib/fingerprint.mjs";
 import { loadSamples } from "./lib/replay.mjs";
 import { validateCapture } from "./lib/validate.mjs";
+import { parseArgs, singleDir, usageError } from "./lib/argv.mjs";
 
 const argv = process.argv.slice(2);
-const dir = argv.find((a) => !a.startsWith("--"));
-const outIdx = argv.indexOf("--out");
-const outPath = outIdx >= 0 ? argv[outIdx + 1] : null;
-const asJson = argv.includes("--json");
+const USAGE = "用法: bun tools/assessment/validate-captures.mjs <dir> [--out <file>] [--json] [--allow-invalid]";
+const { values, positionals, error } = parseArgs(argv, {
+  options: ["--out"],
+  flags: ["--json", "--allow-invalid"],
+});
+if (error) usageError(error, USAGE);
+const dirArg = singleDir(positionals);
+if (dirArg.error) usageError(dirArg.error, USAGE);
+
+const target = dirArg.target;
+const outPath = values["--out"] ?? null;
+const asJson = values["--json"] === true;
 /** 目录本来就放反例夹具时显式声明；默认如实返回 1。 */
-const allowInvalid = argv.includes("--allow-invalid");
+const allowInvalid = values["--allow-invalid"] === true;
 
-if (!dir) {
-  console.error("用法: bun tools/assessment/validate-captures.mjs <dir> [--out <file>] [--json]");
-  process.exit(2);
-}
-
-const target = resolve(dir);
 const samples = loadSamples(target);
 const results = samples.map(({ file, record, parseError }) => {
   if (parseError) {

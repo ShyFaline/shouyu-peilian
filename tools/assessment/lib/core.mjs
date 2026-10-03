@@ -7,6 +7,7 @@
  *   practice/src/inputQuality.js  输入质量门
  *   practice/src/passState.js     连续保持门
  *   practice/src/judge.js         实时编排（decision）
+ *   practice/src/motion.js        动态判定层（画钩/画 Z/晃动）
  *
  * 核心文件由其他席位持有写锁，本目录只读它们。
  */
@@ -28,6 +29,7 @@ export const CORE_SOURCES = [
   "practice/src/inputQuality.js",
   "practice/src/passState.js",
   "practice/src/judge.js",
+  "practice/src/motion.js",
   "practice/src/snapshot.js",
   "practice/src/types.js",
   "practice/content/letters.json",

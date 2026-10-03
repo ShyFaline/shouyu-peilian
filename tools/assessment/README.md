@@ -314,6 +314,6 @@ tools/assessment/
     零样本那项用临时空目录回放（不依赖仓库里存在空目录），报告见 replay-empty.json
 ```
 
-核心指纹 = 下列 8 个文件的 sha256 前 16 位拼接后再取 sha256 前 16 位：
-`practice/src/{coords,evaluate,inputQuality,passState,judge,snapshot,types}.js`、`practice/content/letters.json`。
+核心指纹 = 下列 9 个文件的 sha256 前 16 位拼接后再取 sha256 前 16 位：
+`practice/src/{coords,evaluate,inputQuality,passState,judge,motion,snapshot,types}.js`、`practice/content/letters.json`。
 报告里带 `coreFingerprint`，才能说明「这一版结果对应哪一版核心」。核心被改过之后，旧报告作废。

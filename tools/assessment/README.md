@@ -108,6 +108,11 @@ bash tools/assessment/run-all-r2.sh
 | `unknown` | 无目标字母 / 目标字母不在 letters.json | 只进阻断原因 |
 | `invalid` | 元数据或数据本身损坏（schema 版本、点数、NaN、缺时间） | 只进阻断原因 |
 
+> 归属规则：**质量门失败一律 `undetermined`**（`failureClass` 仍是 `blocked_input`，说明是质量门拦的），
+> `blocked` 只留给规则/状态拒绝（空规则、`practiceStatus` 非 `pose_practice`）。单帧与序列同口径。
+> 例外只有 `level=quality`：该层判的就是「输入质量够不够」，所以质量门失败是**该层明确负例**（`predicted=incorrect`），
+> 不是不可判定——否则这一层的负例标签永远拿不到预测。
+
 每条结果另带两个正交字段：
 
 | 字段 | 取值 | 用途 |

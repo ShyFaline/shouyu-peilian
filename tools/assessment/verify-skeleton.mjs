@@ -323,15 +323,31 @@ function runGroup(group) {
     `err=${t.decidableCoverage.incorrect.num}/${t.decidableCoverage.incorrect.den} ok=${t.decidableCoverage.correct.num}/${t.decidableCoverage.correct.den}`,
   );
   check(
-    "反例3 blocked / undetermined / invalid / unknown 分开计数",
-    t.blocked === 2 && t.invalid === 1 && t.unknown === 1 && t.undetermined === 0,
+    "反例3 blocked / undetermined / invalid / unknown 分开计数（单帧质量门失败归 undetermined）",
+    t.blocked === 0 && t.undetermined === 2 && t.invalid === 1 && t.unknown === 1,
     `blocked=${t.blocked} undetermined=${t.undetermined} invalid=${t.invalid} unknown=${t.unknown}`,
   );
   check(
-    "反例3 blocked 原因可查（fingertip_oob）",
+    "反例3 两类未判定都留了原因（fingertip_oob ×2）",
     g.rep.blockReasons.fingertip_oob === 2,
     JSON.stringify(g.rep.blockReasons),
   );
+  // 质量门失败的样本归 undetermined，但在 quality 层必须能产出明确负例（否则负例标签被吞）
+  {
+    const qReps = byId(replayAll(loadSamples(join(CE, "metric-cells")), letters, "quality"));
+    const qBad = qReps.get("ce-err-blocked");
+    check(
+      "反例3 quality 层单帧质量门失败 => predicted=incorrect（不被吞成 blocked）",
+      qBad?.status === "scored" && qBad.predicted === "incorrect" && qBad.reason === "quality_failed",
+      `status=${qBad?.status} pred=${qBad?.predicted} reason=${qBad?.reason}`,
+    );
+    check(
+      "反例3 blocked 状态与核心 judge().decision 对齐（质量门失败 => undetermined）",
+      g.byId.get("ce-err-blocked")?.status === "undetermined" &&
+        g.byId.get("ce-err-blocked")?.decision === "undetermined",
+      `status=${g.byId.get("ce-err-blocked")?.status} decision=${g.byId.get("ce-err-blocked")?.decision}`,
+    );
+  }
   check(
     "反例3 全体口径与 conditional 口径不是同一个数（禁止互换引用）",
     t.falseAcceptAll.value !== t.conditionalOnDecidable.falseAccept.value ||

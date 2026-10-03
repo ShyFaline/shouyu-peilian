@@ -69,13 +69,6 @@ const outcome = (status, reason, failureClass, extra = {}) => ({
 function replaySingle(record, letter, level) {
   const geom = geomOf(record);
   const quality = assessInputQuality({ lm: record.landmarks, letter, geom });
-
-  if (!quality.ok) {
-    return outcome("blocked", quality.reason, "blocked_input", {
-      evidence: { quality, productDecision: null },
-    });
-  }
-
   const ev = evaluate(letter, record.landmarks, geom);
   // 实时编排的 decision 只作证据（单帧必然 hold.pending），不作几何层预测。
   const jd = judge({ letter, lm: record.landmarks, geom, videoTime: 0, nowMs: 0 });
@@ -87,8 +80,18 @@ function replaySingle(record, letter, level) {
     practiceStatus: jd.practiceStatus,
   };
 
+  // quality 层判的就是「输入质量是否足够」，所以质量门失败在这里是**明确负例**，
+  // 不能吞成不可判定，否则该层的负例标签永远拿不到预测。
   if (level === "quality") {
-    return { status: "scored", reason: "quality_ok", failureClass: "none", predicted: "correct", evidence };
+    if (quality.ok) {
+      return { status: "scored", reason: "quality_ok", failureClass: "none", predicted: "correct", evidence };
+    }
+    return { status: "scored", reason: "quality_failed", failureClass: "blocked_input", predicted: "incorrect", evidence };
+  }
+
+  // 质量门失败 = 无法判定（与 blocked 的「规则/状态拒绝」分开计），但保留 blocked_input 说明是质量门拦的。
+  if (!quality.ok) {
+    return outcome("undetermined", quality.reason, "blocked_input", { evidence });
   }
 
   // 规则本身不可判（空规则 / 未知字段）时，不能算成几何负例。

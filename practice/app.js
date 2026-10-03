@@ -1311,6 +1311,7 @@ async function main() {
       if (current) {
         els.how.textContent = swapHowForHand(current.how, hand);
         showDemo(current);
+        presentLetterIdle(current);
       }
     });
   }

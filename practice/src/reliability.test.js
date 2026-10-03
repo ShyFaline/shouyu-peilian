@@ -9,7 +9,7 @@ import { webcrypto, createHash } from 'node:crypto';
 import { groupLetters, groupIdForStatus, letterAriaLabel, capabilityNote, confusionCluster } from './letterLibrary.js';
 import { PROGRESS_KEY } from './progress.js';
 import { QUEST_KEY } from './quest.js';
-import { CODE_FILES } from './versions.js';
+import { CODE_FILES, RULE_FILES } from './versions.js';
 const practice = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const pack = JSON.parse(readFileSync(resolve(practice, 'content/letters.json'), 'utf8'));
 const V = pack.letters.find(x => x.id === 'GF0021.V');
@@ -162,6 +162,8 @@ test('versions CODE_FILES covers every src module app.js imports',()=>{
  const appSrc=readFileSync(resolve(practice,'app.js'),'utf8');
  const imported=[...appSrc.matchAll(/from\s+["']\.\/src\/([\w.-]+\.js)["']/g)].map(m=>'src/'+m[1]).filter(f=>f!=='src/versions.js');
  for(const f of imported) assert.ok(CODE_FILES.includes(f),`CODE_FILES missing ${f}`);
+ for(const f of RULE_FILES) assert.ok(CODE_FILES.includes(f),`RULE_FILES entry not in CODE_FILES ${f}`);
+ assert.ok(RULE_FILES.includes('src/letterLibrary.js')&&RULE_FILES.includes('src/quest.js'),'影响可练判定与限时/评星的文件须进规则哈希');
 });
 test('runtime versions hash actual sources/letters; export retains raw unmirrored points',async()=>{
  const h=await harness();await h.pass();await h.download();const payload=JSON.parse(await h.blob.text());assert.equal(payload.schemaVersion,2);assert.equal(payload.mirrored,true);assert.deepEqual(payload.landmarks,hand());assert.match(payload.codeVersion,/^sha256:[a-f0-9]{64}$/);assert.match(payload.rulesVersion,/^sha256:[a-f0-9]{64}$/);
@@ -172,6 +174,8 @@ test('runtime versions hash actual sources/letters; export retains raw unmirrore
  const changed=await v.loadVersionManifest();assert.notEqual(changed.codeVersion,manifest.codeVersion);assert.notEqual(changed.rulesVersion,manifest.rulesVersion);
  h.fetchTransform=(path,text)=>String(path).includes('letters.json')?text+'\n':text;
  const lettersChanged=await v.loadVersionManifest();assert.notEqual(lettersChanged.codeVersion,manifest.codeVersion);assert.notEqual(lettersChanged.rulesVersion,manifest.rulesVersion);
+ h.fetchTransform=(path,text)=>String(path).includes('quest.js')?text+'\n':text;
+ const questChanged=await v.loadVersionManifest();assert.notEqual(questChanged.codeVersion,manifest.codeVersion);assert.notEqual(questChanged.rulesVersion,manifest.rulesVersion,'改限时/评星须改变 rulesVersion');
 });
 test('32 letters grouped exactly once by capability',async()=>{
  const h=await harness();await h.boot();

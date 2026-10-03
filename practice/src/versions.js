@@ -9,7 +9,8 @@ export const CODE_FILES = [
 ];
 export const RULE_FILES = [
   'src/coords.js', 'src/evaluate.js', 'src/inputQuality.js', 'src/judge.js',
-  'src/motion.js', 'src/passState.js', 'content/letters.json',
+  'src/letterLibrary.js', 'src/motion.js', 'src/passState.js', 'src/quest.js',
+  'content/letters.json',
 ];
 async function sha256(text) {
   const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));

@@ -18,6 +18,7 @@ import {
   canRecordPass,
 } from "./src/practiceSession.js";
 import {
+  clearQuestKey,
   emptyQuest,
   isQuestUnlocked,
   levelConfig,
@@ -1371,7 +1372,8 @@ async function main() {
     els.recordsClearYes.addEventListener("click", () => {
       const result = clearProgressKey(storage);
       const daysResult = clearDaysKey(storage);
-      if (!result.ok || !daysResult.ok) {
+      const questResult = clearQuestKey(storage);
+      if (!result.ok || !daysResult.ok || !questResult.ok) {
         setStatus("未能清除本机记录", "bad");
         if (els.persistNote) {
           els.persistNote.hidden = false;
@@ -1382,9 +1384,16 @@ async function main() {
       }
       progress = emptyProgress();
       practiceDays = emptyDays();
+      quest = emptyQuest();
       persisted = Boolean(storage);
       showClearConfirm(false);
       hidePassSeal();
+      if (mode === MODE_QUEST) {
+        const status = questStatus(quest, letters);
+        if (status.current && status.current.id !== current?.id) selectLetter(status.current);
+        else resetQuestRun();
+      }
+      renderQuest();
       renderRecords();
       setStatus("已清除此浏览器中的练习记录", "idle");
     });

@@ -148,3 +148,13 @@ export function saveQuest(storage, quest) {
     return false;
   }
 }
+
+export function clearQuestKey(storage) {
+  try {
+    if (!storage) return { ok: false };
+    storage.removeItem(QUEST_KEY);
+    return { ok: true };
+  } catch {
+    return { ok: false };
+  }
+}

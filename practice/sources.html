@@ -29,10 +29,10 @@
 
     <article>
       <h2>2. GF 0021—2019《汉语手指字母方案》</h2>
-      <p>内容层只引用这份国家规范（26 个拉丁字母 + zh / ch / sh / ng / ê / ü）。练习页按内容核对进度分三组：可跟练（已核对且有静态判定）、待核对（能看示范，暂不判对错）、仅示范（只展示）。</p>
-      <p>练习范围可选「基础 26 字母」（A–Z）或「完整 32 项」（再加 zh / ch / sh / ng / ê / ü），两个范围是同一份规范的子集与全集，判定规则相同。<span id="scope-note"></span></p>
+      <p>内容层只引用这份国家规范（26 个拉丁字母 + zh / ch / sh / ng / ê / ü）。练习页按练习状态分三组：可跟练（有静态判定，不代表内容已核定）、待核对（能看示范，暂不判对错）、仅示范（只展示）。目前没有条目完成人工内容核定。</p>
+      <p>练习范围可选「基础 26 字母」（A–Z）或「完整 32 项」（再加 zh / ch / sh / ng / ê / ü），两个范围是同一份规范的子集与全集，判定规则相同。完整 32 项指内容范围，不代表全部可判定。<span id="scope-note"></span></p>
       <p>我们不发明「我们队的手语」，也不把 ASL 手指拼写当国标内容。争议或易混手型写在字母包备注里，不写进判定口号。</p>
-      <p>教育部《汉语手指字母方案》官方入口：未找到官方 URL</p>
+      <p>本仓库已有规范扫描件本地留档及页码索引（docs/standards/），取得记录见 docs/GF0021-2019检索记录.md；官方发布公文页仍未定位，现行有效性未核实。本地留档不等于公开再分发，未经许可不对外发布、不上传。</p>
     </article>
 
     <article>
@@ -43,12 +43,12 @@
     </article>
 
     <article>
-      <h2>4. 标准手示范</h2>
+      <h2>4. 渲染手型参考</h2>
       <p>主路径 8 个字母的正面静图在 <code>content/demos/{字母ID}_front.png</code>，例如 <code>GF0021.U_front.png</code>。缺图时练习页回退字体，不报错。逐张来源见 <code>content/demos/manifest.json</code>。</p>
       <p>2026-09-30 起，<strong>A、B、I、L、V、W、Y</strong> 七张正面图改用 Godot XR Tools 右手网格 <code>hand_r.gltf</code>，由 <code>blender/build_godot_hand_candidate.py</code> 离线渲染。网格许可 <strong>CC0 1.0 Universal</strong>，作者 DigitalN8m4r3 aka Miodrag Sejic（2022）。许可全文：<code>vendor/godot-xr-hands/LICENSE.md</code>。同一网格另由 <code>blender/build_godot_hand_turntable.py</code> 逐字母渲染 24 帧转盘（<code>content/demos/rot/</code>），供练习页左右拖动查看手型各个角度；U 与 J/Z 无旋转帧，保持静态示范或字形。V、W 的 V/W 字形正确，侧面可见拇指搭在屈指上，但拇指与远节是近似接触、并非精确贴面。</p>
       <p><strong>U 未替换</strong>，仍用此前 Blender Studio <strong>Human Base Meshes v1.4.1</strong> 的 <code>realistic_hand</code>（许可 <strong>CC0 1.0</strong>）绑到本仓库 <code>HandRig</code> 后渲染的旧图，因其内容 pending_review 争议未核定。姿态与判定规则仍是本队的；没有把这些手送进识别循环。</p>
       <p>上游：<a href="https://github.com/GodotVR/godot-xr-tools">Godot XR Tools</a>（新手模七字母）；<a href="https://www.blender.org/download/demo-files/">Blender Demo Files · Human Base Meshes</a>（仍在用的 U 旧图；实际 zip：<code>download.blender.org/demo/asset-bundles/human-base-meshes/</code>）。</p>
-      <p><strong>3D 示范不是识别模型。</strong> 只给学习者对照；不驱动虚拟人跟随摄像头，不把渲染图送进分类器。</p>
+      <p><strong>渲染手型参考不是规范核定示范，也不是识别模型。</strong> 目检记录与网格的 CC0 许可不等于规范内容已核定。只给学习者对照；不驱动虚拟人跟随摄像头，不把渲染图送进分类器。</p>
     </article>
 
     <article>

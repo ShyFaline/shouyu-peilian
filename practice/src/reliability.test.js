@@ -36,6 +36,9 @@ class Target {
   scrollIntoView(){}
 }
 function deferred(){let resolve,reject;const promise=new Promise((a,b)=>{resolve=a;reject=b;});return {promise,resolve,reject};}
+async function harness(opts={}){
+  const h={now:1000,epoch:1700000000000,raf:new Map(),seq:0,downloads:[],detects:0,painted:false,hands:[hand()],logs:[],streams:[],gumCalls:0,store:opts.store||new Map(),storageClears:0,images:[]};
+  const ids=['video','overlay','status','verdict','hint','how','demo-stage','demo-image','demo-glyph','demo-label','capability','letter-btns','atlas-btns','demo-btns','practice-group','review-group','demo-group','practice-count','review-count','demo-count','similar-hints','similar-hints-text','similar-hint-btns','start-btn','stop-btn','mirror-toggle','export-toggle','export-btn','stage','demo-panel','test-panel','test-letter','test-scope','test-retry','test-next','test-back','test-letter-btns','test-outcome','mode-learn','mode-test','learn-eyebrow','learn-title','live-title','pass-seal','pass-seal-text','records','records-list','records-empty','persist-note','records-clear','records-clear-confirm','records-clear-yes','records-clear-no'];
   h.els=Object.fromEntries(ids.map(id=>[id,new Target()]));
   h.els['similar-hints'].hidden=true;
   for(const id of ['test-panel','pass-seal','records-clear-confirm','test-outcome','persist-note']) h.els[id].hidden=true;
@@ -49,6 +52,16 @@ function deferred(){let resolve,reject;const promise=new Promise((a,b)=>{resolve
   h.document=document;
   h.newStream=()=>{const track=new Target();track.muted=false;track.readyState='live';track.stops=0;track.stop=()=>{track.stops++;track.readyState='ended';};const s={track,getTracks:()=>[track],getVideoTracks:()=>[track]};h.streams.push(s);return s;};
   class ClockDate extends Date {constructor(...args){super(...(args.length?args:[h.epoch]));}static now(){return h.epoch;}}
+  const localStorage={
+    get length(){if(h.storageGetThrow)throw Error('storage');return h.store.size;},
+    getItem(k){if(h.storageGetThrow)throw Error('storage');return h.store.has(k)?h.store.get(k):null;},
+    setItem(k,v){if(h.storageSetThrow)throw Error('storage');h.store.set(String(k),String(v));},
+    removeItem(k){if(h.storageRemoveThrow)throw Error('storage');h.store.delete(k);},
+    clear(){h.storageClears++;throw Error('clear-all-forbidden');},
+    key(i){return [...h.store.keys()][i]??null;},
+  };
+  h.location={search:opts.search||'',hash:opts.hash||'',pathname:'/learn.html',href:'http://local/learn.html'};
+  const sandbox={document,Image:class {},performance:{now:()=>h.now},Date:ClockDate,TextEncoder,crypto:webcrypto,Blob,URLSearchParams,localStorage,location:h.location,
     console:{log:(...a)=>h.logs.push(a),info:(...a)=>h.logs.push(a),warn:(...a)=>h.logs.push(a),error:(...a)=>h.logs.push(a)},
     URL:{createObjectURL:blob=>{h.blob=blob;return 'blob:test';},revokeObjectURL(){}},
     navigator:{mediaDevices:{getUserMedia:()=>{h.gumCalls++;return h.gum?h.gum():Promise.resolve(h.newStream());}}},
@@ -153,7 +166,6 @@ test('runtime versions hash actual sources/letters; export retains raw unmirrore
  const changed=await v.loadVersionManifest();assert.notEqual(changed.codeVersion,manifest.codeVersion);assert.notEqual(changed.rulesVersion,manifest.rulesVersion);
  h.fetchTransform=(path,text)=>String(path).includes('letters.json')?text+'\n':text;
  const lettersChanged=await v.loadVersionManifest();assert.notEqual(lettersChanged.codeVersion,manifest.codeVersion);assert.notEqual(lettersChanged.rulesVersion,manifest.rulesVersion);
-});
 });
 let passed=0,failed=0;
 for(const [name,fn] of tests){try{await fn();passed++;console.log('ok -',name);}catch(e){failed++;console.error('not ok -',name);console.error(e.stack);}}

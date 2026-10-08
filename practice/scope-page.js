@@ -16,8 +16,7 @@ function main() {
       noteEl.textContent = `${SCOPE_META[scope].note}两个范围共用同一套汉语手指字母与判定规则；切换范围不会清除本机练习记录。`;
     }
     for (const link of document.querySelectorAll("a[data-scope-link]")) {
-      const hash = link.hash || "";
-      link.href = scopeSearch(link.search || "?", scope) + hash;
+      link.search = scopeSearch(link.search || "?", scope);
     }
   }
 

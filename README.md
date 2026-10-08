@@ -62,7 +62,7 @@ node --experimental-vm-modules practice/src/reliability.test.js
 node practice/src/pose-goldens.test.js
 ```
 
-第二条需要支持 `vm.SourceTextModule` 的 Node（本轮使用 Node 22.22.2），执行真实 app/core，只模拟 DOM、媒体、RAF、时钟和 vendor 边界。不安装依赖。原源码匹配用例标为结构检查，不等于行为验证；VM 测试也不是真实浏览器或真人实验，不报准确率。第三条是合成标准姿态的 8×8 规则回归：通过只表示示范与判定规则一致，不是国标正确，也不是真实检测通过。
+第二条需要支持 `vm.SourceTextModule` 的 Node（2026-10-04 实现席使用 `ELECTRON_RUN_AS_NODE=1` 的 ZCode.exe，Node 24.14.0；本轮未在 Node 22 下执行），执行真实 app/core，只模拟 DOM、媒体、RAF、时钟和 vendor 边界。不安装依赖。原源码匹配用例标为结构检查，不等于行为验证；VM 测试也不是真实浏览器或真人实验，不报准确率。第三条是合成标准姿态的 8×8 规则回归：通过只表示示范与判定规则一致，不是国标正确，也不是真实检测通过。
 
 `fixtures` 测试枚举实际 JSON，检查 schema v2 并调用共享核心；0 个时明确打印“真人未执行”。无独立标签不算准确性。`evaluate` 仅单帧几何，`judge` 增加质量/内容与连续帧门；离线合同见 `practice/src/types.js`。旧文件缺有限正尺寸拒绝回放，不猜尺寸。
 
@@ -70,9 +70,12 @@ node practice/src/pose-goldens.test.js
 
 ```
 bun practice/src/eval-handframe.mjs <json路径> <字母ID>
-读 HandFrame JSON，从 letters.json 取字母，调用 evaluate。
-打印 geometry_pass 与 issues[].code / hint。缺手或缺字母时 geometry_pass=false。
-缺 imageWidth / imageHeight（须 >0）时不调用 evaluate，geometry_pass=false，打印 missing_size，不猜尺寸。
+读 HandFrame JSON，从 letters.json 取字母，使用共享 evaluate 做单帧几何评估，不代表在线连续保持通过。
+可评估时 status=evaluated，文本打印 geometry_pass 与审计代码；--json 输出 geometryPass，退出码 0（不等于几何通过）。
+缺手、缺目标或目标未知时 status=unevaluable，JSON 的 geometryPass=null，退出码 2，不是动作负例。
+尺寸须有限且 >0；可从帧字段或可追溯的同源图像文件头获取，不猜尺寸。
+尺寸缺失且无法追溯时仍调用共享 evaluate，返回 missing_size；status=unevaluable，geometryPass=null，退出码 2。
+不可评估时文本不打印 geometry_pass=false；用法或 JSON 读取/解析错误退出码 3。
 不把文件里的 expectedVerdict / pass / decision 当标签。
 ```
 

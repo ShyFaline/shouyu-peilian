@@ -6,6 +6,14 @@ import { judge, presentJudge, createHold, resetHold } from "./src/judge.js";
 import { canExportSnapshot, createSnapshot, serializeSnapshot } from "./src/snapshot.js";
 import { groupLetters, capabilityNote, letterAriaLabel, confusionCluster, isPracticeable } from "./src/letterLibrary.js";
 import { attachRotator, parseRotIndex } from "./src/rotator.js";
+import { mountScopeSwitch } from "./src/scopeSwitch.js";
+import {
+  SCOPE_META,
+  resolveScope,
+  writeStoredScope,
+  filterByScope,
+  scopeSearch,
+} from "./src/scope.js";
 import {
   MODE_LEARN,
   MODE_TEST,
@@ -91,6 +99,9 @@ const els = {
   recordsClearConfirm: document.getElementById("records-clear-confirm"),
   recordsClearYes: document.getElementById("records-clear-yes"),
   recordsClearNo: document.getElementById("records-clear-no"),
+  scopeSwitch: document.getElementById("scope-switch"),
+  scopeNote: document.getElementById("scope-note"),
+  recordsScopeNote: document.getElementById("records-scope-note"),
 };
 
 const ctx = els.canvas.getContext("2d");
@@ -123,6 +134,9 @@ let storage = null;
 let rotIndex = new Map();
 let detachRotator = null;
 let demoLetterId = null;
+let scope = "full";
+let scopeControl = null;
+let scopedLetters = [];
 
 function invalidateFrame(reason = "stale") {
   resetHold(hold);
@@ -309,7 +323,7 @@ function renderSimilarHints(letter) {
     return;
   }
   els.similarHintsText.textContent = cluster.note;
-  const byId = new Map(letters.map((item) => [item.id, item]));
+  const byId = new Map(scopedLetters.map((item) => [item.id, item]));
   for (const id of cluster.ids) {
     const item = byId.get(id);
     if (item) addLetterButton(item, els.similarHintBtns);
@@ -339,7 +353,7 @@ function applyModeUi() {
 }
 
 function practiceableLetters() {
-  return letters.filter(isPracticeable);
+  return scopedLetters.filter(isPracticeable);
 }
 
 function beginAttemptFor(letter) {
@@ -448,7 +462,7 @@ function formatRecordTime(iso) {
 function renderRecords() {
   if (!els.recordsList) return;
   els.recordsList.replaceChildren();
-  const rows = visibleEntries(progress, letters);
+  const rows = visibleEntries(progress, scopedLetters);
   if (els.recordsEmpty) els.recordsEmpty.hidden = rows.length > 0;
   for (const row of rows) {
     const letter = letters.find((item) => item.id === row.letterId);
@@ -461,6 +475,13 @@ function renderRecords() {
     const when = formatRecordTime(row.lastAt);
     item.textContent = when ? `${modeLabel} · ${name} · ${row.count} 次 · ${when}` : `${modeLabel} · ${name} · ${row.count} 次`;
     els.recordsList.appendChild(item);
+  }
+  if (els.recordsScopeNote) {
+    const hiddenCount = visibleEntries(progress, letters).length - rows.length;
+    els.recordsScopeNote.hidden = hiddenCount <= 0;
+    if (hiddenCount > 0) {
+      els.recordsScopeNote.textContent = `另有 ${hiddenCount} 条记录属于另一范围，未被清除，切换到对应范围即可看到。`;
+    }
   }
   if (els.persistNote) {
     els.persistNote.hidden = persisted;
@@ -747,6 +768,63 @@ function downloadHandFrame() {
   setStatus("已下载 JSON", "ok");
 }
 
+function renderLibrary() {
+  const grouped = groupLetters(scopedLetters);
+  els.letterBtns.replaceChildren();
+  els.atlasBtns.replaceChildren();
+  els.demoBtns.replaceChildren();
+  if (els.testLetterBtns) els.testLetterBtns.replaceChildren();
+  for (const letter of grouped.practice) addLetterButton(letter, els.letterBtns);
+  for (const letter of grouped.review) addLetterButton(letter, els.atlasBtns);
+  for (const letter of grouped.demo) addLetterButton(letter, els.demoBtns);
+  if (els.testLetterBtns) {
+    for (const letter of grouped.practice) addLetterButton(letter, els.testLetterBtns);
+  }
+  const showGroup = (section, countEl, n) => {
+    if (countEl) countEl.textContent = String(n);
+    if (section) section.hidden = n === 0;
+  };
+  showGroup(els.practiceGroup, els.practiceCount, grouped.practice.length);
+  showGroup(els.reviewGroup, els.reviewCount, grouped.review.length);
+  showGroup(els.demoGroup, els.demoCount, grouped.demo.length);
+  if (current) syncLetterButtons(current.id);
+}
+
+function updateScopeNote() {
+  if (!els.scopeNote) return;
+  els.scopeNote.textContent = `${SCOPE_META[scope].note}两个范围共用同一套汉语手指字母与判定规则；切换范围不会清除本机练习记录。`;
+}
+
+function syncScopeUrl() {
+  try {
+    const url = scopeSearch(globalThis.location?.search, scope) + (globalThis.location?.hash || "");
+    globalThis.history?.replaceState?.(null, "", url);
+  } catch { /* file:// 等场景写不进地址栏，不影响练习 */ }
+}
+
+function setScope(next, { announce = true } = {}) {
+  if (next === scope) return;
+  scope = next;
+  scopedLetters = filterByScope(letters, scope);
+  writeStoredScope(storage, scope);
+  syncScopeUrl();
+  if (scopeControl) scopeControl.update(scope);
+  updateScopeNote();
+  renderLibrary();
+  renderRecords();
+  const stillVisible = current && scopedLetters.some((item) => item.id === current.id);
+  if (!stillVisible) {
+    const fallback = mode === MODE_TEST
+      ? practiceableLetters()[0]
+      : (scopedLetters.find((item) => item.id === "GF0021.A") || practiceableLetters()[0] || scopedLetters[0]);
+    current = null;
+    if (fallback) selectLetter(fallback);
+  }
+  if (announce) {
+    setStatus(`${SCOPE_META[scope].note}本机练习记录仍保留，未被清除。`, "idle");
+  }
+}
+
 function showClearConfirm(on) {
   if (els.recordsClearConfirm) els.recordsClearConfirm.hidden = !on;
 }
@@ -795,28 +873,25 @@ async function main() {
   progress = loaded.progress;
   persisted = loaded.persisted;
 
-  const byId = new Map(letters.map((letter) => [letter.id, letter]));
-  const grouped = groupLetters(letters);
-  for (const letter of grouped.practice) addLetterButton(letter, els.letterBtns);
-  for (const letter of grouped.review) addLetterButton(letter, els.atlasBtns);
-  for (const letter of grouped.demo) addLetterButton(letter, els.demoBtns);
-  if (els.testLetterBtns) {
-    for (const letter of grouped.practice) addLetterButton(letter, els.testLetterBtns);
-  }
-  const showGroup = (section, countEl, n) => {
-    if (countEl) countEl.textContent = String(n);
-    if (section) section.hidden = n === 0;
-  };
-  showGroup(els.practiceGroup, els.practiceCount, grouped.practice.length);
-  showGroup(els.reviewGroup, els.reviewCount, grouped.review.length);
-  showGroup(els.demoGroup, els.demoCount, grouped.demo.length);
+  scope = resolveScope({ search: globalThis.location?.search, storage });
+  writeStoredScope(storage, scope);
+  scopedLetters = filterByScope(letters, scope);
+  syncScopeUrl();
+  scopeControl = els.scopeSwitch
+    ? mountScopeSwitch(els.scopeSwitch, { scope, onChange: (next) => setScope(next) })
+    : null;
+  updateScopeNote();
+
+  const byId = new Map(scopedLetters.map((letter) => [letter.id, letter]));
+  const grouped = groupLetters(scopedLetters);
+  renderLibrary();
 
   applyModeUi();
   hidePassSeal();
   hideTestOutcome();
   const initial = mode === MODE_TEST
     ? (byId.get("GF0021.A") && isPracticeable(byId.get("GF0021.A")) ? byId.get("GF0021.A") : grouped.practice[0])
-    : (byId.get("GF0021.A") || letters[0]);
+    : (byId.get("GF0021.A") || scopedLetters[0]);
   if (initial) selectLetter(initial);
   setStatus(mode === MODE_TEST ? "自测不看示范。准备好后再打开摄像头。" : "先看示范，准备好后再打开摄像头。");
   applyMirror();

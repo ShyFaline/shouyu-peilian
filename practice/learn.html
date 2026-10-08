@@ -23,6 +23,8 @@
           <button type="button" id="mode-learn" aria-pressed="true">跟练</button>
           <button type="button" id="mode-test" aria-pressed="false">自测</button>
         </div>
+        <div id="scope-switch" class="scope-switch"></div>
+        <p id="scope-note" class="scope-note"></p>
       </div>
       <p id="status" class="status" role="status">先看示范，准备好后再打开摄像头。</p>
     </div>
@@ -85,6 +87,7 @@
       <p class="letter-group-note">仅此浏览器。清除浏览器数据会丢失。只记下静态通过次数。</p>
       <p id="persist-note" class="persist-note" hidden>当前记录只留在本次页面，未能写入此浏览器存储。</p>
       <p id="records-empty" class="atlas-note">还没有通过记录。真实通过静态手型后，会记在这里。</p>
+      <p id="records-scope-note" class="atlas-note" hidden></p>
       <div id="records-list" class="records-list"></div>
       <div class="records-actions">
         <button type="button" id="records-clear">清除记录</button>

@@ -13,7 +13,7 @@
   <a class="skip-link" href="#main">跳到主要内容</a>
   <header class="site-header">
     <a class="brand" href="./index.html" aria-label="指间首页"><span class="brand-seal" aria-hidden="true">指</span><span>指间<small>手指字母陪练</small></span></a>
-    <nav aria-label="主导航"><a href="./index.html" aria-current="page">首页</a><a href="./learn.html">跟着练</a><a href="./sources.html">关于与来源</a></nav>
+    <nav aria-label="主导航"><a href="./index.html" aria-current="page">首页</a><a href="./learn.html" data-scope-link>跟着练</a><a href="./sources.html">关于与来源</a></nav>
   </header>
   <main id="main" class="home">
     <section class="hero" aria-labelledby="hero-title">
@@ -21,21 +21,27 @@
         <p class="eyebrow">一字一形 · 慢慢学会</p>
         <h1 id="hero-title">让指间，<br />多一种表达。</h1>
         <p class="hero-intro">从认识一个手型开始。看清示范，试着比一比，<br class="desktop-break" />按自己的节奏练习汉语手指字母。</p>
-        <div class="hero-actions"><a class="button primary" href="./learn.html">开始学习 <span aria-hidden="true">↗</span></a><a class="text-link" href="#learning-path">先了解怎么练 <span aria-hidden="true">↓</span></a></div>
+        <div class="hero-actions"><a class="button primary" href="./learn.html" data-scope-link>开始学习 <span aria-hidden="true">↗</span></a><a class="text-link" href="#learning-path">先了解怎么练 <span aria-hidden="true">↓</span></a></div>
       </div>
       <div class="hero-art" aria-hidden="true"><div class="paper-sheet"><span class="paper-caption">手指字母 · 习字页</span><span class="hero-glyph">l</span><span class="paper-letter">L <small>从一个手型开始</small></span><span class="paper-stamp">日有所学</span></div></div>
     </section>
     <section id="learning-path" class="learning-path" aria-labelledby="path-title">
       <div class="section-heading"><p class="eyebrow">今天，学一点</p><h2 id="path-title">先看清，再动手。</h2><p>不急着记住所有字母，一次练好一个。</p></div>
       <div class="path-grid">
-        <a class="path-card" href="./learn.html#letter-library"><span class="step-number">01 / 认识</span><h3>看看字母手型 <span aria-hidden="true">↗</span></h3><p>浏览示范和动作要点。</p><span class="card-action">浏览字母</span></a>
-        <a class="path-card" href="./learn.html"><span class="step-number">02 / 练习</span><h3>跟着示范练 <span aria-hidden="true">↗</span></h3><p>准备好后打开摄像头，对照手型，获得当下的练习提示。</p><span class="card-action">进入练习</span></a>
-        <a class="path-card" href="./learn.html?mode=test"><span class="step-number">03 / 自测</span><h3>试试静态手型 <span aria-hidden="true">↗</span></h3><p>不看示范，自己摆静态手型。</p><span class="card-action">开始自测</span></a>
+        <a class="path-card" href="./learn.html#letter-library" data-scope-link><span class="step-number">01 / 认识</span><h3>看看字母手型 <span aria-hidden="true">↗</span></h3><p>浏览示范和动作要点。</p><span class="card-action">浏览字母</span></a>
+        <a class="path-card" href="./learn.html" data-scope-link><span class="step-number">02 / 练习</span><h3>跟着示范练 <span aria-hidden="true">↗</span></h3><p>准备好后打开摄像头，对照手型，获得当下的练习提示。</p><span class="card-action">进入练习</span></a>
+        <a class="path-card" href="./learn.html?mode=test" data-scope-link><span class="step-number">03 / 自测</span><h3>试试静态手型 <span aria-hidden="true">↗</span></h3><p>不看示范，自己摆静态手型。</p><span class="card-action">开始自测</span></a>
       </div>
-      <p class="home-records"><a href="./learn.html#records">查看本机练习记录</a></p>
+      <p class="home-records"><a href="./learn.html#records" data-scope-link>查看本机练习记录</a></p>
+    </section>
+    <section class="home-scope" aria-labelledby="scope-title">
+      <div class="section-heading"><p class="eyebrow">练习范围</p><h2 id="scope-title">选 26 个基础字母，还是完整 32 项？</h2><p>都是 GF 0021—2019《汉语手指字母方案》的内容。完整范围在 26 个拉丁字母之外，加上 zh / ch / sh / ng / ê / ü 六项。</p></div>
+      <div id="scope-switch" class="scope-switch"></div>
+      <p id="scope-note" class="scope-note"></p>
     </section>
     <section class="home-note"><h2>每天一点，表达更近一点。</h2><p>这里陪你练习手指字母的手型。</p></section>
   </main>
   <footer class="site-footer"><span>指间 · 陪你慢慢学</span><a href="./sources.html">关于、隐私与来源</a></footer>
+  <script type="module" src="./scope-page.js"></script>
 </body>
 </html>

@@ -71,6 +71,15 @@ a.path-card:hover { background: var(--panel); transform: translateY(-4px); }
 .mode-switch { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
 .mode-switch button { min-width: 88px; }
 .mode-switch button[aria-pressed="true"] { background: var(--ok); color: #fffdf5; border-color: var(--ok); }
+.scope-switch { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.scope-switch button { flex-direction: column; align-items: flex-start; gap: 2px; min-width: 168px; padding: 10px 14px; }
+.scope-switch .scope-name { font-weight: 600; }
+.scope-switch .scope-desc { font-size: 12px; color: var(--muted); font-weight: 400; }
+.scope-switch button[aria-pressed="true"] { background: var(--ok); color: #fffdf5; border-color: var(--ok); }
+.scope-switch button[aria-pressed="true"] .scope-desc { color: #e4efe8; }
+.scope-switch button[aria-pressed="true"] .scope-name::after { content: "（当前）"; font-size: 12px; font-weight: 400; }
+.scope-note { font-size: 12px; color: var(--muted); margin: 8px 0 0; max-width: 520px; }
+.home-scope { padding: 8px 0 56px; border-top: 1px solid var(--line); }
 .status { color: var(--muted); max-width: 360px; font-size: 13px; margin: 0; }
 .status[data-kind="ok"] { color: var(--ok); }
 .status[data-kind="bad"] { color: var(--bad); }
@@ -116,4 +125,5 @@ input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--ok); }
 @keyframes arrive { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 @media (max-width: 900px) { .hero { gap: 20px; padding: 54px 0; } .paper-sheet { min-height: 330px; padding: 22px; } .hero-glyph { font-size: 170px; } .path-grid { gap: 12px; } .path-card { padding: 20px; } .path-card h3 { font-size: 18px; } .practice-grid { gap: 16px; grid-template-columns: minmax(250px, 1fr) minmax(0, 1.4fr); } .panel { padding: 16px; } .toolbar label { margin-left: 0; } }
 @media (max-width: 680px) { .site-header, .site-footer, main { width: calc(100% - 36px); } .site-header { min-height: 96px; gap: 14px; flex-wrap: wrap; padding: 18px 0 12px; } .brand { font-size: 21px; } .brand-seal { width: 34px; height: 38px; font-size: 25px; } .site-header nav { gap: 18px; } .site-header nav a { font-size: 12px; } .hero { grid-template-columns: 1fr; gap: 20px; padding: 40px 0; } .hero h1 { font-size: 44px; } .hero-intro { font-size: 14px; } .desktop-break { display: none; } .hero-art { width: min(350px, 90%); margin: 0 auto; padding: 20px 8px; } .paper-sheet { min-height: 310px; } .hero-glyph { font-size: 160px; } .path-grid { grid-template-columns: 1fr; } .path-card { padding: 24px; } .path-card h3 { font-size: 22px; } .path-card p { min-height: auto; } .step-number { margin-bottom: 14px; } .home-note { padding-bottom: 34px; } .home-note h2 { font-size: 21px; } .page-heading { display: block; padding-top: 28px; } .page-heading h1 { font-size: 28px; } .page-heading .status { margin-top: 12px; } .practice-grid { grid-template-columns: 1fr; } .demo-stage { min-height: 200px; } .demo-stage img { max-height: 220px; } .placeholder strong { font-size: 15px; } .placeholder span { font-size: 12px; } #verdict { font-size: 20px; } #hint { font-size: 13px; } .sources { padding-top: 28px; } .sources h1 { font-size: 28px; } }
+@media (max-width: 680px) { .scope-switch button { flex: 1 1 140px; min-width: 0; } }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation: none !important; transition: none !important; } }

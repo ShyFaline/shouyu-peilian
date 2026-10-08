@@ -68,7 +68,7 @@ async function harness(opts={}){
     URL:{createObjectURL:blob=>{h.blob=blob;return 'blob:test';},revokeObjectURL(){}},
     navigator:{mediaDevices:{getUserMedia:()=>{h.gumCalls++;return h.gum?h.gum():Promise.resolve(h.newStream());}}},
     requestAnimationFrame:f=>{const id=++h.seq;h.raf.set(id,f);return id;},cancelAnimationFrame:id=>h.raf.delete(id),
-    fetch:async path=>{let text=readFileSync(resolve(practice,String(path).replace(/^\.\//,'')),'utf8');if(h.fetchTransform)text=h.fetchTransform(path,text);return {ok:true,status:200,text:async()=>text,json:async()=>JSON.parse(text)};}};
+    fetch:async path=>{if(h.fetchMissing===String(path).replace(/^\.\//,''))return {ok:false,status:404};let text=readFileSync(resolve(practice,String(path).replace(/^\.\//,'')),'utf8');if(h.fetchTransform)text=h.fetchTransform(path,text);return {ok:true,status:200,text:async()=>text,json:async()=>JSON.parse(text)};}};
   // 可控 Image 伪类：记录每次探测，手动触发 onload/onerror 来模拟慢图、失败图与竞争。
   sandbox.Image=class{constructor(){this.onload=null;this.onerror=null;h.images.push(this);}
     set src(v){this._src=v;if(h.imageAutoLoad!==false)queueMicrotask(()=>this.onload&&this.onload());}
@@ -193,6 +193,16 @@ for(const mode of ['learn','test'])test(`scope buttons invalidate same-target pa
  await h.scope('full');assert.deepEqual(h.els['similar-hint-btns'].children.map(b=>b.dataset.id),['GF0021.E','GF0021.EH']);
  await h.select('GF0021.EH');await h.scope('basic');assert.equal(h.els['demo-label'].textContent,pack.letters.find(l=>l.id==='GF0021.A').title);assert.equal(h.els['similar-hints'].hidden,true);assert.equal(h.gumCalls,0);
  });
+for(const file of ['src/scope.js','src/scopeSwitch.js'])test(`version fingerprint includes ${file} as code only and fails closed on missing source`,async()=>{
+ const h=await harness(),v=await h.core('versions'),baseline=await v.loadVersionManifest();
+ assert.ok(Array.from(v.CODE_FILES).includes(file));assert.equal(Array.from(v.RULE_FILES).includes(file),false);
+ assert.equal(baseline.files.filter(entry=>entry.path===file).length,1);
+ h.fetchTransform=(path,text)=>String(path)===`./${file}`?text+'\n// scope revision\n':text;
+ const changed=await v.loadVersionManifest();assert.notEqual(changed.codeVersion,baseline.codeVersion);assert.equal(changed.rulesVersion,baseline.rulesVersion);
+ h.fetchMissing=file;await assert.rejects(()=>v.loadVersionManifest(),{message:`Version source unavailable: ${file} (404)`});
+ await h.boot().then(()=>assert.fail('missing source must prevent initialization'),()=>{});
+ assert.equal(h.els['start-btn'].events.has('click'),false);assert.equal(h.els.verdict.textContent,'内容层失败');assert.equal(h.gumCalls,0);
+});
 let passed=0,failed=0;
 for(const [name,fn] of tests){try{await fn();passed++;console.log('ok -',name);}catch(e){failed++;console.error('not ok -',name);console.error(e.stack);}}
 console.log(`\n${passed} passed, ${failed} failed, ${tests.length} total (synthetic VM behavior; no human/browser verification)`);

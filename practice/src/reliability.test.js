@@ -203,6 +203,18 @@ for(const file of ['src/scope.js','src/scopeSwitch.js'])test(`version fingerprin
  await h.boot().then(()=>assert.fail('missing source must prevent initialization'),()=>{});
  assert.equal(h.els['start-btn'].events.has('click'),false);assert.equal(h.els.verdict.textContent,'内容层失败');assert.equal(h.gumCalls,0);
 });
+test('real scope buttons preserve all 32 historical entries including extended six; clear leaves scope/unrelated',async()=>{
+ const entries=pack.letters.map((l,i)=>({letterId:l.id,mode:i%2?'test':'learn',count:i+1,lastAt:'2026-10-08T00:00:00.000Z'}));
+ const raw=JSON.stringify({schemaVersion:1,entries}),store=new Map([[PROGRESS_KEY,raw],['unrelated','keep']]);
+ const h=await harness({store,search:'?scope=full'});await h.boot();
+ const visible=h.els['records-list'].children.map(r=>r.dataset.letterId);assert.ok(visible.length>0);
+ await h.scope('basic');assert.equal(store.get(PROGRESS_KEY),raw);assert.deepEqual(h.els['records-list'].children.map(r=>r.dataset.letterId),visible);
+ await h.scope('full');assert.equal(store.get(PROGRESS_KEY),raw);assert.deepEqual(h.els['records-list'].children.map(r=>r.dataset.letterId),visible);
+ const p=await h.core('progress');assert.equal(p.saveProgress({setItem:(k,v)=>store.set(k,v)},p.loadProgress({getItem:k=>store.get(k)},pack.letters).progress).persisted,true);
+ assert.equal(store.get(PROGRESS_KEY),raw);
+ await h.els['records-clear'].emit('click');assert.equal(h.els['records-clear-confirm'].hidden,false);await h.els['records-clear-yes'].emit('click');
+ assert.equal(store.has(PROGRESS_KEY),false);assert.equal(store.get('zhijian.letterScope.v1'),'full');assert.equal(store.get('unrelated'),'keep');assert.equal(h.storageClears,0);assert.equal(h.gumCalls,0);
+});
 let passed=0,failed=0;
 for(const [name,fn] of tests){try{await fn();passed++;console.log('ok -',name);}catch(e){failed++;console.error('not ok -',name);console.error(e.stack);}}
 console.log(`\n${passed} passed, ${failed} failed, ${tests.length} total (synthetic VM behavior; no human/browser verification)`);

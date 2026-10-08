@@ -366,7 +366,7 @@ function beginAttemptFor(letter) {
 }
 
 function selectLetter(letter) {
-  if (!letter) return;
+  if (!letter || !scopedLetters.some((item) => item.id === letter.id)) return;
   if (mode === MODE_TEST && !isPracticeable(letter)) return;
   if (letter.id === current?.id) {
     syncLetterButtons(letter.id);
@@ -804,6 +804,9 @@ function syncScopeUrl() {
 
 function setScope(next, { announce = true } = {}) {
   if (next === scope) return;
+  invalidateFrame("scope_changed");
+  hidePassSeal();
+  hideTestOutcome();
   scope = next;
   scopedLetters = filterByScope(letters, scope);
   writeStoredScope(storage, scope);
@@ -819,6 +822,8 @@ function setScope(next, { announce = true } = {}) {
       : (scopedLetters.find((item) => item.id === "GF0021.A") || practiceableLetters()[0] || scopedLetters[0]);
     current = null;
     if (fallback) selectLetter(fallback);
+  } else {
+    renderSimilarHints(current);
   }
   if (announce) {
     setStatus(`${SCOPE_META[scope].note}本机练习记录仍保留，未被清除。`, "idle");

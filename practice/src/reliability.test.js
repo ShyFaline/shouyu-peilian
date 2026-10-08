@@ -29,6 +29,8 @@ class Target {
   removeEventListener(n,f){this.events.set(n,(this.events.get(n)||[]).filter(x=>x!==f));}
   async emit(n){for(const f of this.events.get(n)||[])await f({target:this});}
   appendChild(x){this.children.push(x);return x;}
+  append(...nodes){this.children.push(...nodes);}
+  hasAttribute(n){return Object.prototype.hasOwnProperty.call(this._attrs,n);}
   replaceChildren(...nodes){this.children=nodes;}
   setAttribute(n,v){const key=String(n);const val=v==null?'':String(v);this._attrs[key]=val;if(key==='hidden')this.hidden=true;}
   getAttribute(n){const key=String(n);return Object.prototype.hasOwnProperty.call(this._attrs,key)?this._attrs[key]:null;}
@@ -38,7 +40,7 @@ class Target {
 function deferred(){let resolve,reject;const promise=new Promise((a,b)=>{resolve=a;reject=b;});return {promise,resolve,reject};}
 async function harness(opts={}){
   const h={now:1000,epoch:1700000000000,raf:new Map(),seq:0,downloads:[],detects:0,painted:false,hands:[hand()],logs:[],streams:[],gumCalls:0,store:opts.store||new Map(),storageClears:0,images:[]};
-  const ids=['video','overlay','status','verdict','hint','how','demo-stage','demo-image','demo-glyph','demo-label','capability','letter-btns','atlas-btns','demo-btns','practice-group','review-group','demo-group','practice-count','review-count','demo-count','similar-hints','similar-hints-text','similar-hint-btns','start-btn','stop-btn','mirror-toggle','export-toggle','export-btn','stage','demo-panel','test-panel','test-letter','test-scope','test-retry','test-next','test-back','test-letter-btns','test-outcome','mode-learn','mode-test','learn-eyebrow','learn-title','live-title','pass-seal','pass-seal-text','records','records-list','records-empty','persist-note','records-clear','records-clear-confirm','records-clear-yes','records-clear-no'];
+  const ids=['scope-switch','scope-note','records-scope-note','video','overlay','status','verdict','hint','how','demo-stage','demo-image','demo-glyph','demo-label','capability','letter-btns','atlas-btns','demo-btns','practice-group','review-group','demo-group','practice-count','review-count','demo-count','similar-hints','similar-hints-text','similar-hint-btns','start-btn','stop-btn','mirror-toggle','export-toggle','export-btn','stage','demo-panel','test-panel','test-letter','test-scope','test-retry','test-next','test-back','test-letter-btns','test-outcome','mode-learn','mode-test','learn-eyebrow','learn-title','live-title','pass-seal','pass-seal-text','records','records-list','records-empty','persist-note','records-clear','records-clear-confirm','records-clear-yes','records-clear-no'];
   h.els=Object.fromEntries(ids.map(id=>[id,new Target()]));
   h.els['similar-hints'].hidden=true;
   for(const id of ['test-panel','pass-seal','records-clear-confirm','test-outcome','persist-note']) h.els[id].hidden=true;
@@ -61,7 +63,7 @@ async function harness(opts={}){
     key(i){return [...h.store.keys()][i]??null;},
   };
   h.location={search:opts.search||'',hash:opts.hash||'',pathname:'/learn.html',href:'http://local/learn.html'};
-  const sandbox={document,Image:class {},performance:{now:()=>h.now},Date:ClockDate,TextEncoder,crypto:webcrypto,Blob,URLSearchParams,localStorage,location:h.location,
+  const sandbox={history:{replaceState(_state,_title,url){h.historyCalls=(h.historyCalls||0)+1;const [search,hash]=url.split('#');h.location.search=search;h.location.hash=hash?'#'+hash:'';}},document,Image:class {},performance:{now:()=>h.now},Date:ClockDate,TextEncoder,crypto:webcrypto,Blob,URLSearchParams,localStorage,location:h.location,
     console:{log:(...a)=>h.logs.push(a),info:(...a)=>h.logs.push(a),warn:(...a)=>h.logs.push(a),error:(...a)=>h.logs.push(a)},
     URL:{createObjectURL:blob=>{h.blob=blob;return 'blob:test';},revokeObjectURL(){}},
     navigator:{mediaDevices:{getUserMedia:()=>{h.gumCalls++;return h.gum?h.gum():Promise.resolve(h.newStream());}}},
@@ -84,6 +86,7 @@ async function harness(opts={}){
   h.advance=(ms)=>{h.now+=ms;h.epoch+=ms;};
   h.tick=async({ms=30,fresh=true}={})=>{h.advance(ms);if(fresh)h.els.video.currentTime+=.03;const callbacks=[...h.raf.values()];h.raf.clear();for(const f of callbacks)await f(h.now);};
   h.select=async(id='GF0021.V')=>{const b=document.querySelectorAll().find(x=>x.dataset.id===id);assert.ok(b);await b.emit('click');};
+  h.scope=next=>{const button=h.els['scope-switch'].children.find(b=>b.dataset.scope===next);assert.ok(button);return button.emit('click');};
   h.start=()=>h.els['start-btn'].emit('click');h.stop=()=>h.els['stop-btn'].emit('click');
   h.pass=async()=>{await h.boot();await h.select();await h.start();for(let i=0;i<6;i++)await h.tick();assert.equal(h.els.verdict.dataset.state,'ok','synthetic V reaches pass after six frames');};
   h.download=async()=>{h.els['export-toggle'].checked=true;await h.els['export-toggle'].emit('change');await h.els['export-btn'].emit('click');};
@@ -167,6 +170,29 @@ test('runtime versions hash actual sources/letters; export retains raw unmirrore
  h.fetchTransform=(path,text)=>String(path).includes('letters.json')?text+'\n':text;
  const lettersChanged=await v.loadVersionManifest();assert.notEqual(lettersChanged.codeVersion,manifest.codeVersion);assert.notEqual(lettersChanged.rulesVersion,manifest.rulesVersion);
 });
+for(const mode of ['learn','test'])test(`scope buttons invalidate same-target pass in ${mode}, recount and preserve attempt`,async()=>{
+ const h=await harness({search:`?mode=${mode}&scope=full`});await h.pass();await h.download();assert.equal(h.downloads.length,1);
+ const records=h.store.get(PROGRESS_KEY),gum=h.gumCalls;
+ assert.equal(h.els['pass-seal'].hidden,false);
+ if(mode==='test')assert.equal(h.els['test-outcome'].hidden,false);
+ await h.scope('basic');await h.invalid();assert.equal(h.els['pass-seal'].hidden,true);assert.equal(h.els['test-outcome'].hidden,true);
+ assert.equal(h.els['demo-label'].textContent,V.title);assert.equal(h.gumCalls,gum);
+ const detects=h.detects;await h.tick({fresh:false});assert.equal(h.detects,detects,'same videoTime is not a new frame');await h.recover();
+ assert.equal(h.store.get(PROGRESS_KEY),records,'scope change must not record the same attempt twice');
+ await h.download();assert.equal(h.downloads.length,2);
+ const historyCalls=h.historyCalls;await h.scope('basic');assert.equal(h.historyCalls,historyCalls);assert.equal(h.els.verdict.dataset.state,'ok');assert.equal(h.painted,true);
+ await h.download();assert.equal(h.downloads.length,3,'repeated scope preserves valid snapshot');
+ await h.scope('full');await h.invalid();await h.recover();assert.equal(h.store.get(PROGRESS_KEY),records);assert.equal(h.gumCalls,gum);
+});
+ test('scope buttons refresh E/ê hints, fallback to A and reject stale extended buttons',async()=>{
+ const h=await harness();await h.boot();await h.select('GF0021.E');
+ assert.deepEqual(h.els['similar-hint-btns'].children.map(b=>b.dataset.id),['GF0021.E','GF0021.EH']);
+ const stale=h.els['similar-hint-btns'].children[1];await h.scope('basic');
+ assert.deepEqual(h.els['similar-hint-btns'].children.map(b=>b.dataset.id),['GF0021.E']);
+ await stale.emit('click');assert.equal(h.els['demo-label'].textContent,pack.letters.find(l=>l.id==='GF0021.E').title);
+ await h.scope('full');assert.deepEqual(h.els['similar-hint-btns'].children.map(b=>b.dataset.id),['GF0021.E','GF0021.EH']);
+ await h.select('GF0021.EH');await h.scope('basic');assert.equal(h.els['demo-label'].textContent,pack.letters.find(l=>l.id==='GF0021.A').title);assert.equal(h.els['similar-hints'].hidden,true);assert.equal(h.gumCalls,0);
+ });
 let passed=0,failed=0;
 for(const [name,fn] of tests){try{await fn();passed++;console.log('ok -',name);}catch(e){failed++;console.error('not ok -',name);console.error(e.stack);}}
 console.log(`\n${passed} passed, ${failed} failed, ${tests.length} total (synthetic VM behavior; no human/browser verification)`);

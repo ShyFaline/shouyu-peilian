@@ -215,6 +215,15 @@ test('real scope buttons preserve all 32 historical entries including extended s
  await h.els['records-clear'].emit('click');assert.equal(h.els['records-clear-confirm'].hidden,false);await h.els['records-clear-yes'].emit('click');
  assert.equal(store.has(PROGRESS_KEY),false);assert.equal(store.get('zhijian.letterScope.v1'),'full');assert.equal(store.get('unrelated'),'keep');assert.equal(h.storageClears,0);assert.equal(h.gumCalls,0);
 });
+test('teaching copy follows this branch: I/J pinky rule shared, J/Z static approximation pending, render reference alt',async()=>{
+ const i=pack.letters.find(l=>l.id==='GF0021.I'),j=pack.letters.find(l=>l.id==='GF0021.J'),z=pack.letters.find(l=>l.id==='GF0021.Z');
+ assert.deepEqual(i.rules.extended,['pinky']);assert.deepEqual(i.rules,j.rules);
+ for(const l of [i,j]){assert.match(l.how,/小指伸直/);assert.match(l.how,/不能据此区分/);}
+ const h=await harness(),session=await h.core('practiceSession');
+ for(const l of [j,z]){assert.match(l.how,/本版静态近似/);assert.match(l.how,/完整规范指式待核对/);assert.match(capabilityNote(l),/完整规范指式待核对/);assert.match(session.testScopeText(l),/完整规范指式待核对/);assert.doesNotMatch(l.how+capabilityNote(l)+session.testScopeText(l),/规范.*轨迹|还要画|还要顺势/);}
+ await h.boot();await h.select(i.id);assert.equal(h.els['demo-image'].alt,`${i.title}渲染手型参考`);
+ assert.doesNotMatch(readFileSync(resolve(practice,'app.js'),'utf8'),/标准手示范图/);
+});
 let passed=0,failed=0;
 for(const [name,fn] of tests){try{await fn();passed++;console.log('ok -',name);}catch(e){failed++;console.error('not ok -',name);console.error(e.stack);}}
 console.log(`\n${passed} passed, ${failed} failed, ${tests.length} total (synthetic VM behavior; no human/browser verification)`);

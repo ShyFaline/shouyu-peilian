@@ -59,7 +59,7 @@ export function capabilityNote(letter) {
   const group = groupIdForLetter(letter);
   if (group === "practice") {
     if (isStaticOnlyLetter(letter)) {
-      return "可跟练。规范中的这一字母带轨迹，这里只核静态手型。";
+      return "本版可跟练静态近似手型，完整规范指式待核对，不作为完整规范通过依据。";
     }
     return "可跟练静态姿态。打开摄像头后，系统会对照当前手型给出提示。";
   }

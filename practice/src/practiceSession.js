@@ -34,7 +34,7 @@ export function isSameAttempt(attempt, mode, letterId) {
 
 export function testScopeText(letter) {
   if (isStaticOnlyLetter(letter)) {
-    return "只核静态手型，规范里的轨迹不在本题。";
+    return "本版只核静态近似手型，完整规范指式待核对。";
   }
   return "只核静态手型。";
 }

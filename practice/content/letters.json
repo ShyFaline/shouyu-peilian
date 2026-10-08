@@ -1,6 +1,6 @@
 {
   "standard": "GF 0021-2019",
-  "notes": "32 个汉语手指字母（26 个拉丁字母 + zh/ch/sh/ng/ê/ü）。规则是国标外形的几何近似，不是新发明的手语。J、Z 带轨迹，第一期只核静态手型。M/N/S、E/ê 容易混，练习页在相关字母下单独提示，以国标图为准。练习页按 practiceStatus 分组：pose_practice 可跟练、pending_review 待核对、demo_only 仅示范。mainPath 供 tools/assessment 采集评测使用，不驱动界面。",
+  "notes": "32 个汉语手指字母（26 个拉丁字母 + zh/ch/sh/ng/ê/ü）。规则是国标外形的几何近似，不是新发明的手语。J、Z 在本版只核静态近似手型，完整规范指式待核对；I、J 使用同一静态规则，不能据此区分。M/N/S、E/ê 容易混，练习页在相关字母下单独提示，以国标图为准。练习页按 practiceStatus 分组：pose_practice 可跟练、pending_review 待核对、demo_only 仅示范。mainPath 供 tools/assessment 采集评测使用，不驱动界面。",
   "mainPath": [
     "GF0021.A",
     "GF0021.B",
@@ -191,7 +191,7 @@
       "standard": "GF 0021-2019",
       "label": "I",
       "title": "字母 I",
-      "how": "小指伸直，其余握拳。",
+      "how": "小指伸直，其余握拳。本版与 J 使用同一静态规则，不能据此区分。",
       "demo": "i",
       "rules": {
         "extended": [
@@ -212,7 +212,7 @@
       "standard": "GF 0021-2019",
       "label": "J",
       "title": "字母 J",
-      "how": "静态同 I（小指伸直）。完整字母还要顺势画钩，第一期只核手型。",
+      "how": "本版静态近似：小指伸直，其余握拳。与 I 使用同一静态规则，不能据此区分；完整规范指式待核对。",
       "demo": "j",
       "rules": {
         "extended": [
@@ -541,7 +541,7 @@
       "standard": "GF 0021-2019",
       "label": "Z",
       "title": "字母 Z",
-      "how": "静态：食指伸直，其余收起。完整字母还要画 Z，第一期只核手型。",
+      "how": "本版静态近似：食指伸直，其余收起。只核本版静态手型，完整规范指式待核对。",
       "demo": "z",
       "rules": {
         "extended": [

@@ -213,7 +213,7 @@ function applyDemoRotator(letter) {
     image: els.demoImage,
     letterId: letter.id,
     frames,
-    alt: `${letter.title}标准手示范图`,
+    alt: `${letter.title}渲染手型参考`,
   });
 }
 
@@ -229,7 +229,7 @@ function showDemo(letter) {
   probe.onload = () => {
     if (current?.id !== letter.id || mode !== MODE_LEARN) return;
     els.demoImage.src = src;
-    els.demoImage.alt = `${letter.title}标准手示范图`;
+    els.demoImage.alt = `${letter.title}渲染手型参考`;
     els.demoStage.dataset.mode = "image";
     applyDemoRotator(letter);
   };
